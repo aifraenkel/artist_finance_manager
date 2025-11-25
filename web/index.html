@@ -65,18 +65,31 @@
   </div>
 
   <script>
+    // Ensure serviceWorkerVersion exists so the loader doesn't throw in dev/debug builds
+    // (build outputs include this variable). Setting it to null is safe and prevents
+    // runtime ReferenceErrors which leave the page stuck on the spinner.
+    var serviceWorkerVersion = typeof serviceWorkerVersion !== 'undefined' ? serviceWorkerVersion : null;
     window.addEventListener('load', function(ev) {
-      // Download main.dart.js
-      _flutter.loader.loadEntrypoint({
-        serviceWorker: {
-          serviceWorkerVersion: serviceWorkerVersion,
-        },
-        onEntrypointLoaded: function(engineInitializer) {
-          engineInitializer.initializeEngine().then(function(appRunner) {
-            appRunner.runApp();
-          });
-        }
-      });
+      // Download main.dart.js. Only include a serviceWorker object when a
+      // serviceWorkerVersion is available to avoid triggering registration
+      // in development environments where the variable may not be present.
+      var loaderOptions = {};
+      if (serviceWorkerVersion !== null) {
+        loaderOptions.serviceWorker = { serviceWorkerVersion: serviceWorkerVersion };
+      }
+      loaderOptions.onEntrypointLoaded = function(engineInitializer) {
+        engineInitializer.initializeEngine().then(function(appRunner) {
+          appRunner.runApp();
+          // Remove / hide the initial HTML loader so the Flutter UI becomes visible.
+          try {
+            var el = document.querySelector('.loading');
+            if (el && el.parentNode) el.parentNode.removeChild(el);
+          } catch (e) {
+            // ignore
+          }
+        });
+      };
+      _flutter.loader.loadEntrypoint(loaderOptions);
     });
   </script>
   <script src="flutter.js" defer></script>
