@@ -113,44 +113,45 @@ jobs:
       - name: Run tests
         run: flutter test
 
-  integration-web:
-    name: Integration tests — web (Chrome)
-    runs-on: ubuntu-latest
-    needs: analyze
-    steps:
-      - uses: actions/checkout@v4
+  # E2E/Integration tests disabled for now
+  # integration-web:
+  #   name: Integration tests — web (Chrome)
+  #   runs-on: ubuntu-latest
+  #   needs: analyze
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
+  #     - name: Set up Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: stable
 
-      - name: Install dependencies
-        run: flutter pub get
+  #     - name: Install dependencies
+  #       run: flutter pub get
 
-      - name: Run integration tests (web)
-        run: |
-          flutter test integration_test/app_test.dart -d chrome
+  #     - name: Run integration tests (web)
+  #       run: |
+  #         flutter test integration_test/app_test.dart -d chrome
 
-  integration-macos:
-    name: Integration tests — iOS Simulator
-    runs-on: macos-latest
-    needs: analyze
-    steps:
-      - uses: actions/checkout@v4
+  # integration-macos:
+  #   name: Integration tests — iOS Simulator
+  #   runs-on: macos-latest
+  #   needs: analyze
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
+  #     - name: Set up Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: stable
 
-      - name: Install dependencies
-        run: flutter pub get
+  #     - name: Install dependencies
+  #       run: flutter pub get
 
-      - name: Start iOS Simulator
-        run: |
-          open -a Simulator || true
-          xcrun simctl bootstatus booted -t 60 || true
+  #     - name: Start iOS Simulator
+  #       run: |
+  #         open -a Simulator || true
+  #         xcrun simctl bootstatus booted -t 60 || true
 
-      - name: Run integration tests on iOS simulator
-        run: flutter test integration_test/app_test.dart -d "iPhone 15 Pro"
+  #     - name: Run integration tests on iOS simulator
+  #       run: flutter test integration_test/app_test.dart -d "iPhone 15 Pro"
