@@ -51,10 +51,19 @@ jobs:
           path: coverage
 
       - name: Upload coverage to Codecov
+        # Only run the upload when either a CODECOV_TOKEN is provided (for private repos)
+        # or this repository is public. Also make the step tolerant so transient Codecov
+        # service/network issues don't fail the entire CI run.
+        if: ${{ secrets.CODECOV_TOKEN != '' || github.repository_visibility == 'public' }}
         uses: codecov/codecov-action@v4
+        env:
+          # If CODECOV_TOKEN is not configured this will be empty; that's fine for public repos.
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           files: ./coverage/lcov.info
-          fail_ci_if_error: true
+          # Avoid failing the whole CI for temporary Codecov outages or misconfigurations
+          # (when token missing for private repos, we'll skip this step because of the `if` above).
+          fail_ci_if_error: false
 
   test-macos:
     name: Tests (macOS)
