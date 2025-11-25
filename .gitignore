@@ -116,5 +116,4 @@ app.*.symbols
 !**/ios/**/default.pbxuser
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
- # Headless test Node.js dependencies
- .tmp/headless_test/node_modules/
+!/dev/ci/**/Gemfile.lock.tmp/headless_test/node_modules/

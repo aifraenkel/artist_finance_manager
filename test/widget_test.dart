@@ -36,7 +36,7 @@ void main() {
     expect(find.text('Type'), findsOneWidget);
     expect(find.text('Category'), findsOneWidget);
     expect(find.text('Description'), findsOneWidget);
-    expect(find.text('Amount (\$)'), findsOneWidget);
+    expect(find.text('Amount (€)'), findsOneWidget);
   });
 
   testWidgets('Can add a transaction', (WidgetTester tester) async {
@@ -70,7 +70,7 @@ void main() {
 
     // Verify transaction appears in list
     expect(find.text('Concert hall rental'), findsOneWidget);
-    expect(find.text('-\$500.00'), findsOneWidget);
+    expect(find.text('-€500.00'), findsOneWidget);
     expect(find.text('Venue'), findsOneWidget);
   });
 
@@ -137,9 +137,9 @@ void main() {
     await tester.tap(find.byKey(const Key('add_transaction_button')));
     await tester.pumpAndSettle();
 
-    // Verify expenses updated: summary shows $50.00 and transaction shows -$50.00
-    expect(find.text('\$50.00'), findsOneWidget); // summary
-    expect(find.text('-\$50.00'), findsOneWidget); // transaction
+    // Verify expenses updated: summary shows €50.00 and transaction shows -€50.00
+    expect(find.text('€50.00'), findsOneWidget); // summary
+    expect(find.text('-€50.00'), findsOneWidget); // transaction
 
     // Switch to income
     await tester.tap(find.text('Expense'));
@@ -166,6 +166,6 @@ void main() {
     await tester.pumpAndSettle();
 
     // Verify balance is correct (100 income - 50 expense = 50 balance)
-    expect(find.textContaining('\$100.00'), findsAtLeastNWidgets(1)); // Income
+    expect(find.textContaining('€100.00'), findsAtLeastNWidgets(1)); // Income
   });
 }
