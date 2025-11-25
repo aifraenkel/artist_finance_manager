@@ -3,7 +3,6 @@ import 'screens/home_screen.dart';
 
 void main() {
   runApp(const MyApp());
-  // (no-op) application bootstrap
 }
 
 class MyApp extends StatelessWidget {
