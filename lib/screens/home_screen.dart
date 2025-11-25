@@ -20,6 +20,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // init state
     _loadTransactions();
   }
 
@@ -28,12 +29,15 @@ class _HomeScreenState extends State<HomeScreen> {
       _isLoading = true;
     });
 
+    // calling storage
     final transactions = await _storageService.loadTransactions();
+    // loaded transactions
 
     setState(() {
       _transactions = transactions;
       _isLoading = false;
     });
+    // finished loading
   }
 
   Future<void> _saveTransactions() async {

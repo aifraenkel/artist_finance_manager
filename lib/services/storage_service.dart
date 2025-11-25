@@ -8,17 +8,21 @@ class StorageService {
   // Load transactions from local storage
   Future<List<Transaction>> loadTransactions() async {
     try {
+      // start loadTransactions
       final prefs = await SharedPreferences.getInstance();
       final String? jsonString = prefs.getString(_key);
 
       if (jsonString == null || jsonString.isEmpty) {
+        // no stored json
         return [];
       }
 
       final List<dynamic> jsonList = json.decode(jsonString);
-      return jsonList.map((json) => Transaction.fromJson(json)).toList();
+      final result = jsonList.map((json) => Transaction.fromJson(json)).toList();
+      // parsed transactions
+      return result;
     } catch (e) {
-      print('Error loading transactions: $e');
+      // error loading transactions: $e
       return [];
     }
   }
