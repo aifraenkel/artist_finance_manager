@@ -20,6 +20,9 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    // Debug trace for load sequencing
+    // ignore: avoid_print
+    print('DDEBUG: HomeScreen.initState - starting _loadTransactions');
     _loadTransactions();
   }
 
@@ -28,12 +31,18 @@ class _HomeScreenState extends State<HomeScreen> {
       _isLoading = true;
     });
 
+    // ignore: avoid_print
+    print('DDEBUG: _loadTransactions - calling storageService.loadTransactions()');
     final transactions = await _storageService.loadTransactions();
+    // ignore: avoid_print
+    print('DDEBUG: _loadTransactions - loadTransactions returned with ${transactions.length} items');
 
     setState(() {
       _transactions = transactions;
       _isLoading = false;
     });
+    // ignore: avoid_print
+    print('DDEBUG: _loadTransactions - completed and set _isLoading=false');
   }
 
   Future<void> _saveTransactions() async {

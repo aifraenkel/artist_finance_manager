@@ -8,17 +8,25 @@ class StorageService {
   // Load transactions from local storage
   Future<List<Transaction>> loadTransactions() async {
     try {
+      // ignore: avoid_print
+      print('DDEBUG: StorageService.loadTransactions - start');
       final prefs = await SharedPreferences.getInstance();
       final String? jsonString = prefs.getString(_key);
 
       if (jsonString == null || jsonString.isEmpty) {
+        // ignore: avoid_print
+        print('DDEBUG: loadTransactions - no jsonString found');
         return [];
       }
 
       final List<dynamic> jsonList = json.decode(jsonString);
-      return jsonList.map((json) => Transaction.fromJson(json)).toList();
+      final result = jsonList.map((json) => Transaction.fromJson(json)).toList();
+      // ignore: avoid_print
+      print('DDEBUG: loadTransactions - parsed ${result.length} transactions');
+      return result;
     } catch (e) {
-      print('Error loading transactions: $e');
+      // ignore: avoid_print
+      print('DDEBUG Error loading transactions: $e');
       return [];
     }
   }

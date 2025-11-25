@@ -2,7 +2,13 @@ import 'package:flutter/material.dart';
 import 'screens/home_screen.dart';
 
 void main() {
+  // Debug: trace app bootstrap for web headless troubleshooting
+  // (temporary log — removed after debugging)
+  // ignore: avoid_print
+  print('DDEBUG: main() starting app');
   runApp(const MyApp());
+  // ignore: avoid_print
+  print('DDEBUG: main() finished runApp');
 }
 
 class MyApp extends StatelessWidget {
