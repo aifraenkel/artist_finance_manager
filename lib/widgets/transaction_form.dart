@@ -222,9 +222,9 @@ class _TransactionFormState extends State<TransactionForm> {
       key: const Key('amount_field'),
       controller: _amountController,
       decoration: const InputDecoration(
-        labelText: 'Amount (\$)',
+        labelText: 'Amount (€)',
         hintText: '0.00',
-        prefixText: '\$ ',
+        prefixText: '€ ',
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [

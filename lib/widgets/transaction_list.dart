@@ -124,7 +124,7 @@ class TransactionList extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${isIncome ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
+                      '${isIncome ? '+' : '-'}€${transaction.amount.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -197,7 +197,7 @@ class TransactionList extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               Text(
-                '${isIncome ? '+' : '-'}\$${transaction.amount.toStringAsFixed(2)}',
+                '${isIncome ? '+' : '-'}€${transaction.amount.toStringAsFixed(2)}',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

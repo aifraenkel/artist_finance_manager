@@ -66,7 +66,7 @@ class SummaryCards extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '\$${totalIncome.toStringAsFixed(2)}',
+                        '€${totalIncome.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -112,7 +112,7 @@ class SummaryCards extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '\$${totalExpenses.toStringAsFixed(2)}',
+                        '€${totalExpenses.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -160,7 +160,7 @@ class SummaryCards extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '\$${balance.toStringAsFixed(2)}',
+                        '€${balance.toStringAsFixed(2)}',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
