@@ -4,7 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:artist_finance_manager/main.dart';
 
 void main() {
-  setUp((){
+  setUp(() {
     SharedPreferences.setMockInitialValues({});
   });
 

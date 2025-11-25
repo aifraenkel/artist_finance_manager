@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 class TransactionForm extends StatefulWidget {
-  final Function(String description, double amount, String type, String category) onSubmit;
+  final Function(
+      String description, double amount, String type, String category) onSubmit;
 
   const TransactionForm({
     super.key,

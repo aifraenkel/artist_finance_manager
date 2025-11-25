@@ -133,7 +133,8 @@ void main() {
       expect(find.text('Transaction 2'), findsOneWidget);
 
       // Verify totals
-      expect(find.text('\$600.00'), findsOneWidget); // Total expenses (100+200+300)
+      expect(find.text('\$600.00'),
+          findsOneWidget); // Total expenses (100+200+300)
     });
 
     testWidgets('Category switching works', (WidgetTester tester) async {
