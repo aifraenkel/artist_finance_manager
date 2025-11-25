@@ -53,9 +53,10 @@ class SummaryCards extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                     Text(
                       'Income',
                       style: TextStyle(
@@ -74,7 +75,8 @@ class SummaryCards extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Icon(
+                ),
+                    const Icon(
                   Icons.trending_up,
                   color: Colors.green,
                   size: 32,
@@ -97,9 +99,10 @@ class SummaryCards extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                     Text(
                       'Expenses',
                       style: TextStyle(
@@ -118,7 +121,8 @@ class SummaryCards extends StatelessWidget {
                     ),
                   ],
                 ),
-                const Icon(
+                ),
+                    const Icon(
                   Icons.trending_down,
                   color: Colors.red,
                   size: 32,
@@ -143,9 +147,10 @@ class SummaryCards extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
                     Text(
                       'Balance',
                       style: TextStyle(
@@ -164,7 +169,8 @@ class SummaryCards extends StatelessWidget {
                     ),
                   ],
                 ),
-                Icon(
+                ),
+                    Icon(
                   Icons.attach_money,
                   color: balanceColor,
                   size: 32,

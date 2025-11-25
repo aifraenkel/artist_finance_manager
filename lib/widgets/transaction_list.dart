@@ -88,7 +88,8 @@ class TransactionList extends StatelessWidget {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color: categoryColor.withOpacity(0.1),
+                        // use an alpha value instead of withOpacity to avoid deprecation
+                        color: categoryColor.withAlpha((0.1 * 255).round()),
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(
@@ -158,7 +159,8 @@ class TransactionList extends StatelessWidget {
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: categoryColor.withOpacity(0.1),
+                            // use an alpha value instead of withOpacity to avoid deprecation
+                            color: categoryColor.withAlpha((0.1 * 255).round()),
                             borderRadius: BorderRadius.circular(4),
                           ),
                           child: Text(

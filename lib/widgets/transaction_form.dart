@@ -138,8 +138,9 @@ class _TransactionFormState extends State<TransactionForm> {
                 width: double.infinity,
                 child: ElevatedButton.icon(
                   onPressed: _handleSubmit,
+                  key: const Key('add_transaction_button'),
                   icon: const Icon(Icons.add),
-                  label: const Text('Add Transaction'),
+                  label: const Text('Add'),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
@@ -155,7 +156,8 @@ class _TransactionFormState extends State<TransactionForm> {
 
   Widget _buildTypeDropdown() {
     return DropdownButtonFormField<String>(
-      value: _type,
+      key: const Key('type_dropdown'),
+      initialValue: _type,
       decoration: const InputDecoration(
         labelText: 'Type',
       ),
@@ -174,7 +176,8 @@ class _TransactionFormState extends State<TransactionForm> {
 
   Widget _buildCategoryDropdown() {
     return DropdownButtonFormField<String>(
-      value: _category,
+      key: const Key('category_dropdown'),
+      initialValue: _category,
       decoration: const InputDecoration(
         labelText: 'Category',
       ),
@@ -198,6 +201,7 @@ class _TransactionFormState extends State<TransactionForm> {
 
   Widget _buildDescriptionField() {
     return TextFormField(
+      key: const Key('description_field'),
       controller: _descriptionController,
       decoration: const InputDecoration(
         labelText: 'Description',
@@ -214,6 +218,7 @@ class _TransactionFormState extends State<TransactionForm> {
 
   Widget _buildAmountField() {
     return TextFormField(
+      key: const Key('amount_field'),
       controller: _amountController,
       decoration: const InputDecoration(
         labelText: 'Amount (\$)',
