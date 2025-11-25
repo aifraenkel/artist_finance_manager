@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:artist_finance_manager/main.dart';
 
 void main() {
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+  });
+
   testWidgets('App loads and shows title', (WidgetTester tester) async {
     // Build our app and trigger a frame.
     await tester.pumpWidget(const MyApp());
 
-    // Verify app title is present
+    // Wait for async loading to finish and then verify title
+    await tester.pumpAndSettle();
     expect(find.text('Project Finance Tracker'), findsOneWidget);
   });
 
@@ -39,25 +45,27 @@ void main() {
 
     // Select expense type (already default)
     // Select category
-    await tester.tap(find.text('Select category').first);
+    await tester.ensureVisible(find.byKey(const Key('category_dropdown')));
+    await tester.tap(find.byKey(const Key('category_dropdown')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Venue').last);
     await tester.pumpAndSettle();
 
     // Enter description
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'What is this for?'),
+      find.byKey(const Key('description_field')),
       'Concert hall rental',
     );
 
     // Enter amount
     await tester.enterText(
-      find.widgetWithText(TextFormField, '0.00'),
+      find.byKey(const Key('amount_field')),
       '500.00',
     );
 
     // Tap add button
-    await tester.tap(find.widgetWithIcon(ElevatedButton, Icons.add));
+    await tester.ensureVisible(find.byKey(const Key('add_transaction_button')));
+    await tester.tap(find.byKey(const Key('add_transaction_button')));
     await tester.pumpAndSettle();
 
     // Verify transaction appears in list
@@ -71,21 +79,23 @@ void main() {
     await tester.pumpAndSettle();
 
     // Add a transaction first
-    await tester.tap(find.text('Select category').first);
+    await tester.ensureVisible(find.byKey(const Key('category_dropdown')));
+    await tester.tap(find.byKey(const Key('category_dropdown')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Other').last);
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'What is this for?'),
+      find.byKey(const Key('description_field')),
       'Test expense',
     );
     await tester.enterText(
-      find.widgetWithText(TextFormField, '0.00'),
+      find.byKey(const Key('amount_field')),
       '100',
     );
 
-    await tester.tap(find.widgetWithIcon(ElevatedButton, Icons.add));
+    await tester.ensureVisible(find.byKey(const Key('add_transaction_button')));
+    await tester.tap(find.byKey(const Key('add_transaction_button')));
     await tester.pumpAndSettle();
 
     // Verify transaction exists
@@ -108,25 +118,28 @@ void main() {
     await tester.pumpAndSettle();
 
     // Add an expense
-    await tester.tap(find.text('Select category').first);
+    await tester.ensureVisible(find.byKey(const Key('category_dropdown')));
+    await tester.tap(find.byKey(const Key('category_dropdown')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Other').last);
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'What is this for?'),
+      find.byKey(const Key('description_field')),
       'Expense item',
     );
     await tester.enterText(
-      find.widgetWithText(TextFormField, '0.00'),
+      find.byKey(const Key('amount_field')),
       '50',
     );
 
-    await tester.tap(find.widgetWithIcon(ElevatedButton, Icons.add));
+    await tester.ensureVisible(find.byKey(const Key('add_transaction_button')));
+    await tester.tap(find.byKey(const Key('add_transaction_button')));
     await tester.pumpAndSettle();
 
-    // Verify expenses updated
-    expect(find.text('\$50.00'), findsAtLeastNWidgets(2)); // In summary and transaction
+    // Verify expenses updated: summary shows $50.00 and transaction shows -$50.00
+    expect(find.text('\$50.00'), findsOneWidget); // summary
+    expect(find.text('-\$50.00'), findsOneWidget); // transaction
 
     // Switch to income
     await tester.tap(find.text('Expense'));
@@ -135,21 +148,21 @@ void main() {
     await tester.pumpAndSettle();
 
     // Add income
-    await tester.tap(find.text('Select category').first);
+    await tester.tap(find.byKey(const Key('category_dropdown')));
     await tester.pumpAndSettle();
     await tester.tap(find.text('Book Sales').last);
     await tester.pumpAndSettle();
 
     await tester.enterText(
-      find.widgetWithText(TextFormField, 'What is this for?'),
+      find.byKey(const Key('description_field')),
       'Book sale',
     );
     await tester.enterText(
-      find.widgetWithText(TextFormField, '0.00'),
+      find.byKey(const Key('amount_field')),
       '100',
     );
 
-    await tester.tap(find.widgetWithIcon(ElevatedButton, Icons.add));
+    await tester.tap(find.byKey(const Key('add_transaction_button')));
     await tester.pumpAndSettle();
 
     // Verify balance is correct (100 income - 50 expense = 50 balance)
