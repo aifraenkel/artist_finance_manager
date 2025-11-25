@@ -2,12 +2,12 @@ name: Flutter CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
-  analyze-and-test-linux:
+  analyze:
     name: Analyze & Test (Linux)
     runs-on: ubuntu-latest
     steps:
@@ -29,12 +29,14 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run analyzer
-        run: flutter analyze
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
 
-      - name: Run tests and collect coverage
-        run: |
-          flutter test --coverage
+      - name: Run analyzer
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
 
       - name: Install lcov (for coverage summary)
         run: sudo apt-get update && sudo apt-get install -y lcov
@@ -47,6 +49,12 @@ jobs:
         with:
           name: coverage-report
           path: coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./coverage/lcov.info
+          fail_ci_if_error: true
 
   test-macos:
     name: Tests (macOS)
@@ -75,116 +83,65 @@ jobs:
 
       - name: Run tests
         run: flutter test
-name: Flutter CI
 
-on:
-  pull_request:
-    branches: [ main, master ]
-  push:
-    branches: [ main, master ]
-
-jobs:
-  analyze:
-    name: Analyze Code
-    runs-on: ubuntu-latest
+  test-windows:
+    name: Tests (Windows)
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Flutter
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+          channel: stable
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
+      - name: Run analyzer
+        run: flutter analyze
 
-      - name: Analyze project source
-        run: flutter analyze --fatal-infos
+      - name: Run tests
+        run: flutter test
 
-      - name: Run tests with coverage
-        run: flutter test --coverage
-
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3
-        with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: true
-
-  build-web:
-    name: Build Web
+  integration-web:
+    name: Integration tests — web (Chrome)
     runs-on: ubuntu-latest
     needs: analyze
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Flutter
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+          channel: stable
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build web
-        run: flutter build web --release
+      - name: Run integration tests (web)
+        run: |
+          flutter test integration_test/app_test.dart -d chrome
 
-      - name: Upload web build
-        uses: actions/upload-artifact@v3
-        with:
-          name: web-build
-          path: build/web/
-
-  build-android:
-    name: Build Android
-    runs-on: ubuntu-latest
-    needs: analyze
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build APK
-        run: flutter build apk --release
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v3
-        with:
-          name: android-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
-
-  build-ios:
-    name: Build iOS
+  integration-macos:
+    name: Integration tests — iOS Simulator
     runs-on: macos-latest
     needs: analyze
     steps:
       - uses: actions/checkout@v4
 
-      - name: Setup Flutter
+      - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+          channel: stable
 
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build iOS (no codesign)
-        run: flutter build ios --release --no-codesign
+      - name: Start iOS Simulator
+        run: |
+          open -a Simulator || true
+          xcrun simctl bootstatus booted -t 60 || true
+
+      - name: Run integration tests on iOS simulator
+        run: flutter test integration_test/app_test.dart -d "iPhone 15 Pro"
