@@ -1,0 +1,13 @@
+name: Artist Finance Manager
+description: A cross-platform finance tracker app for artists to manage project income and expenses
+version: 1.0.0+1
+platforms:
+  - iOS
+  - Android
+  - Web
+categories:
+  - Finance
+  - Productivity
+  - Business
+author: aifraenkel
+repository: https://github.com/aifraenkel/artist_finance_manager
