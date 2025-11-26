@@ -89,7 +89,8 @@
           }
         });
       };
-      _flutter.loader.loadEntrypoint(loaderOptions);
+      // Use the current Flutter Web loader API (load instead of deprecated loadEntrypoint)
+      _flutter.loader.load(loaderOptions);
     });
   </script>
   <script src="flutter.js" defer></script>

@@ -14,8 +14,8 @@ void main() {
       // Verify app loaded
       expect(find.text('Project Finance Tracker'), findsOneWidget);
 
-      // Initial state: all summaries should be $0.00
-      expect(find.text('\$0.00'), findsNWidgets(3));
+      // Initial state: all summaries should be €0.00
+      expect(find.text('€0.00'), findsNWidgets(3));
 
       // Step 1: Add an expense
       await tester.tap(find.text('Select category').first);
@@ -36,10 +36,10 @@ void main() {
 
       // Verify expense was added
       expect(find.text('Band payment'), findsOneWidget);
-      expect(find.text('-\$1000.00'), findsOneWidget);
+      expect(find.text('-€1000.00'), findsOneWidget);
 
       // Verify summary updated
-      expect(find.text('\$1000.00'), findsAtLeastNWidgets(1));
+      expect(find.text('€1000.00'), findsAtLeastNWidgets(1));
 
       // Step 2: Add income
       await tester.tap(find.text('Expense'));
@@ -65,10 +65,10 @@ void main() {
 
       // Verify income was added
       expect(find.text('Concert ticket sales'), findsOneWidget);
-      expect(find.text('+\$2500.00'), findsOneWidget);
+      expect(find.text('+€2500.00'), findsOneWidget);
 
       // Step 3: Verify final balance (2500 - 1000 = 1500)
-      expect(find.text('\$1500.00'), findsOneWidget); // Balance card
+      expect(find.text('€1500.00'), findsOneWidget); // Balance card
 
       // Step 4: Delete a transaction
       await tester.tap(find.text('Delete').first);
@@ -133,7 +133,7 @@ void main() {
       expect(find.text('Transaction 2'), findsOneWidget);
 
       // Verify totals
-      expect(find.text('\$600.00'),
+        expect(find.text('€600.00'),
           findsOneWidget); // Total expenses (100+200+300)
     });
 
