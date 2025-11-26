@@ -139,7 +139,7 @@ jobs:
       - name: Install e2e dependencies
         run: |
           cd e2e_web
-          npm ci
+          npm install
 
       - name: Start static web server
         run: |
@@ -148,12 +148,19 @@ jobs:
           echo $! > ../server.pid
         shell: bash
 
-      - name: Run Puppeteer smoke test
+      - name: Run Puppeteer tests
         run: |
           cd e2e_web
-          node e2e_web_test.js
+          npm test
         env:
           TEST_URL: http://127.0.0.1:8000
+
+      - name: Upload E2E screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-web-screenshots
+          path: e2e_web/screenshots
 
       - name: Stop static web server
         if: always()
