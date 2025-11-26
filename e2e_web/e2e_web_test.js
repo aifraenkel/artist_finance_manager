@@ -21,6 +21,7 @@ const TEST_URL = process.env.TEST_URL || 'http://127.0.0.1:8000';
 
   // Wait for Flutter to attach by looking for a known text from the app
   // Title expected from home screen
+  try {
   await page.waitForFunction(() => {
     return !!document && !!document.body && document.body.innerText.includes('Project Finance Tracker');
   }, { timeout: 20000 });
@@ -32,5 +33,13 @@ const TEST_URL = process.env.TEST_URL || 'http://127.0.0.1:8000';
   }
 
   console.log('E2E smoke: app loaded and UI visible');
+  } catch (err) {
+    try {
+      await page.screenshot({ path: 'screenshots/e2e_web_test_smoke.png', fullPage: true });
+    } catch (_) {}
+    console.error('E2E smoke failed:', err?.message || err);
+    await browser.close();
+    process.exit(1);
+  }
   await browser.close();
 })();
