@@ -148,10 +148,10 @@ jobs:
           echo $! > ../server.pid
         shell: bash
 
-      - name: Run Puppeteer smoke test
+      - name: Run Puppeteer tests
         run: |
           cd e2e_web
-          node e2e_web_test.js
+          npm test
         env:
           TEST_URL: http://127.0.0.1:8000
 
