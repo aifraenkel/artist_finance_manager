@@ -205,6 +205,52 @@ artist_finance_manager/
 - **Material Design 3**: Modern UI components
 - **Intl**: Date/time formatting
 
+## 🧪 Testing
+
+The project includes comprehensive testing at multiple levels:
+
+### Unit & Widget Tests
+```bash
+# Run all tests
+flutter test
+
+# Run tests with coverage
+flutter test --coverage
+```
+
+Tests are located in the `test/` directory and cover:
+- Transaction model serialization/deserialization
+- Storage service functionality
+- Widget behavior and UI interactions
+
+Target code coverage: **80%**
+
+### End-to-End (E2E) Tests
+
+E2E tests use [**Arbigent**](https://github.com/takahirom/arbigent), an AI-powered testing framework designed for Flutter web applications.
+
+**Why Arbigent?**
+- Works seamlessly with Flutter's canvas-based rendering
+- AI-powered test scenarios that adapt to UI changes
+- Natural language test descriptions for better maintainability
+- Visual assertions to verify UI state
+
+**Running E2E Tests:**
+
+See [arbigent/README.md](arbigent/README.md) for detailed instructions.
+
+Quick start:
+```bash
+# 1. Build and serve the web app
+flutter build web --release
+cd build/web && python3 -m http.server 8000 &
+
+# 2. Run Arbigent tests (requires OpenAI API key)
+arbigent run --project-file=arbigent/project.yaml --os=web
+```
+
+**Note:** E2E tests require an OpenAI API key. See the Arbigent README for setup instructions.
+
 ## 📊 Data Storage
 
 The app uses platform-specific local storage:

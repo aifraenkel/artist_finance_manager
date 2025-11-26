@@ -121,6 +121,11 @@ app.*.symbols
 # Temporary test directories
 .tmp/
 
-# E2E web test artifacts
-e2e_web/node_modules/
-e2e_web/screenshots/
+# E2E web test artifacts (legacy Puppeteer - now removed)
+# e2e_web/node_modules/
+# e2e_web/screenshots/
+
+# Arbigent E2E test artifacts
+arbigent-results/
+arbigent-screenshots/
+.arbigent/settings.local.yaml

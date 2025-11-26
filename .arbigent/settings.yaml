@@ -1,0 +1,37 @@
+# Arbigent Settings Template
+# Copy this file and configure with your API key
+
+# AI Provider Configuration
+# Supported values: openai, gemini, azure-openai
+ai_type: openai
+
+# OpenAI Configuration
+# Get your API key from: https://platform.openai.com/api-keys
+openai_api_key: ${OPENAI_API_KEY}
+
+# Optional: Use a specific model (default: gpt-4o)
+# Cheaper option: gpt-4o-mini (recommended for cost savings)
+# openai_model: gpt-4o-mini
+
+# Google Gemini Configuration (alternative to OpenAI)
+# gemini_api_key: ${GEMINI_API_KEY}
+# gemini_model: gemini-1.5-pro
+
+# Azure OpenAI Configuration (alternative to OpenAI)
+# azure_openai_api_key: ${AZURE_OPENAI_API_KEY}
+# azure_openai_endpoint: ${AZURE_OPENAI_ENDPOINT}
+# azure_openai_deployment: ${AZURE_OPENAI_DEPLOYMENT}
+
+# Platform Configuration
+# For web testing, use 'web'
+os: web
+
+# Browser Configuration (for web testing)
+# headless: true  # Run browser in headless mode
+# browser_type: chromium  # Options: chromium, firefox, webkit
+
+# Caching Configuration (reduces AI costs significantly)
+# enable_caching: true  # Cache successful actions to reduce LLM calls
+
+# Logging Configuration
+# verbose: true  # Enable detailed logging for debugging

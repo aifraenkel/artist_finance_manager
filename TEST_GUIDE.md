@@ -22,10 +22,9 @@ open coverage/index.html  # View coverage report
 
 ### Integration Tests (E2E)
 
-**Web:**
-```bash
-flutter test integration_test/app_test.dart -d chrome
-```
+#### Flutter Integration Tests (Mobile/Native)
+
+For testing native mobile app flows using Flutter's integration_test framework:
 
 **iOS Simulator:**
 ```bash
@@ -39,6 +38,40 @@ flutter test integration_test/app_test.dart -d "iPhone 15 Pro"
 flutter test integration_test/app_test.dart -d <emulator-id>
 ```
 
+**Web (Chrome driver):**
+```bash
+flutter test integration_test/app_test.dart -d chrome
+```
+
+#### Arbigent E2E Tests (Web - AI-Powered)
+
+For comprehensive web application testing using AI-powered scenarios:
+
+**Why Arbigent?**
+- Specifically designed for Flutter web apps (works with canvas rendering)
+- AI-based testing that adapts to UI changes
+- Natural language test scenarios
+- Visual assertions for UI validation
+
+**Setup & Usage:**
+
+See [arbigent/README.md](arbigent/README.md) for complete instructions.
+
+Quick start:
+```bash
+# 1. Build and serve the web app
+flutter build web --release
+cd build/web && python3 -m http.server 8000 &
+
+# 2. Configure API key (one-time setup)
+export OPENAI_API_KEY="your-api-key"
+
+# 3. Run Arbigent tests
+arbigent run --project-file=arbigent/project.yaml --os=web
+```
+
+**Note:** Arbigent requires an OpenAI API key (~$1-2/month for typical usage). The integration_test approach above does not require any API keys.
+
 ## Test Structure
 
 ```
@@ -50,7 +83,11 @@ test/
     └── storage_service_test.dart # Storage service tests
 
 integration_test/
-└── app_test.dart                 # E2E user flow tests
+└── app_test.dart                 # Flutter E2E tests (native mobile/web)
+
+arbigent/
+├── project.yaml                  # Arbigent test scenarios (web)
+└── README.md                     # Arbigent setup guide
 ```
 
 ## Test Coverage Goals

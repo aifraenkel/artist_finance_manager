@@ -1,0 +1,149 @@
+# Arbigent E2E Test Configuration for Artist Finance Manager
+# This replaces the previous Puppeteer-based tests with AI-powered testing
+
+name: artist_finance_manager_e2e
+description: End-to-end tests for the Artist Finance Manager Flutter web application
+
+# Base URL will be overridden by TEST_URL environment variable in CI
+# For local testing: http://localhost:8000
+base_url: ${TEST_URL:-http://localhost:8000}
+
+# Test scenarios - broken down into logical, dependent steps
+scenarios:
+  # Basic smoke test - equivalent to previous Puppeteer test
+  - id: verify_app_loads
+    goal: |
+      Verify the Flutter web app loads successfully:
+      1. Wait for the app to fully render (not just the loading screen)
+      2. Confirm the 'Project Finance Tracker' title is visible at the top
+      3. Verify the app UI is interactive and ready for user input
+    image_assertions:
+      - name: "app_loaded_state"
+        description: "App displays 'Project Finance Tracker' title and shows the main interface with summary cards and transaction form"
+    timeout: 30000
+
+  # Verify initial state
+  - id: check_initial_state
+    goal: |
+      Verify the initial state of the application:
+      1. Check that all three summary cards are visible (Income, Expenses, Balance)
+      2. Confirm all amounts show €0.00 initially
+      3. Verify the transaction list is empty
+      4. Confirm the transaction form is visible and ready for input
+    depends_on: [verify_app_loads]
+    image_assertions:
+      - name: "initial_zero_state"
+        description: "Income, Expenses, and Balance summary cards all display €0.00"
+
+  # Test adding an expense transaction
+  - id: add_expense_transaction
+    goal: |
+      Add an expense transaction:
+      1. Locate and click on the category dropdown (should show 'Select category')
+      2. Select 'Musicians' from the expense categories
+      3. Find the description field labeled 'What is this for?'
+      4. Enter 'Band payment' as the description
+      5. Locate the amount input field
+      6. Enter '1000' as the amount
+      7. Click the Add button (has a plus icon)
+      8. Wait for the transaction to be added successfully
+    depends_on: [check_initial_state]
+    timeout: 20000
+
+  # Verify expense was added correctly
+  - id: verify_expense_added
+    goal: |
+      Verify the expense transaction appears correctly:
+      1. Look for 'Band payment' in the transaction list
+      2. Verify it shows '-€1000.00' (negative for expense)
+      3. Check that the Expenses summary card now shows '€1000.00'
+      4. Verify the Balance card shows '-€1000.00' (negative balance)
+      5. Confirm the Income card still shows '€0.00'
+    depends_on: [add_expense_transaction]
+    image_assertions:
+      - name: "expense_added_state"
+        description: "Transaction list shows 'Band payment' with -€1000.00, Expenses card shows €1000.00, Balance shows -€1000.00"
+
+  # Test adding an income transaction
+  - id: add_income_transaction
+    goal: |
+      Add an income transaction:
+      1. Find and click the transaction type toggle/dropdown (currently set to 'Expense')
+      2. Select 'Income' as the transaction type
+      3. Click on the category dropdown (now showing income categories)
+      4. Select 'Event Tickets' from the income categories
+      5. In the description field, enter 'Concert ticket sales'
+      6. In the amount field, enter '2500'
+      7. Click the Add button to submit
+      8. Wait for the transaction to be added
+    depends_on: [verify_expense_added]
+    timeout: 20000
+
+  # Verify income was added and balance calculated correctly
+  - id: verify_income_and_balance
+    goal: |
+      Verify the income transaction and final balance:
+      1. Find 'Concert ticket sales' in the transaction list
+      2. Verify it shows '+€2500.00' (positive for income)
+      3. Check that the Income summary card shows '€2500.00'
+      4. Check that the Expenses card still shows '€1000.00'
+      5. Most importantly, verify the Balance card shows '€1500.00' (2500 - 1000)
+      6. Confirm both transactions are visible in the list
+    depends_on: [add_income_transaction]
+    image_assertions:
+      - name: "final_balance_state"
+        description: "Balance card displays €1500.00, Income shows €2500.00, Expenses shows €1000.00, both transactions visible in list"
+
+  # Test form validation
+  - id: test_form_validation
+    goal: |
+      Test that form validation works:
+      1. Scroll to the transaction form
+      2. Without filling any fields, click the Add button
+      3. Verify that validation error messages appear
+      4. Look for error messages like 'Please select a category' or 'Please enter a description'
+      5. Confirm the form does not submit with empty fields
+    depends_on: [verify_app_loads]
+    image_assertions:
+      - name: "validation_errors"
+        description: "Form shows validation error messages for required fields when attempting to submit empty form"
+
+  # Test delete transaction
+  - id: delete_transaction
+    goal: |
+      Test deleting a transaction:
+      1. Locate the first transaction in the transaction list
+      2. Find and click the 'Delete' button for that transaction
+      3. If a confirmation dialog appears, click the 'Delete' button in the dialog to confirm
+      4. Wait for the transaction to be removed from the list
+    depends_on: [verify_income_and_balance]
+    timeout: 15000
+
+  # Verify deletion worked
+  - id: verify_transaction_deleted
+    goal: |
+      Verify the transaction was deleted and totals updated:
+      1. Confirm one transaction was removed from the list
+      2. Verify only one transaction remains visible
+      3. Check that the summary card totals have been recalculated correctly
+      4. Ensure the Balance card reflects the deletion
+    depends_on: [delete_transaction]
+    image_assertions:
+      - name: "after_deletion_state"
+        description: "Transaction list has one transaction removed, summary cards show updated totals"
+
+# Global settings
+settings:
+  # Maximum time to wait for any scenario (can be overridden per scenario)
+  default_timeout: 30000
+
+  # Take screenshots on failure for debugging
+  screenshot_on_failure: true
+
+  # Directory for storing test results and screenshots
+  results_dir: arbigent-results
+  screenshots_dir: arbigent-screenshots
+
+  # Retry failed scenarios once before marking as failed
+  retry_on_failure: true
+  max_retries: 1

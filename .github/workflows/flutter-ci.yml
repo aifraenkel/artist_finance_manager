@@ -113,58 +113,62 @@ jobs:
       - name: Run tests
         run: flutter test
 
-  integration-web:
-    name: E2E smoke test — web (Chrome + Puppeteer)
-    runs-on: ubuntu-latest
-    needs: analyze
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Install Flutter dependencies
-        run: flutter pub get
-
-      - name: Build web release bundle
-        run: flutter build web --release
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install e2e dependencies
-        run: |
-          cd e2e_web
-          npm install
-
-      - name: Start static web server
-        run: |
-          cd build/web
-          python3 -m http.server 8000 &
-          echo $! > ../server.pid
-        shell: bash
-
-      - name: Run Puppeteer tests
-        run: |
-          cd e2e_web
-          npm test
-        env:
-          TEST_URL: http://127.0.0.1:8000
-
-      - name: Upload E2E screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-web-screenshots
-          path: e2e_web/screenshots
-
-      - name: Stop static web server
-        if: always()
-        run: |
-          kill $(cat build/server.pid) || true
+  # NOTE: Puppeteer-based E2E tests have been replaced with Arbigent
+  # Arbigent CI/CD integration will be configured separately
+  # See arbigent/README.md for local testing instructions
+  #
+  # integration-web:
+  #   name: E2E smoke test — web (Chrome + Puppeteer)
+  #   runs-on: ubuntu-latest
+  #   needs: analyze
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Set up Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         channel: stable
+  #
+  #     - name: Install Flutter dependencies
+  #       run: flutter pub get
+  #
+  #     - name: Build web release bundle
+  #       run: flutter build web --release
+  #
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: '18'
+  #
+  #     - name: Install e2e dependencies
+  #       run: |
+  #         cd e2e_web
+  #         npm install
+  #
+  #     - name: Start static web server
+  #       run: |
+  #         cd build/web
+  #         python3 -m http.server 8000 &
+  #         echo $! > ../server.pid
+  #       shell: bash
+  #
+  #     - name: Run Puppeteer tests
+  #       run: |
+  #         cd e2e_web
+  #         npm test
+  #       env:
+  #         TEST_URL: http://127.0.0.1:8000
+  #
+  #     - name: Upload E2E screenshots
+  #       if: always()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: e2e-web-screenshots
+  #         path: e2e_web/screenshots
+  #
+  #     - name: Stop static web server
+  #       if: always()
+  #       run: |
+  #         kill $(cat build/server.pid) || true
 
   # Removed mobile E2E checks (Android/iOS) from CI to simplify pipeline.
