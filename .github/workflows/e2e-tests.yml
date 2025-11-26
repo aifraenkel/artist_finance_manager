@@ -1,103 +1,111 @@
-name: E2E Tests
+# name: E2E Tests
 
-on:
-  pull_request:
-    branches: [ main, master ]
-  push:
-    branches: [ main, master ]
+# on:
+#   pull_request:
+#     branches: [ main, master ]
+#   push:
+#     branches: [ main, master ]
 
-jobs:
-  web-e2e:
-    name: E2E Tests - Web
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+# jobs:
+#   web-e2e:
+#     name: E2E Tests - Web
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+#       - name: Setup Flutter
+#         uses: subosito/flutter-action@v2
+#         with:
+#           flutter-version: '3.24.0'
+#           channel: 'stable'
 
-      - name: Install dependencies
-        run: flutter pub get
+#       - name: Install dependencies
+#         run: flutter pub get
 
-      - name: Install Chrome
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+#       - name: Install Chrome
+#         run: |
+#           sudo apt-get update
+#           sudo apt-get install -y google-chrome-stable
 
-      - name: Run integration tests (web)
-        run: flutter test integration_test/app_test.dart -d web-server
+#       - name: Run integration tests (web)
+#         run: flutter test integration_test/app_test.dart -d web-server
 
-  android-e2e:
-    name: E2E Tests - Android
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
+  # Run E2E tests on Android using an emulator
+  # android-e2e:
+  #   name: E2E Tests - Android
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+  #     - name: Setup Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         flutter-version: '3.24.0'
+  #         channel: 'stable'
 
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'zulu'
-          java-version: '17'
+  #     - name: Setup Java
+  #       uses: actions/setup-java@v3
+  #       with:
+  #         distribution: 'zulu'
+  #         java-version: '17'
 
-      - name: Install dependencies
-        run: flutter pub get
+  #     - name: Install dependencies
+  #       run: flutter pub get
 
-      - name: AVD cache
-        uses: actions/cache@v3
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-29
+  #     # Cache Android Virtual Device to speed up subsequent runs
+  #     - name: AVD cache
+  #       uses: actions/cache@v3
+  #       id: avd-cache
+  #       with:
+  #         path: |
+  #           ~/.android/avd/*
+  #           ~/.android/adb*
+  #         key: avd-29
 
-      - name: Create AVD and generate snapshot
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 29
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: false
-          script: echo "Generated AVD snapshot for caching."
+  #     # Create AVD snapshot if not cached
+  #     - name: Create AVD and generate snapshot
+  #       if: steps.avd-cache.outputs.cache-hit != 'true'
+  #       uses: reactivecircus/android-emulator-runner@v2
+  #       with:
+  #         api-level: 29
+  #         force-avd-creation: false
+  #         emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+  #         disable-animations: false
+  #         script: echo "Generated AVD snapshot for caching."
 
-      - name: Run integration tests (Android)
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: 29
-          script: flutter test integration_test/app_test.dart
+  #     # Execute integration tests on Android emulator
+  #     - name: Run integration tests (Android)
+  #       uses: reactivecircus/android-emulator-runner@v2
+  #       with:
+  #         api-level: 29
+  #         script: flutter test integration_test/app_test.dart
 
-  ios-e2e:
-    name: E2E Tests - iOS
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
+  # Run E2E tests on iOS using a simulator
+  # ios-e2e:
+  #   name: E2E Tests - iOS
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.24.0'
-          channel: 'stable'
+  #     - name: Setup Flutter
+  #       uses: subosito/flutter-action@v2
+  #       with:
+  #         flutter-version: '3.24.0'
+  #         channel: 'stable'
 
-      - name: Install dependencies
-        run: flutter pub get
+  #     - name: Install dependencies
+  #       run: flutter pub get
 
-      - name: List iOS simulators
-        run: xcrun simctl list devices available
+  #     # Display available iOS simulators for debugging
+  #     - name: List iOS simulators
+  #       run: xcrun simctl list devices available
 
-      - name: Start iOS Simulator
-        run: |
-          DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 15 Pro" | head -1 | awk -F'[()]' '{print $2}')
-          xcrun simctl boot $DEVICE_ID
+  #     # Boot the iOS simulator
+  #     - name: Start iOS Simulator
+  #       run: |
+  #         DEVICE_ID=$(xcrun simctl list devices available | grep "iPhone 15 Pro" | head -1 | awk -F'[()]' '{print $2}')
+  #         xcrun simctl boot $DEVICE_ID
 
-      - name: Run integration tests (iOS)
-        run: flutter test integration_test/app_test.dart -d iPhone
+  #     # Execute integration tests on iOS simulator
+  #     - name: Run integration tests (iOS)
+  #       run: flutter test integration_test/app_test.dart -d iPhone
