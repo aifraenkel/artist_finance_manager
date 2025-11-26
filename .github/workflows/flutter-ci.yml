@@ -139,7 +139,7 @@ jobs:
       - name: Install e2e dependencies
         run: |
           cd e2e_web
-          npm ci
+          npm install
 
       - name: Start static web server
         run: |
