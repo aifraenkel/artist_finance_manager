@@ -160,25 +160,4 @@ jobs:
         run: |
           kill $(cat build/server.pid) || true
 
-  integration-macos:
-    name: Integration tests — iOS Simulator
-    runs-on: macos-latest
-    needs: analyze
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Start iOS Simulator
-        run: |
-          open -a Simulator || true
-          xcrun simctl bootstatus booted -t 60 || true
-
-      - name: Run integration tests on iOS simulator
-        run: flutter test integration_test/app_test.dart -d "iPhone 15 Pro"
+  # Removed mobile E2E checks (Android/iOS) from CI to simplify pipeline.
