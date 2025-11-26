@@ -118,8 +118,8 @@ app.*.symbols
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
 
-# Headless test Node.js dependencies
-.tmp/headless_test/node_modules/
+# Temporary test directories
+.tmp/
 
 # E2E web test artifacts
 e2e_web/node_modules/
