@@ -120,3 +120,7 @@ app.*.symbols
 
 # Headless test Node.js dependencies
 .tmp/headless_test/node_modules/
+
+# E2E web test artifacts
+e2e_web/node_modules/
+e2e_web/screenshots/
