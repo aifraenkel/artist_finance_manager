@@ -1,0 +1,103 @@
+# .dockerignore for Artist Finance Manager
+# Excludes unnecessary files from Docker build context
+
+# Deployment scripts (keep only nginx.conf)
+scripts/
+!scripts/nginx.conf
+
+# Git
+.git/
+.gitignore
+.github/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Flutter/Dart build outputs
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/ephemeral/
+ios/Runner.xcworkspace/xcuserdata/
+ios/Runner.xcodeproj/xcuserdata/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+xcuserdata/
+*.moved-aside
+DerivedData/
+*.hmap
+*.ipa
+
+# Android
+android/.gradle/
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/local.properties
+android/**/GeneratedPluginRegistrant.java
+android/key.properties
+*.jks
+*.keystore
+
+# Web
+web/build/
+
+# Testing
+test/e2e_web/node_modules/
+test/e2e_web/playwright-report/
+test/e2e_web/test-results/
+coverage/
+test/.test_coverage.dart
+test_driver/
+
+# Documentation
+docs/
+*.md
+LICENSE
+
+# CI/CD
+.github/
+.circleci/
+.travis.yml
+
+# Deployment scripts (not needed in image)
+scripts/
+
+# Logs
+*.log
+
+# Temporary files
+*.tmp
+tmp/
+temp/
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# GCP credentials (NEVER include these!)
+gcp-key.json
+*.json.key
+*-credentials.json
+
+# Other
+.claude/

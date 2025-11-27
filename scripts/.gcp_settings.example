@@ -1,0 +1,131 @@
+# ============================================================================
+# GCP Setup Configuration File
+# ============================================================================
+# Copy this file to .gcp_settings and customize the values below.
+# The setup script will use these settings to automate GCP configuration.
+#
+# Usage:
+#   cp .gcp_settings.example .gcp_settings
+#   nano .gcp_settings  # Edit with your values
+#   ./scripts/setup-gcp.sh
+#
+# ============================================================================
+
+# ----------------------------------------------------------------------------
+# REQUIRED SETTINGS (you must customize these)
+# ----------------------------------------------------------------------------
+
+# Your GCP Project ID (must be globally unique, 6-30 characters, lowercase, numbers, hyphens)
+# Suggestion: Use your app name + random suffix, e.g., "artist-finance-mgr-prod-2024"
+# Leave empty and the script will suggest one based on your Google account
+GCP_PROJECT_ID=""
+
+# Your Google Cloud billing account ID
+# The script will list available billing accounts if you leave this empty
+# Format: "XXXXXX-YYYYYY-ZZZZZZ"
+GCP_BILLING_ACCOUNT_ID=""
+
+# ----------------------------------------------------------------------------
+# OPTIONAL SETTINGS (smart defaults provided)
+# ----------------------------------------------------------------------------
+
+# Deployment region (default: us-central1 - Iowa, USA)
+# Popular options:
+#   us-central1    - Iowa, USA (lowest latency for US, recommended)
+#   us-east1       - South Carolina, USA
+#   us-west1       - Oregon, USA
+#   europe-west1   - Belgium, Europe
+#   europe-west2   - London, UK
+#   asia-northeast1 - Tokyo, Asia
+#   asia-southeast1 - Singapore, Asia
+# Full list: https://cloud.google.com/run/docs/locations
+GCP_REGION="us-central1"
+
+# Cloud Run service name (default: artist-finance-manager)
+# Must be lowercase, max 63 chars, alphanumeric and hyphens only
+GCP_SERVICE_NAME="artist-finance-manager"
+
+# Service account name for CI/CD (default: github-actions)
+# This account will be used by GitHub Actions for deployments
+GCP_SERVICE_ACCOUNT_NAME="github-actions"
+
+# Service account display name (default: GitHub Actions Deployment)
+GCP_SERVICE_ACCOUNT_DISPLAY_NAME="GitHub Actions Deployment"
+
+# Service account key file output path (default: gcp-key.json)
+# WARNING: This file contains credentials! Keep it secure and never commit to git
+GCP_SERVICE_ACCOUNT_KEY_FILE="gcp-key.json"
+
+# ----------------------------------------------------------------------------
+# GITHUB REPOSITORY SETTINGS (for automatic secret configuration)
+# ----------------------------------------------------------------------------
+
+# Your GitHub repository (format: owner/repo)
+# Example: "aifraenkel/artist_finance_manager"
+# Leave empty to skip GitHub secrets setup
+GITHUB_REPOSITORY=""
+
+# GitHub Personal Access Token (with 'repo' scope)
+# Create at: https://github.com/settings/tokens
+# Required only if you want to automatically configure GitHub secrets
+# Leave empty to manually configure secrets
+GITHUB_TOKEN=""
+
+# ----------------------------------------------------------------------------
+# ADVANCED SETTINGS (usually no need to change)
+# ----------------------------------------------------------------------------
+
+# Enable verbose logging (default: false)
+# Set to "true" for detailed output during setup
+VERBOSE="false"
+
+# Skip confirmation prompts (default: false)
+# Set to "true" for non-interactive mode (use with caution!)
+AUTO_CONFIRM="false"
+
+# APIs to enable (space-separated list)
+# These are the required GCP APIs for the deployment
+GCP_APIS="run.googleapis.com containerregistry.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com"
+
+# IAM roles for the service account (space-separated list)
+# These permissions are required for CI/CD deployment
+GCP_SERVICE_ACCOUNT_ROLES="roles/run.admin roles/storage.admin roles/iam.serviceAccountUser"
+
+# Log file path (default: .gcp_setup.log)
+LOG_FILE=".gcp_setup.log"
+
+# State file path (tracks completed steps, default: .gcp_setup.state)
+STATE_FILE=".gcp_setup.state"
+
+# ----------------------------------------------------------------------------
+# NOTES
+# ----------------------------------------------------------------------------
+#
+# 1. After running setup, add these secrets to GitHub:
+#    - GCP_PROJECT_ID: Your project ID
+#    - GCP_SA_KEY: Content of gcp-key.json
+#    - GCP_REGION: Your chosen region
+#
+# 2. The script will:
+#    - Validate all settings before starting
+#    - Create your GCP project if it doesn't exist
+#    - Enable required APIs
+#    - Set up billing
+#    - Create service account with appropriate permissions
+#    - Generate service account key
+#    - Optionally configure GitHub secrets (if GITHUB_TOKEN provided)
+#    - Log all actions to .gcp_setup.log
+#    - Save state to .gcp_setup.state for resume capability
+#
+# 3. If setup fails at any step:
+#    - Review the log file: cat .gcp_setup.log
+#    - Fix the issue
+#    - Re-run the script - it will resume from the failed step
+#
+# 4. Security notes:
+#    - Never commit .gcp_settings with real values to git
+#    - Never commit gcp-key.json to git
+#    - Store credentials securely (GitHub Secrets, password manager, etc.)
+#    - Rotate service account keys periodically
+#
+# ============================================================================

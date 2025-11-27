@@ -135,3 +135,16 @@ integration_test/results/
 screenshots/
 *.mp4
 *.webm
+
+# GCP credentials and deployment files
+gcp-key.json
+*-key.json
+*.key.json
+*credentials.json
+.gcloud/
+.config/gcloud/
+
+# GCP setup configuration and logs
+.gcp_settings
+.gcp_setup.log
+.gcp_setup.state
