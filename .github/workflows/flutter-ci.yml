@@ -1,0 +1,170 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  analyze:
+    name: Analyze & Test (Linux)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Run analyzer
+        run: flutter analyze --fatal-infos
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Install lcov (for coverage summary)
+        run: sudo apt-get update && sudo apt-get install -y lcov
+
+      - name: Show coverage summary
+        run: lcov --summary coverage/lcov.info || true
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage
+
+      - name: Upload coverage to Codecov
+        # Only run the upload when either a CODECOV_TOKEN is provided (for private repos)
+        # or this repository is public. Also make the step tolerant so transient Codecov
+        # service/network issues don't fail the entire CI run.
+        if: ${{ secrets.CODECOV_TOKEN != '' || github.repository_visibility == 'public' }}
+        uses: codecov/codecov-action@v4
+        env:
+          # If CODECOV_TOKEN is not configured this will be empty; that's fine for public repos.
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        with:
+          files: ./coverage/lcov.info
+          # Avoid failing the whole CI for temporary Codecov outages or misconfigurations
+          # (when token missing for private repos, we'll skip this step because of the `if` above).
+          fail_ci_if_error: false
+
+  test-macos:
+    name: Tests (macOS)
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run analyzer
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+  test-windows:
+    name: Tests (Windows)
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run analyzer
+        run: flutter analyze
+
+      - name: Run tests
+        run: flutter test
+
+  integration-web:
+    name: E2E smoke test — web (Chrome + Puppeteer)
+    runs-on: ubuntu-latest
+    needs: analyze
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Build web release bundle
+        run: flutter build web --release
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install e2e dependencies
+        run: |
+          cd e2e_web
+          npm install
+
+      - name: Start static web server
+        run: |
+          cd build/web
+          python3 -m http.server 8000 &
+          echo $! > ../server.pid
+        shell: bash
+
+      - name: Run Puppeteer tests
+        run: |
+          cd e2e_web
+          npm test
+        env:
+          TEST_URL: http://127.0.0.1:8000
+
+      - name: Upload E2E screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-web-screenshots
+          path: e2e_web/screenshots
+
+      - name: Stop static web server
+        if: always()
+        run: |
+          kill $(cat build/server.pid) || true
+
+  # Removed mobile E2E checks (Android/iOS) from CI to simplify pipeline.
