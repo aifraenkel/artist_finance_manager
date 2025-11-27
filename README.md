@@ -245,13 +245,7 @@ flutter run -d chrome
 
 ## 🧪 Testing
 
-This project has comprehensive test coverage with three test types:
-
-- ✅ E2E widget tests (all platforms, fast)
-- ✅ E2E web tests (browser only)
-- ✅ Integration tests (mobile only, real devices)
-
-See [test/README.md](test/README.md) for detailed testing documentation.
+This project has comprehensive test coverage with three test types, see [test/README.md](test/README.md) for detailed testing documentation.
 
 **Quick start:**
 ```bash
@@ -267,24 +261,11 @@ cd test/e2e_web && ./run-e2e-tests.sh
 # Clean test artifacts
 cd test && ./clean-test-artifacts.sh
 ```
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 👤 Author
-
-**aifraenkel**
-- GitHub: [@aifraenkel](https://github.com/aifraenkel)
-
-## 🤝 Contributing
-
-Contributions, issues, and feature requests are welcome!
-
-## 💡 Support
-
-If you found this helpful, please give it a ⭐️!
-
 ---
+
+📄 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+🤝 Contributions, issues, and feature requests are welcome!
+💡 If you found this helpful, please give it a ⭐️!
+
 
 Built with ❤️ for artists everywhere
