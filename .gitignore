@@ -117,3 +117,9 @@ app.*.symbols
 !**/ios/**/default.perspectivev3
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 !/dev/ci/**/Gemfile.lock
+
+# E2E Tests (Stagehand)
+e2e/node_modules/
+e2e/.env
+e2e/screenshots/
+e2e/.stagehand/
