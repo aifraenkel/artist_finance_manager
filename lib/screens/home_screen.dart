@@ -136,6 +136,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               const Text(
                                 'Project Finance Tracker',
+                                key: ValueKey('app-title'),
                                 style: TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
@@ -144,16 +145,19 @@ class _HomeScreenState extends State<HomeScreen> {
                               ),
                               const SizedBox(height: 24),
                               SummaryCards(
+                                key: const ValueKey('summary-cards'),
                                 totalIncome: _totalIncome,
                                 totalExpenses: _totalExpenses,
                                 balance: _balance,
                               ),
                               const SizedBox(height: 24),
                               TransactionForm(
+                                key: const ValueKey('transaction-form'),
                                 onSubmit: _addTransaction,
                               ),
                               const SizedBox(height: 24),
                               TransactionList(
+                                key: const ValueKey('transaction-list'),
                                 transactions: _transactions,
                                 onDelete: _deleteTransaction,
                               ),

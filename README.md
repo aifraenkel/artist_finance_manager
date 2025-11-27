@@ -243,16 +243,30 @@ flutter pub get
 flutter run -d chrome
 ```
 
-## 🚀 Future Enhancements
+## 🧪 Testing
 
-- [ ] Add backend sync (Firebase, Supabase, etc.)
-- [ ] Export to CSV/PDF
-- [ ] Charts and analytics
-- [ ] Multiple projects
-- [ ] Budget planning
-- [ ] Receipt photo attachments
-- [ ] Dark mode
-- [ ] Multi-currency support
+This project has comprehensive test coverage with three test types:
+
+- ✅ E2E widget tests (all platforms, fast)
+- ✅ E2E web tests (browser only)
+- ✅ Integration tests (mobile only, real devices)
+
+See [test/README.md](test/README.md) for detailed testing documentation.
+
+**Quick start:**
+```bash
+# Run E2E widget tests (fast, all platforms)
+flutter test test/e2e_widget/
+
+# Run integration tests (requires device/simulator)
+flutter test test/integration_test/
+
+# Run E2E web tests (browser)
+cd test/e2e_web && ./run-e2e-tests.sh
+
+# Clean test artifacts
+cd test && ./clean-test-artifacts.sh
+```
 
 ## 📄 License
 

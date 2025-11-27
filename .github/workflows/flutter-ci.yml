@@ -7,8 +7,9 @@ on:
     branches: [ main, master ]
 
 jobs:
+  # Job 1: Code analysis and formatting
   analyze:
-    name: Analyze & Test (Linux)
+    name: Analyze & Format Check
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,8 +36,32 @@ jobs:
       - name: Run analyzer
         run: flutter analyze --fatal-infos
 
-      - name: Run tests with coverage
-        run: flutter test --coverage
+  # Job 2: Unit and Widget Tests
+  tests-unit-widget:
+    name: Unit & Widget Tests
+    runs-on: ubuntu-latest
+    needs: analyze
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run unit and widget tests with coverage
+        run: flutter test --coverage --exclude-tags=integration
 
       - name: Install lcov (for coverage summary)
         run: sudo apt-get update && sudo apt-get install -y lcov
@@ -51,20 +76,129 @@ jobs:
           path: coverage
 
       - name: Upload coverage to Codecov
-        # Only run the upload when either a CODECOV_TOKEN is provided (for private repos)
-        # or this repository is public. Also make the step tolerant so transient Codecov
-        # service/network issues don't fail the entire CI run.
         if: ${{ secrets.CODECOV_TOKEN != '' || github.repository_visibility == 'public' }}
         uses: codecov/codecov-action@v4
         env:
-          # If CODECOV_TOKEN is not configured this will be empty; that's fine for public repos.
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         with:
           files: ./coverage/lcov.info
-          # Avoid failing the whole CI for temporary Codecov outages or misconfigurations
-          # (when token missing for private repos, we'll skip this step because of the `if` above).
           fail_ci_if_error: false
 
+  # Job 3: E2E Widget Tests
+  tests-e2e-widget:
+    name: E2E Widget Tests
+    runs-on: ubuntu-latest
+    needs: analyze
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run E2E widget tests
+        run: flutter test test/e2e_widget/
+
+  # Job 4: Browser E2E Tests (Playwright)
+  tests-e2e-web:
+    name: E2E Browser Tests (Playwright)
+    runs-on: ubuntu-latest
+    needs: analyze
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Build web release bundle
+        run: flutter build web --release
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('test/e2e_web/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install E2E dependencies
+        run: |
+          cd test/e2e_web
+          npm ci
+
+      - name: Install Playwright browsers
+        run: |
+          cd test/e2e_web
+          npx playwright install chromium --with-deps
+
+      - name: Start static web server
+        run: |
+          cd build/web
+          python3 -m http.server 8000 &
+          echo $! > ../server.pid
+          # Wait for server to be ready
+          sleep 5
+        shell: bash
+
+      - name: Run Playwright E2E tests
+        run: |
+          cd test/e2e_web
+          npm test
+        env:
+          E2E_BASE_URL: http://127.0.0.1:8000
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: test/e2e_web/playwright-report
+          retention-days: 7
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results
+          path: test/e2e_web/test-results
+          retention-days: 7
+
+      - name: Stop static web server
+        if: always()
+        run: |
+          kill $(cat build/server.pid) || true
+
+  # Optional: Cross-platform tests (can run in parallel)
   test-macos:
     name: Tests (macOS)
     runs-on: macos-latest
@@ -87,11 +221,8 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run analyzer
-        run: flutter analyze
-
       - name: Run tests
-        run: flutter test
+        run: flutter test --exclude-tags=integration
 
   test-windows:
     name: Tests (Windows)
@@ -107,64 +238,5 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run analyzer
-        run: flutter analyze
-
       - name: Run tests
-        run: flutter test
-
-  integration-web:
-    name: E2E smoke test — web (Chrome + Puppeteer)
-    runs-on: ubuntu-latest
-    needs: analyze
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up Flutter
-        uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-
-      - name: Install Flutter dependencies
-        run: flutter pub get
-
-      - name: Build web release bundle
-        run: flutter build web --release
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-
-      - name: Install e2e dependencies
-        run: |
-          cd e2e_web
-          npm install
-
-      - name: Start static web server
-        run: |
-          cd build/web
-          python3 -m http.server 8000 &
-          echo $! > ../server.pid
-        shell: bash
-
-      - name: Run Puppeteer tests
-        run: |
-          cd e2e_web
-          npm test
-        env:
-          TEST_URL: http://127.0.0.1:8000
-
-      - name: Upload E2E screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-web-screenshots
-          path: e2e_web/screenshots
-
-      - name: Stop static web server
-        if: always()
-        run: |
-          kill $(cat build/server.pid) || true
-
-  # Removed mobile E2E checks (Android/iOS) from CI to simplify pipeline.
+        run: flutter test --exclude-tags=integration
