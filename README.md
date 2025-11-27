@@ -61,6 +61,10 @@ Before you begin, ensure you have the following installed:
 
 ## 🛠️ Installation & Setup
 
+For detailed setup instructions, see [SETUP_GUIDE.md](SETUP_GUIDE.md).
+
+**Quick start:**
+
 1. **Clone the repository**
    ```bash
    git clone https://github.com/aifraenkel/artist_finance_manager.git
@@ -72,11 +76,10 @@ Before you begin, ensure you have the following installed:
    flutter pub get
    ```
 
-3. **Verify your Flutter installation**
+3. **Run the app**
    ```bash
-   flutter doctor
+   flutter run -d chrome  # For web
    ```
-   Fix any issues reported by Flutter Doctor before proceeding.
 
 ## 🏃‍♂️ Running the App
 
@@ -174,45 +177,9 @@ The top cards show:
 - Each transaction shows category, description, date, time, and amount
 - Delete any transaction by clicking the **Delete** button
 
-## 📂 Project Structure
+## 🏗️ Architecture & Tech Stack
 
-```
-artist_finance_manager/
-├── lib/
-│   ├── main.dart                 # App entry point
-│   ├── models/
-│   │   └── transaction.dart      # Transaction data model
-│   ├── services/
-│   │   └── storage_service.dart  # Local storage service
-│   ├── screens/
-│   │   └── home_screen.dart      # Main app screen
-│   └── widgets/
-│       ├── summary_cards.dart    # Income/Expense/Balance cards
-│       ├── transaction_form.dart # Add transaction form
-│       └── transaction_list.dart # Transaction history list
-├── android/                      # Android platform files
-├── ios/                          # iOS platform files
-├── web/                          # Web platform files
-├── pubspec.yaml                  # Dependencies
-└── README.md                     # This file
-```
-
-## 🔧 Technologies Used
-
-- **Flutter 3.x**: Cross-platform UI framework
-- **Dart**: Programming language
-- **SharedPreferences**: Local data persistence
-- **Material Design 3**: Modern UI components
-- **Intl**: Date/time formatting
-
-## 📊 Data Storage
-
-The app uses platform-specific local storage:
-
-- **iOS/Android**: SharedPreferences (native key-value storage)
-- **Web**: Browser LocalStorage
-
-Data is stored as JSON and automatically saved when you add or delete transactions.
+The app is built with Flutter 3.x and uses a clean layered architecture with local-first data storage. For detailed information about the project structure, technology stack, design patterns, and architecture decisions, see [ARCHITECTURE.md](ARCHITECTURE.md).
 
 ## 🐛 Troubleshooting
 
@@ -245,21 +212,18 @@ flutter run -d chrome
 
 ## 🧪 Testing
 
-This project has comprehensive test coverage with three test types, see [test/README.md](test/README.md) for detailed testing documentation.
+This project has comprehensive test coverage including unit tests, widget tests, integration tests, and E2E browser tests. For detailed testing documentation, see [TEST_GUIDE.md](TEST_GUIDE.md).
 
 **Quick start:**
 ```bash
+# Run all unit and widget tests
+flutter test
+
 # Run E2E widget tests (fast, all platforms)
 flutter test test/e2e_widget/
 
-# Run integration tests (requires device/simulator)
-flutter test test/integration_test/
-
 # Run E2E web tests (browser)
 cd test/e2e_web && ./run-e2e-tests.sh
-
-# Clean test artifacts
-cd test && ./clean-test-artifacts.sh
 ```
 ---
 

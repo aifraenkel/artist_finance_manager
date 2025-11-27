@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project implements a comprehensive testing strategy with multiple test types running at different levels. For a complete guide with detailed explanations, see [test/README.md](test/README.md).
+This project implements a comprehensive testing strategy with multiple test types running at different levels:
 
 - **Unit Tests**: Test individual functions, classes, and business logic
 - **E2E Widget Tests**: End-to-end tests in Flutter test framework (all platforms)
@@ -32,8 +32,7 @@ test/                                    → All tests
 │   └── transaction_test.dart
 ├── services/                           → Service unit tests
 │   └── storage_service_test.dart
-├── widget_test.dart                    → Basic widget tests
-└── README.md                           → Comprehensive testing documentation
+└── widget_test.dart                    → Basic widget tests
 ```
 
 **Test Type Summary:**
