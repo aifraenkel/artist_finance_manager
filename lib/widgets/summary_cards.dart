@@ -45,6 +45,7 @@ class SummaryCards extends StatelessWidget {
 
   Widget _buildIncomeCard() {
     return Card(
+      key: const ValueKey('income-card'),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -57,16 +58,18 @@ class SummaryCards extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Income',
+                        key: ValueKey('income-label'),
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: Colors.grey,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '€${totalIncome.toStringAsFixed(2)}',
+                        key: const ValueKey('income-amount'),
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -91,6 +94,7 @@ class SummaryCards extends StatelessWidget {
 
   Widget _buildExpensesCard() {
     return Card(
+      key: const ValueKey('expenses-card'),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -103,16 +107,18 @@ class SummaryCards extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Expenses',
+                        key: ValueKey('expenses-label'),
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: Colors.grey,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '€${totalExpenses.toStringAsFixed(2)}',
+                        key: const ValueKey('expenses-amount'),
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -139,6 +145,7 @@ class SummaryCards extends StatelessWidget {
     final balanceColor = balance >= 0 ? Colors.blue : Colors.red;
 
     return Card(
+      key: const ValueKey('balance-card'),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -151,16 +158,18 @@ class SummaryCards extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      const Text(
                         'Balance',
+                        key: ValueKey('balance-label'),
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.grey[600],
+                          color: Colors.grey,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         '€${balance.toStringAsFixed(2)}',
+                        key: const ValueKey('balance-amount'),
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,

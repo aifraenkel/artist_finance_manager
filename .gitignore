@@ -120,7 +120,18 @@ app.*.symbols
 
 # Temporary test directories
 .tmp/
+test-results/
 
-# E2E web test artifacts
-e2e_web/node_modules/
-e2e_web/screenshots/
+# E2E Playwright test artifacts
+e2e/node_modules/
+e2e/test-results/
+e2e/playwright-report/
+e2e/.cache/
+e2e/package-lock.json
+
+# Flutter test results
+test/results/
+integration_test/results/
+screenshots/
+*.mp4
+*.webm
