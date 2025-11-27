@@ -1,0 +1,34 @@
+import 'observability_service.dart';
+
+/// Stub implementation for non-web platforms (iOS, Android)
+class ObservabilityServiceImpl implements ObservabilityService {
+  @override
+  void trackEvent(String name, {Map<String, dynamic>? attributes}) {
+    // No-op on mobile platforms
+    // You could add mobile-specific analytics here (Firebase, etc.)
+  }
+
+  @override
+  void trackMeasurement(String name, double value, {Map<String, String>? attributes}) {
+    // No-op on mobile platforms
+  }
+
+  @override
+  void trackError(dynamic error, {StackTrace? stackTrace, Map<String, dynamic>? context}) {
+    // No-op on mobile platforms
+    // You could add Crashlytics or similar here
+  }
+
+  @override
+  void log(String message, {String level = 'info', Map<String, dynamic>? context}) {
+    // No-op on mobile platforms
+  }
+
+  @override
+  void setUser(String userId, {String? email, String? username}) {
+    // No-op on mobile platforms
+  }
+}
+
+/// Factory function to get the observability service
+ObservabilityService getObservabilityService() => ObservabilityServiceImpl();

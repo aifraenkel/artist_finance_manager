@@ -198,6 +198,31 @@ The top cards show:
 
 The app is built with Flutter 3.x and uses a clean layered architecture with local-first data storage. For detailed information about the project structure, technology stack, design patterns, and architecture decisions, see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
+## 📊 Observability with Grafana Cloud
+
+The web version includes **Grafana Faro** integration for real-time observability:
+
+### What's Tracked
+- **Custom Events**: Transaction additions/deletions, page loads
+- **Performance Metrics**: Load times, Web Vitals (LCP, FID, CLS)
+- **Error Tracking**: JavaScript errors, storage failures
+- **User Sessions**: Session duration and behavior
+- **Console Logs**: Application logging
+
+### Setup
+1. Create a free Grafana Cloud account at [grafana.com](https://grafana.com)
+2. Follow the detailed setup guide in [GRAFANA_SETUP.md](GRAFANA_SETUP.md)
+3. Configure your Faro collector URL in `web/index.html`
+4. Build and deploy - observability is automatic!
+
+### Benefits
+- Monitor real-time user activity
+- Track and fix errors proactively
+- Analyze performance bottlenecks
+- Understand feature usage patterns
+
+**Note**: Observability is currently web-only. Mobile platforms use a no-op implementation.
+
 ## 🐛 Troubleshooting
 
 ### "Flutter command not found"
