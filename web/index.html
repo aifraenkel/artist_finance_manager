@@ -72,10 +72,8 @@
         }
       };
 
-      // Only initialize if configuration is valid
-      if (!GRAFANA_FARO_CONFIG.url || GRAFANA_FARO_CONFIG.url.includes('YOUR_')) {
-        console.log('Grafana Faro not configured - skipping initialization');
-        // Create a no-op faro object for development
+      // Create no-op faro object helper
+      function createNoOpFaro() {
         window.faro = {
           api: {
             pushEvent: function() {},
@@ -85,6 +83,12 @@
             setUser: function() {}
           }
         };
+      }
+
+      // Only initialize if configuration is valid
+      if (!GRAFANA_FARO_CONFIG.url || GRAFANA_FARO_CONFIG.url.includes('YOUR_')) {
+        console.log('Grafana Faro not configured - skipping initialization');
+        createNoOpFaro();
         return;
       }
 
@@ -108,17 +112,33 @@
 
           // Initialize and add the Web Tracing instrumentation to the already loaded Web-SDK
           webTracingScript.onload = () => {
-            window.GrafanaFaroWebSdk.faro.instrumentations.add(
-              new window.GrafanaFaroWebTracing.TracingInstrumentation()
-            );
-            console.log('Grafana Faro Web Tracing enabled');
+            try {
+              window.GrafanaFaroWebSdk.faro.instrumentations.add(
+                new window.GrafanaFaroWebTracing.TracingInstrumentation()
+              );
+              console.log('Grafana Faro Web Tracing enabled');
+            } catch (error) {
+              console.error('Failed to initialize Grafana Faro Web Tracing:', error);
+            }
+          };
+
+          // Handle web tracing script loading failure
+          webTracingScript.onerror = () => {
+            console.error('Failed to load Grafana Faro Web Tracing - continuing without tracing');
           };
 
           // Append the Web Tracing script tag to the HTML page
           document.head.appendChild(webTracingScript);
         } catch (error) {
           console.error('Failed to initialize Grafana Faro:', error);
+          createNoOpFaro();
         }
+      };
+
+      // Handle main SDK script loading failure
+      webSdkScript.onerror = () => {
+        console.error('Failed to load Grafana Faro SDK - using no-op implementation');
+        createNoOpFaro();
       };
 
       // Append the Web-SDK script tag to the HTML page
