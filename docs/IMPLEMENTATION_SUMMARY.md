@@ -314,8 +314,8 @@ Cloud Run scales to zero, so costs are minimal with no traffic.
 
 ### Added Files
 
-- `Dockerfile` - Multi-stage Docker build
-- `nginx.conf` - Nginx configuration
+- `scripts/Dockerfile` - Multi-stage Docker build
+- `scripts/nginx.conf` - Nginx configuration
 - `.dockerignore` - Docker build exclusions
 - `scripts/.gcp_settings.example` - Configuration template for automated setup
 - `scripts/setup-gcp.sh` - Automated GCP configuration script
