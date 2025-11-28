@@ -125,13 +125,30 @@ flutter run -d <device-id>
 flutter build web --release
 
 # Output will be in build/web/
-# Deploy this folder to any static hosting service:
-# - Firebase Hosting
-# - Netlify
-# - Vercel
-# - GitHub Pages
-# - AWS S3
 ```
+
+## 🚀 Deployment
+
+The app is automatically deployed to Google Cloud Run when code is merged to `main`. See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for full documentation.
+
+### Quick Deploy Commands
+
+```bash
+# Deploy to GCP Cloud Run (one command)
+./scripts/deploy.sh
+
+# Rollback to previous version
+./scripts/rollback.sh
+```
+
+**Automatic CI/CD**: Every push to `main` triggers:
+1. ✅ All tests (unit, widget, integration, E2E)
+2. 🏗️ Build Flutter web app
+3. 🐳 Build and push Docker image
+4. 🚀 Deploy to Cloud Run
+5. 🏥 Health checks and smoke tests
+
+For detailed deployment setup, configuration, and troubleshooting, see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 ### iOS App
 
@@ -179,7 +196,7 @@ The top cards show:
 
 ## 🏗️ Architecture & Tech Stack
 
-The app is built with Flutter 3.x and uses a clean layered architecture with local-first data storage. For detailed information about the project structure, technology stack, design patterns, and architecture decisions, see [ARCHITECTURE.md](ARCHITECTURE.md).
+The app is built with Flutter 3.x and uses a clean layered architecture with local-first data storage. For detailed information about the project structure, technology stack, design patterns, and architecture decisions, see [ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
 ## 🐛 Troubleshooting
 

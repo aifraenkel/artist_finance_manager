@@ -1,0 +1,332 @@
+name: Deploy to GCP Cloud Run
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:  # Allow manual triggering
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.GCP_REGION }}
+  SERVICE_NAME: artist-finance-manager
+  IMAGE_NAME: gcr.io/${{ secrets.GCP_PROJECT_ID }}/artist-finance-manager
+
+jobs:
+  # ============================================================================
+  # Job 1: Run All Tests (gate for deployment)
+  # ============================================================================
+  tests:
+    name: Run All Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Run analyzer
+        run: flutter analyze --fatal-infos
+
+      - name: Run unit and widget tests
+        run: flutter test --exclude-tags=integration
+
+      - name: Run E2E widget tests
+        run: flutter test test/e2e_widget/
+
+  # ============================================================================
+  # Job 2: Build and Deploy to Cloud Run
+  # ============================================================================
+  deploy:
+    name: Build & Deploy to Cloud Run
+    runs-on: ubuntu-latest
+    needs: tests  # Only deploy if tests pass
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build Flutter web app
+        run: flutter build web --release --web-renderer canvaskit
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Configure Docker for GCR
+        run: gcloud auth configure-docker
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            -t ${{ env.IMAGE_NAME }}:latest \
+            -t ${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            -t ${{ env.IMAGE_NAME }}:${{ github.run_number }} \
+            .
+
+      - name: Push Docker image to GCR
+        run: |
+          docker push ${{ env.IMAGE_NAME }}:latest
+          docker push ${{ env.IMAGE_NAME }}:${{ github.sha }}
+          docker push ${{ env.IMAGE_NAME }}:${{ github.run_number }}
+
+      - name: Deploy to Cloud Run
+        id: deploy
+        run: |
+          gcloud run deploy ${{ env.SERVICE_NAME }} \
+            --image ${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --platform managed \
+            --region ${{ secrets.GCP_REGION }} \
+            --allow-unauthenticated \
+            --port 8080 \
+            --memory 512Mi \
+            --cpu 1 \
+            --min-instances 0 \
+            --max-instances 10 \
+            --timeout 300 \
+            --set-env-vars "FLUTTER_WEB_APP=true,DEPLOYMENT_SHA=${{ github.sha }},DEPLOYMENT_TIME=$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+            --quiet
+
+      - name: Get service URL
+        id: url
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --region ${{ secrets.GCP_REGION }} \
+            --format "value(status.url)")
+          echo "SERVICE_URL=${SERVICE_URL}" >> $GITHUB_OUTPUT
+          echo "Service URL: ${SERVICE_URL}"
+
+      - name: Health check
+        run: |
+          echo "Running health check..."
+          sleep 10  # Wait for service to be fully ready
+
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ steps.url.outputs.SERVICE_URL }}/health)
+
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "✅ Health check passed (HTTP $HTTP_STATUS)"
+          else
+            echo "❌ Health check failed (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+
+      - name: Smoke test - Check main page
+        run: |
+          echo "Running smoke test on main page..."
+
+          HTTP_STATUS=$(curl -s -o /dev/null -w "%{http_code}" ${{ steps.url.outputs.SERVICE_URL }})
+
+          if [ "$HTTP_STATUS" -eq 200 ]; then
+            echo "✅ Main page is accessible (HTTP $HTTP_STATUS)"
+          else
+            echo "❌ Main page check failed (HTTP $HTTP_STATUS)"
+            exit 1
+          fi
+
+      - name: Get deployment info
+        id: deployment-info
+        run: |
+          REVISION=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --region ${{ secrets.GCP_REGION }} \
+            --format "value(status.latestReadyRevisionName)")
+          echo "REVISION=${REVISION}" >> $GITHUB_OUTPUT
+
+          echo "=========================================="
+          echo "  Deployment Successful!"
+          echo "=========================================="
+          echo "  Service:   ${{ env.SERVICE_NAME }}"
+          echo "  Revision:  ${REVISION}"
+          echo "  URL:       ${{ steps.url.outputs.SERVICE_URL }}"
+          echo "  SHA:       ${{ github.sha }}"
+          echo "=========================================="
+
+      - name: Create deployment summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## 🚀 Deployment Successful!
+
+          ### Service Information
+          - **Service**: \`${{ env.SERVICE_NAME }}\`
+          - **Revision**: \`${{ steps.deployment-info.outputs.REVISION }}\`
+          - **Region**: \`${{ secrets.GCP_REGION }}\`
+          - **Commit**: \`${{ github.sha }}\`
+
+          ### URLs
+          - 🌐 **Live URL**: [${{ steps.url.outputs.SERVICE_URL }}](${{ steps.url.outputs.SERVICE_URL }})
+          - 🏥 **Health Check**: [${{ steps.url.outputs.SERVICE_URL }}/health](${{ steps.url.outputs.SERVICE_URL }}/health)
+
+          ### Deployed Changes
+          $(git log -1 --pretty=format:"- %s (%an)")
+
+          ### Useful Commands
+          \`\`\`bash
+          # View logs
+          gcloud run services logs read ${{ env.SERVICE_NAME }} --region=${{ secrets.GCP_REGION }}
+
+          # View service details
+          gcloud run services describe ${{ env.SERVICE_NAME }} --region=${{ secrets.GCP_REGION }}
+
+          # Rollback if needed
+          ./scripts/rollback.sh <PREVIOUS_REVISION>
+          \`\`\`
+
+          ---
+          ✅ All health checks passed | Deployed at $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)
+          EOF
+
+  # ============================================================================
+  # Job 3: Run E2E Browser Tests Post-Deployment
+  # ============================================================================
+  e2e-tests:
+    name: E2E Browser Tests (Production)
+    runs-on: ubuntu-latest
+    needs: deploy  # Run after deployment
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v2
+        with:
+          project_id: ${{ secrets.GCP_PROJECT_ID }}
+
+      - name: Get service URL
+        id: url
+        run: |
+          SERVICE_URL=$(gcloud run services describe artist-finance-manager \
+            --region ${{ secrets.GCP_REGION }} \
+            --format "value(status.url)")
+          echo "SERVICE_URL=${SERVICE_URL}" >> $GITHUB_OUTPUT
+          echo "Testing deployed service at: ${SERVICE_URL}"
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ hashFiles('test/e2e_web/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
+      - name: Install E2E dependencies
+        run: |
+          cd test/e2e_web
+          npm ci
+
+      - name: Install Playwright browsers
+        run: |
+          cd test/e2e_web
+          npx playwright install chromium --with-deps
+
+      - name: Run E2E tests against production
+        run: |
+          cd test/e2e_web
+          npm test
+        env:
+          E2E_BASE_URL: ${{ steps.url.outputs.SERVICE_URL }}
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-production
+          path: test/e2e_web/playwright-report
+          retention-days: 7
+
+      - name: Upload E2E test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-test-results-production
+          path: test/e2e_web/test-results
+          retention-days: 7
+
+      - name: Report E2E results
+        if: always()
+        run: |
+          if [ -f test/e2e_web/test-results/.last-run.json ]; then
+            echo "E2E tests completed against production"
+          fi
+
+  # ============================================================================
+  # Job 4: Notify on Failure
+  # ============================================================================
+  notify-failure:
+    name: Notify on Deployment Failure
+    runs-on: ubuntu-latest
+    needs: [tests, deploy]
+    if: failure() && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Create failure summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << EOF
+          ## ❌ Deployment Failed
+
+          The deployment to GCP Cloud Run failed. Please check the logs above for details.
+
+          ### Troubleshooting Steps
+          1. Check the failed job logs above
+          2. Verify GCP credentials are valid
+          3. Ensure all tests are passing locally
+          4. Check Cloud Run quotas and limits
+          5. Review recent code changes
+
+          ### Quick Links
+          - [GitHub Actions Run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          - [Commit](${{ github.server_url }}/${{ github.repository }}/commit/${{ github.sha }})
+
+          ---
+          ❌ Deployment failed at $(date -u +%Y-%m-%d\ %H:%M:%S\ UTC)
+          EOF
