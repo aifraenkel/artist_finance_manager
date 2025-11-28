@@ -5,8 +5,8 @@
 # The setup script will use these settings to automate GCP configuration.
 #
 # Usage:
-#   cp .gcp_settings.example .gcp_settings
-#   nano .gcp_settings  # Edit with your values
+#   cp scripts/.gcp_settings.example scripts/.gcp_settings
+#   nano scripts/.gcp_settings  # Edit with your values
 #   ./scripts/setup-gcp.sh
 #
 # ============================================================================
