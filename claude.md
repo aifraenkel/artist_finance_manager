@@ -1,6 +1,6 @@
 # Claude.md - Contributor Guide for LLM Contributors
 
-**Version:** 1.0.0
+**Version:** 1.1.0
 **Last Updated:** 2025-11-28
 **Project:** Artist Finance Manager
 
@@ -155,9 +155,7 @@ Must support (now or future):
 3. **Email + Password** (Priority 2)
 4. **Future providers** (must be easy to add)
 
-### Architecture Requirements
-
-#### Decoupling Principles
+### Architecture Principles
 
 The authentication system **must**:
 
@@ -176,37 +174,7 @@ The authentication system **must**:
    - Business logic in separate service layer
    - No auth logic in widgets
 
-#### File Structure
-
-```
-lib/
-  services/
-    auth/
-      auth_service.dart              # Abstract interface
-      auth_service_impl.dart         # Concrete implementation
-      providers/
-        google_auth_provider.dart
-        apple_auth_provider.dart
-        email_auth_provider.dart
-  models/
-    user.dart                        # User model
-    auth_state.dart                  # Auth state model
-  widgets/
-    auth/
-      sign_in_button.dart            # Reusable auth UI
-      auth_screen.dart               # Auth screen
-```
-
-#### Testing Requirements
-
-Every auth feature must have:
-
-1. **Unit tests** for auth service logic
-2. **Widget tests** for auth UI
-3. **Integration tests** for auth flow
-4. **E2E tests** for complete auth journey (minimal, only smoke tests)
-
-#### Code Example
+### Code Pattern
 
 ```dart
 // ✅ GOOD: Abstract interface
@@ -224,7 +192,7 @@ abstract class AuthProvider {
 // ❌ BAD: Direct provider coupling
 class AuthService {
   Future<User> signInWithGoogle() {
-    // Direct GoogleSignIn SDK usage
+    // Direct GoogleSignIn SDK usage - too coupled
   }
 }
 ```
@@ -248,32 +216,20 @@ Each user must be able to configure preferences that:
 **Requirements:**
 - All user-facing text must be fully localizable
 - **Zero hardcoded strings** in UI code
-- Support multiple languages (English, Spanish, French, etc.)
+- Support multiple languages
 - Dynamic language switching without app restart
-- Translation files for all supported languages
 
-**Implementation Rules:**
+**Implementation:**
 
 ✅ **DO:**
 ```dart
-// Use localization
 Text(AppLocalizations.of(context).welcomeMessage)
-
-// Or with intl package
-Text(Intl.message('Welcome', name: 'welcomeMessage'))
 ```
 
 ❌ **DON'T:**
 ```dart
-// Never hardcode strings
-Text('Welcome')
-Text("Add Transaction")
+Text('Welcome') // Never hardcode strings
 ```
-
-**Testing:**
-- Tests must catch any hardcoded strings
-- Tests must validate all translation keys exist
-- Tests must ensure no missing translations
 
 #### 2. Currency
 
@@ -281,83 +237,55 @@ Text("Add Transaction")
 - Support all major world currencies
 - Real-time or cached currency conversion
 - Switch currencies at any time
-- UI updates reactively when currency changes
 - Clear separation between stored canonical values and displayed values
 
-**Architecture:**
-
+**Architecture Pattern:**
 ```
-Stored Value (canonical) → Currency Service → Displayed Value (user preference)
-        USD                                           EUR, JPY, GBP, etc.
+Stored Value (USD cents) → Currency Service → Displayed Value (user currency)
 ```
 
-**Implementation Rules:**
+**Implementation:**
 
 ✅ **DO:**
 ```dart
-// Store amounts in a canonical currency (e.g., USD cents)
+// Store in canonical currency
 class Transaction {
-  final int amountInCents; // Always USD
+  final int amountInCents; // Always USD cents
   final String currency;   // User's display preference
 }
 
-// Convert for display
 class CurrencyService {
   String formatAmount(int amountInCents, String targetCurrency);
-  int convertAmount(int amountInCents, String fromCurrency, String toCurrency);
+  int convertAmount(int amountInCents, String from, String to);
 }
 ```
 
 ❌ **DON'T:**
 ```dart
-// Don't store amounts in user's currency only
 class Transaction {
   final double amount; // Which currency? How to convert?
 }
-
-// Don't hardcode currency symbols
 Text('\$${amount}') // What if user prefers EUR?
 ```
 
-**Testing:**
-- Unit tests for currency conversion
-- Widget tests for currency formatting
-- Integration tests for preference changes
-
 #### 3. Other Preferences
 
-The preferences system must support:
+Support extensible preferences: theme, date format, number format, notifications, privacy settings, and any future additions.
 
-- **Theme** (light/dark/system)
-- **Date format** (MM/DD/YYYY vs DD/MM/YYYY vs ISO)
-- **Number format** (commas vs periods for decimals)
-- **Notification settings**
-- **Privacy settings**
-- **Any future preferences** (extensible system)
-
-**Architecture Requirements:**
+**Implementation Pattern:**
 
 ```dart
-// ✅ GOOD: Extensible preferences system
 abstract class PreferencesService {
   Future<T?> get<T>(String key);
   Future<void> set<T>(String key, T value);
   Stream<T?> watch<T>(String key);
 }
-
-// ✅ GOOD: Reactive preferences
-class PreferencesProvider extends ChangeNotifier {
-  Future<void> setLanguage(String languageCode) async {
-    await _prefsService.set('language', languageCode);
-    notifyListeners(); // UI updates automatically
-  }
-}
 ```
 
 **Sync Requirements:**
-- Preferences stored locally first (offline-first)
-- Synced to backend when online
-- Conflicts resolved (last-write-wins or user prompt)
+- Store locally first (offline-first)
+- Sync to backend when online
+- Resolve conflicts (last-write-wins or user prompt)
 - No data loss if sync fails
 
 ---
@@ -428,20 +356,11 @@ class PreferencesProvider extends ChangeNotifier {
 ### Architecture Boundaries
 
 ```
-┌─────────────────────────────────────────────────┐
-│                 UI Layer                        │
-│  (Widgets, Screens, Presentational Components) │
-└─────────────────┬───────────────────────────────┘
-                  │
-┌─────────────────▼───────────────────────────────┐
-│              Business Logic                     │
-│  (Services, Providers, State Management)        │
-└─────────────────┬───────────────────────────────┘
-                  │
-┌─────────────────▼───────────────────────────────┐
-│              Data Layer                         │
-│  (Repositories, API Clients, Local Storage)     │
-└─────────────────────────────────────────────────┘
+UI Layer (Widgets, Screens)
+         ↓
+Business Logic (Services, Providers)
+         ↓
+Data Layer (Repositories, API Clients)
 ```
 
 **Each layer must:**
@@ -474,19 +393,12 @@ class PreferencesProvider extends ChangeNotifier {
 
 #### 1. Unit Tests (MAXIMIZE)
 
-**Use for:**
-- Business logic
-- Services
-- Utilities
-- Models
-- Converters
-- Validators
+**Use for:** Business logic, services, utilities, models, converters, validators
 
 **Characteristics:**
-- **Fastest** execution
-- **Highest** coverage
+- **Fastest** execution (< 100ms per test)
+- **Highest** coverage target (80%+)
 - **Most** reliable
-- **Easiest** to maintain
 - **Zero** external dependencies
 
 **Example:**
@@ -500,15 +412,10 @@ test('CurrencyService converts USD to EUR correctly', () {
 
 #### 2. Widget Tests (MAXIMIZE)
 
-**Use for:**
-- UI components
-- User interactions
-- Layout behavior
-- Accessibility
-- Navigation
+**Use for:** UI components, user interactions, layout behavior, accessibility, navigation
 
 **Characteristics:**
-- **Fast** execution
+- **Fast** execution (< 1s per test)
 - **Essential** for Flutter apps
 - **Best** ROI for UI testing
 - **No** need for real devices
@@ -525,26 +432,12 @@ testWidgets('AddTransactionButton shows dialog when tapped', (tester) async {
 
 #### 3. Integration Tests (MODERATE)
 
-**Use for:**
-- Multiple components working together
-- Service integration
-- Data flow between layers
-- API contract validation
+**Use for:** Multiple components working together, service integration, data flow between layers, API contract validation
 
 **Characteristics:**
 - **Slower** than unit/widget tests
 - **Higher** confidence
 - **More** realistic scenarios
-
-**Example:**
-```dart
-test('TransactionService saves transaction and updates repository', () async {
-  final service = TransactionService(repository: mockRepo);
-  await service.addTransaction(transaction);
-  verify(mockRepo.save(transaction)).called(1);
-  expect(service.transactions, contains(transaction));
-});
-```
 
 #### 4. E2E Tests (MINIMIZE BUT KEEP ESSENTIAL)
 
@@ -553,28 +446,12 @@ test('TransactionService saves transaction and updates repository', () async {
 - Backend connectivity smoke tests
 - Persistence flow validation
 - Pre-deployment sanity checks
-- Critical user journeys
+- Critical user journeys (normal flow only)
 
 **DO NOT use for:**
 - Coverage
 - Feature testing (use widget/integration tests)
 - Regression testing (use unit/widget tests)
-
-**Characteristics:**
-- **Slowest** execution
-- **Most** brittle
-- **Expensive** to maintain
-- **Essential** for confidence
-
-**Example scenarios:**
-```
-E2E Test: Complete Auth Flow
-1. User opens app
-2. User clicks "Sign in with Google"
-3. User completes Google auth
-4. User sees dashboard
-5. User signs out
-```
 
 ### Testing Goals
 
@@ -596,11 +473,6 @@ E2E Test: Complete Auth Flow
    - < 10 E2E tests total
    - Each E2E test must be essential
    - E2E tests run before deployment only
-
-5. **Maintainable test suite for long-term velocity**
-   - Tests are easy to read and understand
-   - Tests are easy to update when code changes
-   - Tests provide clear failure messages
 
 ### Test Quality Standards
 
@@ -701,17 +573,13 @@ Acceptance Criteria:
 ```dart
 testWidgets('User can change currency and see updated amounts', (tester) async {
   await tester.pumpWidget(MyApp());
-
-  // Add transaction in USD
   await addTransaction(tester, amount: 100, currency: 'USD');
   expect(find.text('\$100.00'), findsOneWidget);
 
-  // Change to EUR
   await openSettings(tester);
   await selectCurrency(tester, 'EUR');
   await tester.pumpAndSettle();
 
-  // Verify conversion
   expect(find.text('€85.00'), findsOneWidget);
 });
 ```
@@ -733,8 +601,6 @@ test('convert throws on unknown currency', () {
   expect(() => service.convert(100, 'USD', 'XXX'), throwsException);
 });
 
-// Implement...
-
 // Continue TDD cycle...
 ```
 
@@ -755,70 +621,26 @@ test('convert throws on unknown currency', () {
 - Write tests that don't fail first
 - Write overly complex tests
 
-### TDD Benefits
-
-- **Better design:** Forces you to think about API before implementation
-- **Higher confidence:** Tests prove code works
-- **Living documentation:** Tests show how code should be used
-- **Faster debugging:** Tests catch bugs immediately
-- **Refactoring safety:** Tests allow confident refactoring
-
 ---
 
 ## 9. Coding Standards for Maintainability
 
-### File Size and Complexity
+### Core Principles
 
-✅ **DO:**
-- Keep files under 300 lines
-- Keep classes under 200 lines
-- Keep methods under 50 lines
-- Split large files into smaller modules
-
-❌ **DON'T:**
-- Create 1000+ line files
-- Create god classes
-- Create methods with 100+ lines
-
-### Naming Conventions
-
-✅ **DO:**
-```dart
-// Classes: PascalCase
-class TransactionService {}
-
-// Variables: camelCase
-final userName = 'John';
-
-// Constants: lowerCamelCase
-const maxRetries = 3;
-
-// Private: _leadingUnderscore
-final _privateField = 'secret';
-
-// Descriptive names
-class UserAuthenticationService {} // Clear
-final isAuthenticated = true;      // Clear
-```
-
-❌ **DON'T:**
-```dart
-// Abbreviations
-class TxnSvc {}          // What is this?
-final usr = 'John';      // Unclear
-
-// Single letters (except loops)
-final a = true;          // What does 'a' mean?
-
-// Hungarian notation
-final strName = 'John';  // Not Dart style
-```
+- **Keep files small** (< 300 lines)
+- **Keep classes focused** (< 200 lines)
+- **Keep methods short** (< 50 lines)
+- **Use descriptive names** (no abbreviations)
+- **Depend on abstractions**, not concrete classes
+- **Use dependency injection everywhere**
+- **Avoid global mutable state**
+- **Prefer simplicity over cleverness**
 
 ### Architecture Boundaries
 
 ✅ **DO:**
 - Clear separation between layers (UI, Business Logic, Data)
-- Use dependency injection everywhere
+- Use SOLID principles
 - Depend on abstractions, not concrete classes
 - Keep modules loosely coupled
 
@@ -836,26 +658,26 @@ final strName = 'John';  // Not Dart style
 String getName() => 'John';
 List<Transaction> getTransactions() => [];
 
-// Use named parameters for clarity
+// Named parameters for clarity
 void addTransaction({
   required String description,
   required int amount,
   required DateTime date,
 }) {}
 
-// Use enums for fixed sets
+// Enums for fixed sets
 enum TransactionType { income, expense }
 ```
 
 ❌ **DON'T:**
 ```dart
-// Dynamic/Object unless necessary
+// Avoid dynamic/Object unless necessary
 dynamic getData() => '???';
 
-// Positional parameters (unless obvious)
-void add(String a, int b, DateTime c) {} // Hard to understand
+// Avoid positional parameters (unless obvious)
+void add(String a, int b, DateTime c) {}
 
-// String constants instead of enums
+// Don't use strings instead of enums
 const type = 'income'; // Error-prone
 ```
 
@@ -873,9 +695,6 @@ class TransactionService {
 abstract class TransactionRepository {
   Future<void> save(Transaction t);
 }
-
-// Testable with mocks
-final service = TransactionService(MockRepository());
 ```
 
 ❌ **DON'T:**
@@ -890,19 +709,6 @@ class TransactionService {
   final _repository = FirestoreRepository(); // Coupled
 }
 ```
-
-### State Management
-
-✅ **DO:**
-- Use immutable data models
-- Use ChangeNotifier/Provider for simple state
-- Use Riverpod/Bloc for complex state
-- Avoid global mutable state
-
-❌ **DON'T:**
-- Use global variables for state
-- Mutate objects directly
-- Create state management spaghetti
 
 ### Error Handling
 
@@ -939,26 +745,27 @@ try {
 
 ❌ **DON'T:**
 ```dart
-// Catch and ignore
+// Never catch and ignore
 try {
   await something();
 } catch (e) {
   // Silent failure - BAD!
 }
 
-// Return null for errors
+// Don't return null for errors (loses error info)
 Transaction? loadTransaction() {
   try {
     return repository.load();
   } catch (e) {
-    return null; // Lost error information
+    return null;
   }
 }
 ```
 
 ### Documentation
 
-✅ **DO:**
+Document public APIs and complex logic. Avoid obvious comments.
+
 ```dart
 /// Loads a transaction by [id] from the repository.
 ///
@@ -973,33 +780,6 @@ Future<Transaction> loadTransaction(String id) async {
 final amountInCents = (amount * 100).round();
 ```
 
-❌ **DON'T:**
-```dart
-// Obvious comments
-// Set name
-name = 'John';
-
-// Outdated comments
-// TODO: Fix this later (from 2020)
-
-// No documentation for public APIs
-Future<Transaction> load(String id) async {
-  // What does this do? What can go wrong?
-}
-```
-
-### Avoid Premature Abstraction
-
-✅ **DO:**
-- Start simple
-- Abstract when you have 2-3 concrete cases
-- Prefer duplication over wrong abstraction
-
-❌ **DON'T:**
-- Create abstractions "just in case"
-- Over-engineer simple features
-- Create complex inheritance hierarchies
-
 ### Code Quality Checklist
 
 Before submitting code, verify:
@@ -1012,7 +792,7 @@ Before submitting code, verify:
 - [ ] No duplicate code
 - [ ] Clear, descriptive names
 - [ ] Proper error handling
-- [ ] Documentation for public APIs
+- [ ] Documentation is updated
 - [ ] No lint warnings
 - [ ] Formatted with `dart format`
 
@@ -1022,61 +802,28 @@ Before submitting code, verify:
 
 ### Continuous Integration (CI)
 
-#### CI Pipeline Requirements
-
 CI **must**:
+1. Run on every commit to any branch
+2. Run on every pull request
+3. Block merge if tests fail
+4. Be fast (< 10 minutes total)
 
-1. **Run on every commit** to any branch
-2. **Run on every pull request**
-3. **Block merge if tests fail**
-4. **Be fast** (< 10 minutes total)
+### CI Pipeline Stages
 
-#### CI Pipeline Stages
-
-```
-┌──────────────────────────────────────┐
-│  1. Code Quality Checks              │
-│     - dart analyze                   │
-│     - dart format --check            │
-│     - Check for TODO/FIXME           │
-└──────────┬───────────────────────────┘
-           │
-┌──────────▼───────────────────────────┐
-│  2. Unit Tests                       │
-│     - Run all unit tests             │
-│     - Generate coverage report       │
-│     - Fail if coverage < 80%         │
-└──────────┬───────────────────────────┘
-           │
-┌──────────▼───────────────────────────┐
-│  3. Widget Tests                     │
-│     - Run all widget tests           │
-│     - Test on multiple screen sizes  │
-└──────────┬───────────────────────────┘
-           │
-┌──────────▼───────────────────────────┐
-│  4. Integration Tests                │
-│     - Run integration test suite     │
-└──────────┬───────────────────────────┘
-           │
-┌──────────▼───────────────────────────┐
-│  5. Build Verification               │
-│     - Build web                      │
-│     - Build Android APK              │
-│     - Build iOS (if on macOS)        │
-└──────────────────────────────────────┘
-```
+1. **Code Quality Checks** - `dart analyze`, `dart format --check`
+2. **Unit Tests** - Run all unit tests, generate coverage, fail if < 80%
+3. **Widget Tests** - Run all widget tests
+4. **Integration Tests** - Run integration test suite
+5. **Build Verification** - Build web, Android APK, iOS (if on macOS)
 
 ### Continuous Deployment (CD)
 
 #### Pre-Deployment Requirements
 
-Before deploying to production:
-
-1. **All CI stages pass**
-2. **Run minimal E2E test suite** (< 10 tests)
-3. **Manual approval** (if required)
-4. **Deployment smoke test** passes
+1. All CI stages pass
+2. Run minimal E2E test suite (< 10 tests)
+3. Manual approval (if required)
+4. Deployment smoke test passes
 
 #### Deployment Targets
 
@@ -1086,71 +833,38 @@ Before deploying to production:
 
 #### Deployment Process
 
-```bash
-# 1. Run pre-deployment checks
-./scripts/pre-deploy-check.sh
-
-# 2. Run E2E smoke tests
-flutter test test/e2e/
-
-# 3. Deploy backend
-./scripts/deploy-backend.sh
-
-# 4. Deploy frontend
-./scripts/deploy-frontend.sh
-
-# 5. Run post-deployment smoke tests
-./scripts/smoke-test.sh
-```
+Use the deployment scripts in `scripts/`:
+- `./scripts/deploy.sh` - Main deployment script
+- `./scripts/rollback.sh` - Rollback if issues detected
 
 #### Post-Deployment Verification
 
-After deployment:
+Smoke test critical flows:
+- User can sign in
+- User can view dashboard
+- User can add transaction
+- User can sign out
 
-1. **Smoke test critical flows**
-   - User can sign in
-   - User can view dashboard
-   - User can add transaction
-   - User can sign out
-
-2. **Monitor for errors**
-   - Check error logs
-   - Check performance metrics
-   - Verify no alerts fired
-
-3. **Rollback if necessary**
-   - Use `./scripts/rollback.sh` if issues detected
+Monitor for errors and rollback if necessary.
 
 ### Cloud Portability
 
 Code **must**:
-
 - Work in cloud environments (no local file paths)
 - Use environment variables for configuration
 - Not depend on specific machine state
 - Be containerizable (Docker)
 - Support multiple environments (dev, staging, prod)
 
-### Environment Configuration
-
-✅ **DO:**
+**Example:**
 ```dart
-// Use environment variables
+// ✅ GOOD: Use environment variables
 final apiUrl = const String.fromEnvironment('API_URL',
   defaultValue: 'https://api.example.com'
 );
 
-// Use config files
-final config = await loadConfig('config/${environment}.json');
-```
-
-❌ **DON'T:**
-```dart
-// Hardcode URLs
+// ❌ BAD: Hardcode URLs
 final apiUrl = 'http://localhost:3000';
-
-// Use absolute paths
-final dataPath = '/Users/me/data';
 ```
 
 ---
@@ -1159,92 +873,23 @@ final dataPath = '/Users/me/data';
 
 ### .gitignore Maintenance
 
-#### What to Ignore
-
 The `.gitignore` **must** exclude:
-
-1. **Build Outputs**
-   - `build/`
-   - `.dart_tool/`
-   - `.flutter-plugins`
-   - `.flutter-plugins-dependencies`
-   - `*.apk`, `*.ipa`, `*.aab`
-
-2. **IDE Files**
-   - `.vscode/`
-   - `.idea/`
-   - `*.swp`, `*.swo`
-   - `.DS_Store`
-
-3. **Credentials**
-   - `gcp-key.json`
-   - `.env`
-   - `.gcp_settings` (with real values)
-   - Any files containing secrets
-
-4. **Test Outputs**
-   - `coverage/`
-   - `test/.test_coverage.dart`
-   - `test_driver/`
-   - `playwright-report/`
-
-5. **Temp Files**
-   - `*.log`
-   - `*.tmp`
-   - `tmp/`
-   - `temp/`
-
-6. **Generated Files**
-   - `*.g.dart` (if not needed in repo)
-   - `*.freezed.dart`
-
-#### Updating .gitignore
-
-When you:
-- Add new tools → Update `.gitignore`
-- Add new build outputs → Update `.gitignore`
-- Change file structure → Update `.gitignore`
+- **Build outputs:** `build/`, `.dart_tool/`, `*.apk`, `*.ipa`, `*.aab`
+- **IDE files:** `.vscode/`, `.idea/`, `*.swp`, `.DS_Store`
+- **Credentials:** `gcp-key.json`, `.env`, `.gcp_settings` (with real values)
+- **Test outputs:** `coverage/`, `test/.test_coverage.dart`, `playwright-report/`
+- **Temp files:** `*.log`, `*.tmp`, `tmp/`, `temp/`
+- **Generated files:** `*.g.dart`, `*.freezed.dart` (if not needed in repo)
 
 **Rule:** If a file is generated or temporary, it should be in `.gitignore`.
 
+Update `.gitignore` when you add new tools, build outputs, or change file structure.
+
 ### Cleanup Scripts
 
-#### Cleanup Script Requirements
+The repository has a cleanup script at `scripts/cleanup.sh` that removes build artifacts, test artifacts, and temp files.
 
-The repository **must** have a cleanup script at `scripts/cleanup.sh` that:
-
-1. **Removes build artifacts**
-   ```bash
-   rm -rf build/
-   rm -rf .dart_tool/
-   flutter clean
-   ```
-
-2. **Removes test artifacts**
-   ```bash
-   rm -rf coverage/
-   rm -rf test/e2e_web/playwright-report/
-   ```
-
-3. **Removes temp files**
-   ```bash
-   rm -f *.log
-   rm -rf tmp/
-   ```
-
-4. **Is safe to run** (doesn't delete source code or important files)
-
-#### When to Update Cleanup Script
-
-Update `scripts/cleanup.sh` when:
-- New build tools are added
-- New test frameworks are added
-- New temp directories are created
-- File structure changes
-
-#### Running Cleanup
-
-Developers should run cleanup:
+Run cleanup:
 - Before committing
 - After switching branches
 - When disk space is low
@@ -1254,49 +899,23 @@ Developers should run cleanup:
 ./scripts/cleanup.sh
 ```
 
-### Documentation Updates
+Update the cleanup script when file structure changes or new build tools are added.
 
-#### When Code Changes, Update Docs
+### Documentation Updates
 
 **Rule:** Documentation must stay in sync with code.
 
 When you make changes, update:
 
-1. **README.md**
-   - New features
-   - Changed setup instructions
-   - Updated dependencies
-   - Changed architecture
+1. **README.md** - New features, setup instructions, dependencies, architecture
+2. **Architecture Docs** - New services, data flow, dependencies, deployment
+3. **This File (claude.md)** - New rules, testing approach, architectural decisions
 
-2. **Architecture Docs**
-   - New services
-   - Changed data flow
-   - New dependencies
-   - Changed deployment process
-
-3. **API Documentation**
-   - New endpoints
-   - Changed contracts
-   - Deprecated APIs
-
-4. **This File (claude.md)**
-   - New coding rules
-   - Changed testing approach
-   - New architectural decisions
-   - Changed contribution guidelines
-
-#### Documentation Standards
-
-Documentation must:
-- Be up-to-date (no outdated information)
-- Be clear and concise
-- Include examples
-- Be formatted consistently
-- Be spell-checked
+**Important:** Every time you review claude.md, critically evaluate if it can be simplified, if something is no longer relevant, or if content can be removed. Keep this file valuable and concise.
 
 ### Git Commit Standards
 
-#### Commit Message Format
+Use conventional commits format:
 
 ```
 <type>(<scope>): <subject>
@@ -1306,16 +925,9 @@ Documentation must:
 <footer>
 ```
 
-**Types:**
-- `feat`: New feature
-- `fix`: Bug fix
-- `docs`: Documentation only
-- `style`: Code style (formatting)
-- `refactor`: Code change that neither fixes a bug nor adds a feature
-- `test`: Adding or updating tests
-- `chore`: Maintenance tasks
+**Types:** `feat`, `fix`, `docs`, `style`, `refactor`, `test`, `chore`
 
-**Examples:**
+**Example:**
 ```
 feat(auth): add Google Sign-In support
 
@@ -1325,28 +937,11 @@ proper error handling and token management.
 Closes #123
 ```
 
-```
-fix(currency): handle invalid exchange rates gracefully
-
-Previously, invalid rates caused app to crash. Now we
-show user-friendly error and use cached rates.
-
-Fixes #456
-```
-
-#### Commit Best Practices
-
-✅ **DO:**
+**Best Practices:**
 - Write clear, descriptive commit messages
 - Keep commits focused (one logical change per commit)
 - Reference issue numbers
 - Include tests in the same commit as code
-
-❌ **DON'T:**
-- Write vague messages ("fix stuff", "update")
-- Create giant commits with many unrelated changes
-- Commit broken code
-- Commit without tests
 
 ---
 
@@ -1357,56 +952,35 @@ Fixes #456
 ```
 artist_finance_manager/
 ├── lib/
-│   ├── main.dart                    # App entry point
-│   ├── models/                      # Data models
-│   │   ├── transaction.dart
-│   │   ├── user.dart
-│   │   └── preferences.dart
-│   ├── services/                    # Business logic
+│   ├── main.dart               # App entry point
+│   ├── models/                 # Data models
+│   ├── services/               # Business logic
 │   │   ├── auth/
-│   │   │   ├── auth_service.dart
-│   │   │   └── providers/
 │   │   ├── transaction_service.dart
 │   │   ├── currency_service.dart
 │   │   └── preferences_service.dart
-│   ├── providers/                   # State management
-│   │   ├── auth_provider.dart
-│   │   └── transaction_provider.dart
-│   ├── repositories/                # Data access layer
-│   │   ├── transaction_repository.dart
-│   │   └── user_repository.dart
-│   ├── screens/                     # Full screen views
-│   │   ├── home_screen.dart
-│   │   ├── auth_screen.dart
-│   │   └── settings_screen.dart
-│   ├── widgets/                     # Reusable UI components
-│   │   ├── transaction_list.dart
-│   │   └── transaction_card.dart
-│   └── utils/                       # Utilities
-│       ├── formatters.dart
-│       └── validators.dart
+│   ├── providers/              # State management
+│   ├── repositories/           # Data access layer
+│   ├── screens/                # Full screen views
+│   ├── widgets/                # Reusable UI components
+│   └── utils/                  # Utilities
 ├── test/
-│   ├── models/                      # Model tests
-│   ├── services/                    # Service tests
-│   ├── widgets/                     # Widget tests
-│   ├── integration/                 # Integration tests
-│   └── e2e/                         # E2E tests (minimal)
-├── scripts/                         # Build/deploy scripts
-│   ├── deploy.sh
-│   ├── cleanup.sh
-│   └── setup-gcp.sh
-├── docs/                            # Additional documentation
-├── .github/                         # GitHub Actions workflows
-└── pubspec.yaml                     # Dependencies
+│   ├── models/
+│   ├── services/
+│   ├── widgets/
+│   ├── integration/
+│   └── e2e/                    # Minimal E2E tests
+├── scripts/                    # Build/deploy scripts
+├── docs/                       # Documentation
+└── .github/                    # GitHub Actions
 ```
 
 ### Layer Responsibilities
 
-#### 1. Models (`lib/models/`)
-
-**Purpose:** Pure data classes, no logic
+**Purpose and Example:**
 
 ```dart
+// 1. Models - Pure data classes, no logic
 class Transaction {
   const Transaction({
     required this.id,
@@ -1414,55 +988,33 @@ class Transaction {
     required this.amount,
     required this.date,
   });
-
   final String id;
   final String description;
   final int amount;
   final DateTime date;
 }
-```
 
-#### 2. Services (`lib/services/`)
-
-**Purpose:** Business logic, no UI
-
-```dart
+// 2. Services - Business logic, no UI
 class TransactionService {
   TransactionService(this._repository);
   final TransactionRepository _repository;
 
   Future<void> addTransaction(Transaction transaction) async {
-    // Validation
     if (transaction.amount <= 0) {
       throw ArgumentError('Amount must be positive');
     }
-    // Save
     await _repository.save(transaction);
   }
 }
-```
 
-#### 3. Repositories (`lib/repositories/`)
-
-**Purpose:** Data access, abstract persistence
-
-```dart
+// 3. Repositories - Data access, abstract persistence
 abstract class TransactionRepository {
   Future<void> save(Transaction transaction);
   Future<Transaction?> findById(String id);
   Future<List<Transaction>> findAll();
 }
 
-class FirestoreTransactionRepository implements TransactionRepository {
-  // Firestore-specific implementation
-}
-```
-
-#### 4. Providers (`lib/providers/`)
-
-**Purpose:** State management, connect services to UI
-
-```dart
+// 4. Providers - State management, connect services to UI
 class TransactionProvider extends ChangeNotifier {
   TransactionProvider(this._service);
   final TransactionService _service;
@@ -1476,13 +1028,8 @@ class TransactionProvider extends ChangeNotifier {
     notifyListeners();
   }
 }
-```
 
-#### 5. Screens (`lib/screens/`)
-
-**Purpose:** Full-screen views, orchestrate widgets
-
-```dart
+// 5. Screens - Full-screen views, orchestrate widgets
 class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -1493,13 +1040,8 @@ class HomeScreen extends StatelessWidget {
     );
   }
 }
-```
 
-#### 6. Widgets (`lib/widgets/`)
-
-**Purpose:** Reusable UI components
-
-```dart
+// 6. Widgets - Reusable UI components
 class TransactionCard extends StatelessWidget {
   const TransactionCard({required this.transaction});
   final Transaction transaction;
@@ -1532,31 +1074,17 @@ class TransactionCard extends StatelessWidget {
 
 ### Configuration Management
 
-#### Use Layers for Configuration
+Never hardcode values. Use configuration layers:
 
 ```dart
-// 1. Environment variables (deployment)
+// Environment variables (deployment)
 const apiUrl = String.fromEnvironment('API_URL');
 
-// 2. Config files (per environment)
+// Config files (per environment)
 final config = await loadConfig('config/prod.json');
 
-// 3. Remote config (runtime)
+// Remote config (runtime)
 final remoteConfig = await RemoteConfig.instance.fetch();
-```
-
-#### Never Hardcode
-
-❌ **DON'T:**
-```dart
-final apiUrl = 'https://api.example.com';
-final apiKey = 'secret-key-123';
-```
-
-✅ **DO:**
-```dart
-final apiUrl = Config.instance.apiUrl;
-final apiKey = await SecureStorage.read('api_key');
 ```
 
 ---
@@ -1749,6 +1277,7 @@ This document defines the standards and practices for contributing to Artist Fin
 
 **Version History:**
 - 1.0.0 (2025-11-28): Initial version
+- 1.1.0 (2025-11-28): Streamlined version - reduced redundancy, removed premature details, focused on project-specific guidance
 
 ---
 
