@@ -169,12 +169,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Anonymizes amount into ranges for privacy-safe observability tracking
   String _getAmountRange(double amount) {
-    if (amount < 10) return '0-10';
-    if (amount < 50) return '10-50';
-    if (amount < 100) return '50-100';
-    if (amount < 500) return '100-500';
-    if (amount < 1000) return '500-1000';
-    if (amount < 5000) return '1000-5000';
+    final absAmount = amount.abs();
+    if (absAmount < 10) return '0-10';
+    if (absAmount < 50) return '10-50';
+    if (absAmount < 100) return '50-100';
+    if (absAmount < 500) return '100-500';
+    if (absAmount < 1000) return '500-1000';
+    if (absAmount < 5000) return '1000-5000';
     return '5000+';
   }
 
