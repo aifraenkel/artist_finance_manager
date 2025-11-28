@@ -103,13 +103,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _saveTransactions();
 
-    // Track transaction added event
+    // Track transaction added event (privacy-safe: no actual amounts)
     _observability.trackEvent(
       'transaction_added',
       attributes: {
         'type': type,
         'category': category,
-        'amount': amount,
         'total_transactions': _transactions.length,
       },
     );
@@ -155,13 +154,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _saveTransactions();
 
-    // Track transaction deleted event
+    // Track transaction deleted event (privacy-safe: no actual amounts)
     _observability.trackEvent(
       'transaction_deleted',
       attributes: {
         'type': transaction.type,
         'category': transaction.category,
-        'amount': transaction.amount,
         'remaining_transactions': _transactions.length,
       },
     );
