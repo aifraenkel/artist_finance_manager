@@ -38,12 +38,12 @@ This guide will help you configure Grafana Faro for web observability in the Art
 
 2. **Update the Grafana Faro Configuration**
    - Find the `GRAFANA_FARO_CONFIG` object (around line 67)
-   - Replace `YOUR_GRAFANA_CLOUD_COLLECTOR_URL` with your actual collector URL from Step 1
+   - Replace the hardcoded collector URL with your actual collector URL from Step 1
 
    **Before:**
    ```javascript
    const GRAFANA_FARO_CONFIG = {
-     url: 'YOUR_GRAFANA_CLOUD_COLLECTOR_URL',
+     url: 'https://faro-collector-prod-us-east-0.grafana.net/collect/YOUR_INSTANCE_ID',
      app: {
        name: 'artist-finance-manager-web',
        version: '1.0.0',
