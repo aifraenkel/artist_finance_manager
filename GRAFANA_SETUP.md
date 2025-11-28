@@ -177,18 +177,25 @@ Depending on your jurisdiction and user base, consider the following regulations
 
 1. **Minimize Data Collection**: Only track what's necessary for debugging and monitoring.
 
-   ```javascript
+   ```dart
    // Consider anonymizing amounts if exact values aren't needed
-   function getAmountRange(amount) {
+   String getAmountRange(double amount) {
      if (amount < 50) return 'low';
      if (amount < 500) return 'medium';
      return 'high';
    }
 
-   attributes: {
-     amount_range: getAmountRange(amount), // 'low', 'medium', 'high'
-     // instead of: amount: exactAmount
-   }
+   // Then use in your tracking call:
+   _observability.trackEvent(
+     'transaction_added',
+     attributes: {
+       'type': type,
+       'category': category,
+       'amount_range': getAmountRange(amount), // 'low', 'medium', 'high'
+       // instead of: 'amount': amount
+       'total_transactions': _transactions.length,
+     },
+   );
    ```
 
 2. **Review Before Production**: Audit all tracked data before deploying to production.
