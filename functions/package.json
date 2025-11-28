@@ -1,0 +1,21 @@
+{
+  "name": "artist-finance-manager-functions",
+  "description": "Cloud Functions for Artist Finance Manager",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "deploy": "gcloud functions deploy",
+    "lint": "eslint ."
+  },
+  "engines": {
+    "node": "20"
+  },
+  "dependencies": {
+    "@google-cloud/firestore": "^7.1.0",
+    "@google-cloud/functions-framework": "^3.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0"
+  }
+}
