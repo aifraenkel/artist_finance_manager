@@ -63,7 +63,6 @@ RUN echo 'pid /tmp/nginx.pid;' > /etc/nginx/nginx.conf && \
     echo 'http { include /etc/nginx/mime.types; include /etc/nginx/conf.d/*.conf; }' >> /etc/nginx/nginx.conf
 
 # Add a simple health check endpoint
-RUN echo '<!DOCTYPE html><html><body>OK</body></html>' > /usr/share/nginx/html/health.html
 
 # Expose port 8080 (Cloud Run requirement)
 EXPOSE 8080
