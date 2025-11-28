@@ -103,13 +103,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _saveTransactions();
 
-    // Track transaction added event
+    // Track transaction added event (amount anonymized as range for privacy)
     _observability.trackEvent(
       'transaction_added',
       attributes: {
         'type': type,
         'category': category,
-        'amount': amount,
+        'amount_range': _getAmountRange(amount),
         'total_transactions': _transactions.length,
       },
     );
@@ -133,13 +133,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _saveTransactions();
 
-    // Track transaction deleted event
+    // Track transaction deleted event (amount anonymized as range for privacy)
     _observability.trackEvent(
       'transaction_deleted',
       attributes: {
         'type': transaction.type,
         'category': transaction.category,
-        'amount': transaction.amount,
+        'amount_range': _getAmountRange(transaction.amount),
         'remaining_transactions': _transactions.length,
       },
     );
@@ -166,6 +166,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   double get _balance => _totalIncome - _totalExpenses;
+
+  /// Anonymizes amount into ranges for privacy-safe observability tracking
+  String _getAmountRange(double amount) {
+    if (amount < 10) return '0-10';
+    if (amount < 50) return '10-50';
+    if (amount < 100) return '50-100';
+    if (amount < 500) return '100-500';
+    if (amount < 1000) return '500-1000';
+    if (amount < 5000) return '1000-5000';
+    return '5000+';
+  }
 
   @override
   Widget build(BuildContext context) {
