@@ -95,8 +95,9 @@
       // Dynamically load Faro Web SDK
       var webSdkScript = document.createElement("script");
 
-      // Fetch the latest 1.x.x version of the Web-SDK from the CDN
-      webSdkScript.src = "https://unpkg.com/@grafana/faro-web-sdk@1/dist/bundle/faro-web-sdk.iife.js";
+      // Pin to specific version for production stability
+      // Using @1.3.6 instead of @1 to avoid potential breaking changes from automatic updates
+      webSdkScript.src = "https://unpkg.com/@grafana/faro-web-sdk@1.3.6/dist/bundle/faro-web-sdk.iife.js";
 
       webSdkScript.onload = () => {
         try {
@@ -107,8 +108,9 @@
           // This is important because we need to ensure that the Web-SDK has been loaded and initialized
           var webTracingScript = document.createElement("script");
 
-          // Fetch the latest 1.x.x version of the Web Tracing package from the CDN
-          webTracingScript.src = "https://unpkg.com/@grafana/faro-web-tracing@1/dist/bundle/faro-web-tracing.iife.js";
+          // Pin to specific version for production stability
+          // Using @1.3.6 instead of @1 to avoid potential breaking changes from automatic updates
+          webTracingScript.src = "https://unpkg.com/@grafana/faro-web-tracing@1.3.6/dist/bundle/faro-web-tracing.iife.js";
 
           // Initialize and add the Web Tracing instrumentation to the already loaded Web-SDK
           webTracingScript.onload = () => {
