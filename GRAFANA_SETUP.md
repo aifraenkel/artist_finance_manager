@@ -52,10 +52,10 @@ This guide will help you configure Grafana Faro for web observability in the Art
    };
    ```
 
-   **After:**
+   **After (example with your instance ID):**
    ```javascript
    const GRAFANA_FARO_CONFIG = {
-     url: 'https://faro-collector-prod-us-east-0.grafana.net/collect/YOUR_INSTANCE_ID',
+     url: 'https://faro-collector-prod-us-east-0.grafana.net/collect/a1b2c3d4e5f67890abcdef1234567890',
      app: {
        name: 'artist-finance-manager-web',
        version: '1.0.0',
