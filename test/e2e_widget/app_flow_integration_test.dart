@@ -49,7 +49,7 @@ void main() {
       homePage.verifyTransactionExists('-€1000.00');
 
       // Verify summary updated
-      homePage.verifySummary(expenses: '€1000.00', balance: '€-1000.00');
+      homePage.verifySummary(expenses: '€1000.00', balance: '-€1000.00');
     });
 
     testWidgets('User can add income and expense, see correct balance',
