@@ -119,9 +119,11 @@ This guide will help you configure Grafana Faro for web observability in the Art
 
 ### Custom Events
 - `transaction_added` - When a user adds a transaction
-  - Attributes: type, category, amount, total_transactions
+  - Attributes: type, category, total_transactions
+  - **Privacy Note**: Actual transaction amounts are NOT tracked
 - `transaction_deleted` - When a user deletes a transaction
-  - Attributes: type, category, amount, remaining_transactions
+  - Attributes: type, category, remaining_transactions
+  - **Privacy Note**: Actual transaction amounts are NOT tracked
 - `transactions_loaded` - When transactions are loaded from storage
   - Attributes: count, load_time_ms
 
@@ -139,6 +141,34 @@ The Faro SDK automatically tracks:
 - Storage errors (loading/saving transactions)
 - JSON parsing errors
 - Any uncaught exceptions
+
+## Privacy & Data Protection
+
+**Privacy-First Approach:**
+This app is designed with user privacy in mind, especially as it prepares for SaaS deployment.
+
+**What is NOT Tracked:**
+- ❌ Actual transaction amounts (dollar values)
+- ❌ Transaction descriptions
+- ❌ Personally identifiable financial data
+- ❌ User names or email addresses (until authentication is added)
+
+**What IS Tracked:**
+- ✅ Event types (add, delete, load)
+- ✅ Transaction categories (venue, materials, etc.)
+- ✅ Transaction counts
+- ✅ Performance metrics (load times, Web Vitals)
+- ✅ JavaScript errors and stack traces
+- ✅ Session analytics
+
+**Compliance:**
+- Designed for GDPR and CCPA compliance
+- User consent mechanism planned (see GitHub issue #31)
+- Data minimization principle applied
+- Third-party data sharing limited to Grafana Cloud for observability
+
+**For SaaS Deployment:**
+Before accepting paying customers, implement user consent (see GitHub issue #31) to comply with privacy regulations.
 
 ## Example Queries
 

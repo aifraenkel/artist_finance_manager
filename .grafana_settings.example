@@ -1,0 +1,10 @@
+{
+  "faro": {
+    "url": "YOUR_GRAFANA_CLOUD_COLLECTOR_URL",
+    "app": {
+      "name": "artist-finance-manager-web",
+      "version": "1.0.0",
+      "environment": "production"
+    }
+  }
+}
