@@ -59,51 +59,71 @@
   </style>
 </head>
 <body>
-  <!-- Grafana Faro Web SDK -->
-  <script src="https://unpkg.com/@grafana/faro-web-sdk@^1.3.0/dist/bundle/faro-web-sdk.iife.js"></script>
+  <!-- Grafana Faro Web SDK with Web Tracing -->
   <script>
-    // Initialize Grafana Faro
-    // TODO: Replace these values with your Grafana Cloud configuration
-    const GRAFANA_FARO_CONFIG = {
-      url: 'YOUR_GRAFANA_CLOUD_COLLECTOR_URL', // e.g., 'https://faro-collector-prod-us-east-0.grafana.net/collect/YOUR_INSTANCE_ID'
-      app: {
-        name: 'artist-finance-manager-web',
-        version: '1.0.0',
-        environment: 'production'
-      }
-    };
-
-    // Only initialize if configuration is provided
-    if (GRAFANA_FARO_CONFIG.url && !GRAFANA_FARO_CONFIG.url.includes('YOUR_')) {
-      try {
-        window.faro = window.GrafanaFaroWebSdk.initializeFaro({
-          url: GRAFANA_FARO_CONFIG.url,
-          app: GRAFANA_FARO_CONFIG.app,
-          instrumentations: [
-            // Load default instrumentations
-            new window.GrafanaFaroWebSdk.ConsoleInstrumentation(),
-            new window.GrafanaFaroWebSdk.ErrorsInstrumentation(),
-            new window.GrafanaFaroWebSdk.WebVitalsInstrumentation(),
-            new window.GrafanaFaroWebSdk.SessionInstrumentation(),
-          ],
-        });
-        console.log('Grafana Faro initialized successfully');
-      } catch (error) {
-        console.error('Failed to initialize Grafana Faro:', error);
-      }
-    } else {
-      console.log('Grafana Faro not configured - skipping initialization');
-      // Create a no-op faro object for development
-      window.faro = {
-        api: {
-          pushEvent: function() {},
-          pushMeasurement: function() {},
-          pushLog: function() {},
-          pushError: function() {},
-          setUser: function() {}
+    (function () {
+      // Configuration - can be environment-specific
+      const GRAFANA_FARO_CONFIG = {
+        url: 'https://faro-collector-prod-us-east-2.grafana.net/collect/108e6a6709ac048a26198aa289d4b93f',
+        app: {
+          name: 'artist-finance-manager-web',
+          version: '1.0.0',
+          environment: 'production'
         }
       };
-    }
+
+      // Only initialize if configuration is valid
+      if (!GRAFANA_FARO_CONFIG.url || GRAFANA_FARO_CONFIG.url.includes('YOUR_')) {
+        console.log('Grafana Faro not configured - skipping initialization');
+        // Create a no-op faro object for development
+        window.faro = {
+          api: {
+            pushEvent: function() {},
+            pushMeasurement: function() {},
+            pushLog: function() {},
+            pushError: function() {},
+            setUser: function() {}
+          }
+        };
+        return;
+      }
+
+      // Dynamically load Faro Web SDK
+      var webSdkScript = document.createElement("script");
+
+      // Fetch the latest 1.x.x version of the Web-SDK from the CDN
+      webSdkScript.src = "https://unpkg.com/@grafana/faro-web-sdk@1/dist/bundle/faro-web-sdk.iife.js";
+
+      webSdkScript.onload = () => {
+        try {
+          window.faro = window.GrafanaFaroWebSdk.initializeFaro(GRAFANA_FARO_CONFIG);
+          console.log('Grafana Faro initialized successfully');
+
+          // Load instrumentations at the onLoad event of the web-SDK
+          // This is important because we need to ensure that the Web-SDK has been loaded and initialized
+          var webTracingScript = document.createElement("script");
+
+          // Fetch the latest 1.x.x version of the Web Tracing package from the CDN
+          webTracingScript.src = "https://unpkg.com/@grafana/faro-web-tracing@1/dist/bundle/faro-web-tracing.iife.js";
+
+          // Initialize and add the Web Tracing instrumentation to the already loaded Web-SDK
+          webTracingScript.onload = () => {
+            window.GrafanaFaroWebSdk.faro.instrumentations.add(
+              new window.GrafanaFaroWebTracing.TracingInstrumentation()
+            );
+            console.log('Grafana Faro Web Tracing enabled');
+          };
+
+          // Append the Web Tracing script tag to the HTML page
+          document.head.appendChild(webTracingScript);
+        } catch (error) {
+          console.error('Failed to initialize Grafana Faro:', error);
+        }
+      };
+
+      // Append the Web-SDK script tag to the HTML page
+      document.head.appendChild(webSdkScript);
+    })();
   </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
