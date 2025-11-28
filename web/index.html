@@ -126,9 +126,6 @@
 
           // Handle web tracing script loading failure
           webTracingScript.onerror = () => {
-            console.error('Failed to load Grafana Faro Web Tracing - continuing without tracing');
-          };
-          webTracingScript.onerror = () => {
             console.warn('Failed to load Grafana Faro Web Tracing - continuing without tracing');
           };
 
