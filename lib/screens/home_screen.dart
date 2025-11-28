@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/transaction.dart';
 import '../services/storage_service.dart';
+import '../services/observability_service.dart';
 import '../widgets/summary_cards.dart';
 import '../widgets/transaction_form.dart';
 import '../widgets/transaction_list.dart';
@@ -14,6 +15,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   final StorageService _storageService = StorageService();
+  final ObservabilityService _observability = ObservabilityService();
   List<Transaction> _transactions = [];
   bool _isLoading = true;
 
@@ -25,18 +27,54 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _loadTransactions() async {
+    final startTime = DateTime.now();
+
     setState(() {
       _isLoading = true;
     });
 
-    // calling storage
-    final transactions = await _storageService.loadTransactions();
-    // loaded transactions
+    try {
+      // calling storage
+      final transactions = await _storageService.loadTransactions();
+      // loaded transactions
 
-    setState(() {
-      _transactions = transactions;
-      _isLoading = false;
-    });
+      setState(() {
+        _transactions = transactions;
+        _isLoading = false;
+      });
+
+      // Track successful load with performance metric
+      final loadDuration = DateTime.now().difference(startTime).inMilliseconds;
+      _observability.trackMeasurement(
+        'transactions_load_time_ms',
+        loadDuration.toDouble(),
+        attributes: {'transaction_count': transactions.length.toString()},
+      );
+
+      _observability.trackEvent(
+        'transactions_loaded',
+        attributes: {
+          'count': transactions.length,
+          'load_time_ms': loadDuration,
+        },
+      );
+    } catch (e, stackTrace) {
+      setState(() {
+        _isLoading = false;
+      });
+
+      // Track error
+      _observability.trackError(
+        e,
+        stackTrace: stackTrace,
+        context: {'operation': 'load_transactions'},
+      );
+
+      _observability.log(
+        'Failed to load transactions: $e',
+        level: 'error',
+      );
+    }
     // finished loading
   }
 
@@ -65,6 +103,16 @@ class _HomeScreenState extends State<HomeScreen> {
 
     _saveTransactions();
 
+    // Track transaction added event (privacy-safe: no actual amounts)
+    _observability.trackEvent(
+      'transaction_added',
+      attributes: {
+        'type': type,
+        'category': category,
+        'total_transactions': _transactions.length,
+      },
+    );
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Transaction added: $description'),
@@ -75,11 +123,37 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _deleteTransaction(int id) {
+    // Find transaction index
+    final index = _transactions.indexWhere((t) => t.id == id);
+
+    if (index == -1) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Transaction not found'),
+          duration: Duration(seconds: 2),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    final transaction = _transactions[index];
+
     setState(() {
-      _transactions.removeWhere((t) => t.id == id);
+      _transactions.removeAt(index);
     });
 
     _saveTransactions();
+
+    // Track transaction deleted event (privacy-safe: no actual amounts)
+    _observability.trackEvent(
+      'transaction_deleted',
+      attributes: {
+        'type': transaction.type,
+        'category': transaction.category,
+        'remaining_transactions': _transactions.length,
+      },
+    );
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(

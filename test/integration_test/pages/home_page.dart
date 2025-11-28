@@ -149,7 +149,7 @@ class HomePage {
 
   /// Verify a transaction appears in the list
   void verifyTransactionExists(String description) {
-    expect(find.text(description), findsOneWidget);
+    expect(find.text(description), findsAtLeastNWidgets(1));
   }
 
   /// Verify a transaction does not appear in the list

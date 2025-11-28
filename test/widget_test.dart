@@ -70,7 +70,7 @@ void main() {
 
     // Verify transaction appears in list
     expect(find.text('Concert hall rental'), findsOneWidget);
-    expect(find.text('-€500.00'), findsOneWidget);
+    expect(find.text('-€500.00'), findsAtLeastNWidgets(1));
     expect(find.text('Venue'), findsOneWidget);
   });
 
@@ -139,7 +139,7 @@ void main() {
 
     // Verify expenses updated: summary shows €50.00 and transaction shows -€50.00
     expect(find.text('€50.00'), findsOneWidget); // summary
-    expect(find.text('-€50.00'), findsOneWidget); // transaction
+    expect(find.text('-€50.00'), findsAtLeastNWidgets(1)); // transaction
 
     // Switch to income
     await tester.tap(find.text('Expense'));

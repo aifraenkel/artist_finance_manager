@@ -24,6 +24,5 @@ comment:
 
 ignore:
   - "test/**"
-  - "integration_test/**"
   - "**/*.g.dart"
   - "**/generated_plugin_registrant.dart"

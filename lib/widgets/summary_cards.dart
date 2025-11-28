@@ -168,7 +168,9 @@ class SummaryCards extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '€${balance.toStringAsFixed(2)}',
+                        balance < 0
+                            ? '-€${balance.abs().toStringAsFixed(2)}'
+                            : '€${balance.toStringAsFixed(2)}',
                         key: const ValueKey('balance-amount'),
                         style: TextStyle(
                           fontSize: 24,

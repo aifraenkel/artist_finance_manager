@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/transaction.dart';
+import 'observability_service.dart';
 
 class StorageService {
   static const String _key = 'project-finances';
+  final ObservabilityService _observability = ObservabilityService();
 
   // Load transactions from local storage
   Future<List<Transaction>> loadTransactions() async {
@@ -21,8 +23,13 @@ class StorageService {
       final result = jsonList.map((json) => Transaction.fromJson(json)).toList();
       // parsed transactions
       return result;
-    } catch (e) {
+    } catch (e, stackTrace) {
       // error loading transactions: $e
+      _observability.trackError(
+        e,
+        stackTrace: stackTrace,
+        context: {'operation': 'load_transactions', 'storage_key': _key},
+      );
       return [];
     }
   }
@@ -34,7 +41,16 @@ class StorageService {
       final jsonList = transactions.map((t) => t.toJson()).toList();
       final jsonString = json.encode(jsonList);
       await prefs.setString(_key, jsonString);
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _observability.trackError(
+        e,
+        stackTrace: stackTrace,
+        context: {
+          'operation': 'save_transactions',
+          'storage_key': _key,
+          'transaction_count': transactions.length.toString(),
+        },
+      );
       print('Error saving transactions: $e');
     }
   }
