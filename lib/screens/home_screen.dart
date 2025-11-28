@@ -123,21 +123,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _deleteTransaction(int id) {
-    // Find transaction before deleting for logging
-    final transaction = _transactions.firstWhere(
-      (t) => t.id == id,
-      orElse: () => Transaction(
-        id: id,
-        description: 'Unknown',
-        amount: 0,
-        type: 'unknown',
-        category: 'unknown',
-        date: DateTime.now(),
-      ),
-    );
+    // Find transaction index
+    final index = _transactions.indexWhere((t) => t.id == id);
 
-    // Check if transaction was found
-    if (transaction.type == 'unknown') {
+    if (index == -1) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Transaction not found'),
@@ -148,8 +137,10 @@ class _HomeScreenState extends State<HomeScreen> {
       return;
     }
 
+    final transaction = _transactions[index];
+
     setState(() {
-      _transactions.removeWhere((t) => t.id == id);
+      _transactions.removeAt(index);
     });
 
     _saveTransactions();
