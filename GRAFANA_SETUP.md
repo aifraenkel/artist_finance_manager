@@ -140,6 +140,78 @@ The Faro SDK automatically tracks:
 - JSON parsing errors
 - Any uncaught exceptions
 
+## Privacy & Data Protection
+
+### What Sensitive Data Is Collected
+
+When using Grafana Faro observability, the following data is sent to Grafana Cloud:
+
+| Data Type | Examples | Sensitivity Level |
+|-----------|----------|-------------------|
+| **Transaction Amounts** | `amount: 150.00` | Financial/Sensitive |
+| **Transaction Types** | `income`, `expense` | Low |
+| **Transaction Categories** | `salary`, `rent`, `food` | Personal/Behavioral |
+| **Session Data** | Browser info, timestamps | Low |
+| **Error Details** | Stack traces, error messages | Technical |
+| **Performance Metrics** | Load times, Web Vitals | Technical |
+
+### Privacy Considerations
+
+1. **Financial Data Exposure**: Transaction amounts are transmitted to a third-party service (Grafana Cloud). While Grafana Cloud uses encryption in transit (HTTPS), consider whether tracking exact amounts is necessary for your use case.
+
+2. **Behavioral Insights**: Transaction categories and patterns can reveal personal spending habits and financial behaviors.
+
+3. **Data Retention**: Grafana Cloud free tier retains data for 14 days. Consider your retention requirements.
+
+4. **User Consent**: If deploying this application for other users, ensure they are informed about data collection and have provided appropriate consent.
+
+### Compliance Requirements
+
+Depending on your jurisdiction and user base, consider the following regulations:
+
+- **GDPR (EU)**: Requires explicit consent for data collection, right to access/delete data, and data processing agreements with third parties.
+- **CCPA (California)**: Requires disclosure of data collection practices and opt-out mechanisms for data selling.
+- **Other Regional Laws**: Many countries have their own data protection regulations.
+
+### Best Practices for Data Protection
+
+1. **Minimize Data Collection**: Only track what's necessary for debugging and monitoring.
+
+   ```javascript
+   // Consider anonymizing amounts if exact values aren't needed
+   attributes: {
+     amount_range: getAmountRange(amount), // 'low', 'medium', 'high'
+     // instead of: amount: exactAmount
+   }
+   ```
+
+2. **Review Before Production**: Audit all tracked data before deploying to production.
+
+3. **Data Processing Agreement**: Ensure you have a DPA with Grafana Cloud if required by GDPR.
+
+4. **User Documentation**: Clearly document what data is collected in your privacy policy.
+
+5. **Environment Separation**: Use different Grafana Faro apps for development vs. production to avoid mixing test data with real user data.
+
+### Disabling Sensitive Data Tracking
+
+To disable tracking of transaction amounts, modify the observability calls in `lib/utils/observability.dart`:
+
+```dart
+// Remove 'amount' from attributes
+static void trackTransactionAdded(Transaction transaction, int totalCount) {
+  GrafanaFaro.instance?.pushEvent(
+    'transaction_added',
+    attributes: {
+      'type': transaction.type.name,
+      'category': transaction.category,
+      // 'amount': transaction.amount.toString(), // Removed for privacy
+      'total_transactions': totalCount.toString(),
+    },
+  );
+}
+```
+
 ## Example Queries
 
 ### Count transactions by type (in Grafana Explore)
