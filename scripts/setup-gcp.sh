@@ -139,7 +139,7 @@ initialize() {
         log_info "Please copy scripts/.gcp_settings.example to scripts/.gcp_settings and configure it:"
         echo ""
         echo "  cp scripts/.gcp_settings.example scripts/.gcp_settings"
-        echo "  nano .gcp_settings  # Edit with your values"
+        echo "  nano scripts/.gcp_settings  # Edit with your values"
         echo "  ./scripts/setup-gcp.sh"
         echo ""
         exit 1
