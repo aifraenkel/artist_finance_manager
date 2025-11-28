@@ -25,7 +25,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-PROJECT_ID="${GCP_PROJECT_ID:-artist-finance-manager}"
+PROJECT_ID="${GCP_PROJECT_ID:-artist-manager-479514}"
 REGION="${GCP_REGION:-us-central1}"
 SERVICE_NAME="${GCP_SERVICE_NAME:-artist-finance-manager}"
 
