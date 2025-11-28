@@ -79,7 +79,6 @@ LICENSE
 .travis.yml
 
 # Deployment scripts (not needed in image)
-scripts/
 
 # Logs
 *.log
