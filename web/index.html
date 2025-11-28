@@ -18,6 +18,8 @@
 
   <title>Artist Finance Manager</title>
   <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
@@ -87,7 +89,8 @@
 
       // Only initialize if configuration is valid
       if (!GRAFANA_FARO_CONFIG.url || GRAFANA_FARO_CONFIG.url.includes('YOUR_')) {
-        console.log('Grafana Faro not configured - skipping initialization');
+        // Silently skip Faro initialization when not configured
+        // To enable Grafana Faro, update the GRAFANA_FARO_CONFIG with your collector URL
         createNoOpFaro();
         return;
       }
