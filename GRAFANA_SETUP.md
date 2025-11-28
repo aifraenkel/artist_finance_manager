@@ -201,36 +201,32 @@ Depending on your jurisdiction and user base, consider the following regulations
 
 ### Disabling Sensitive Data Tracking
 
-To disable tracking of transaction amounts, modify the observability calls in `lib/utils/observability.dart`. 
+To disable tracking of transaction amounts, modify the observability calls in `lib/screens/home_screen.dart`. 
 
-> **Note**: Apply similar modifications to all tracking functions that collect sensitive data, including `trackTransactionAdded` and `trackTransactionDeleted`.
+> **Note**: Apply similar modifications to all tracking functions that collect sensitive data, including `transaction_added` and `transaction_deleted` events.
 
 ```dart
-// Remove 'amount' from attributes in trackTransactionAdded
-static void trackTransactionAdded(Transaction transaction, int totalCount) {
-  GrafanaFaro.instance?.pushEvent(
-    'transaction_added',
-    attributes: {
-      'type': transaction.type.name,
-      'category': transaction.category,
-      // 'amount': transaction.amount.toString(), // Removed for privacy
-      'total_transactions': totalCount.toString(),
-    },
-  );
-}
+// In _addTransaction method - remove 'amount' from attributes
+_observability.trackEvent(
+  'transaction_added',
+  attributes: {
+    'type': type,
+    'category': category,
+    // 'amount': amount,  // Removed for privacy
+    'total_transactions': _transactions.length,
+  },
+);
 
-// Also update trackTransactionDeleted similarly
-static void trackTransactionDeleted(Transaction transaction, int remainingCount) {
-  GrafanaFaro.instance?.pushEvent(
-    'transaction_deleted',
-    attributes: {
-      'type': transaction.type.name,
-      'category': transaction.category,
-      // 'amount': transaction.amount.toString(), // Removed for privacy
-      'remaining_transactions': remainingCount.toString(),
-    },
-  );
-}
+// In _deleteTransaction method - remove 'amount' from attributes  
+_observability.trackEvent(
+  'transaction_deleted',
+  attributes: {
+    'type': transaction.type,
+    'category': transaction.category,
+    // 'amount': transaction.amount,  // Removed for privacy
+    'remaining_transactions': _transactions.length,
+  },
+);
 ```
 
 ## Example Queries
