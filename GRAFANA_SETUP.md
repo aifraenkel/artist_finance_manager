@@ -210,7 +210,7 @@ Depending on your jurisdiction and user base, consider the following regulations
 
 To disable tracking of transaction amounts, modify the observability calls in `lib/screens/home_screen.dart`. 
 
-> **Note**: Apply similar modifications to all tracking functions that collect sensitive data, including `transaction_added` and `transaction_deleted` events.
+> **Note**: Apply similar modifications to all tracking functions that collect sensitive data, including `transaction_added` and `transaction_deleted` events. Verify the exact method names and structure match your current codebase version.
 
 ```dart
 // In _addTransaction method - remove 'amount' from attributes
