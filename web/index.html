@@ -140,6 +140,19 @@
         }
       };
 
+      // Handle script loading failure with a no-op faro object
+      webSdkScript.onerror = () => {
+        console.warn('Failed to load Grafana Faro SDK - using no-op implementation');
+        window.faro = {
+          api: {
+            pushEvent: function() {},
+            pushMeasurement: function() {},
+            pushLog: function() {},
+            pushError: function() {},
+            setUser: function() {}
+          }
+        };
+      };
       // Handle main SDK script loading failure
       webSdkScript.onerror = () => {
         console.error('Failed to load Grafana Faro SDK - using no-op implementation');
