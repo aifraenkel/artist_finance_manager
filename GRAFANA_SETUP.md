@@ -179,6 +179,12 @@ Depending on your jurisdiction and user base, consider the following regulations
 
    ```javascript
    // Consider anonymizing amounts if exact values aren't needed
+   function getAmountRange(amount) {
+     if (amount < 50) return 'low';
+     if (amount < 500) return 'medium';
+     return 'high';
+   }
+
    attributes: {
      amount_range: getAmountRange(amount), // 'low', 'medium', 'high'
      // instead of: amount: exactAmount
@@ -195,10 +201,12 @@ Depending on your jurisdiction and user base, consider the following regulations
 
 ### Disabling Sensitive Data Tracking
 
-To disable tracking of transaction amounts, modify the observability calls in `lib/utils/observability.dart`:
+To disable tracking of transaction amounts, modify the observability calls in `lib/utils/observability.dart`. 
+
+> **Note**: Apply similar modifications to all tracking functions that collect sensitive data, including `trackTransactionAdded` and `trackTransactionDeleted`.
 
 ```dart
-// Remove 'amount' from attributes
+// Remove 'amount' from attributes in trackTransactionAdded
 static void trackTransactionAdded(Transaction transaction, int totalCount) {
   GrafanaFaro.instance?.pushEvent(
     'transaction_added',
@@ -207,6 +215,19 @@ static void trackTransactionAdded(Transaction transaction, int totalCount) {
       'category': transaction.category,
       // 'amount': transaction.amount.toString(), // Removed for privacy
       'total_transactions': totalCount.toString(),
+    },
+  );
+}
+
+// Also update trackTransactionDeleted similarly
+static void trackTransactionDeleted(Transaction transaction, int remainingCount) {
+  GrafanaFaro.instance?.pushEvent(
+    'transaction_deleted',
+    attributes: {
+      'type': transaction.type.name,
+      'category': transaction.category,
+      // 'amount': transaction.amount.toString(), // Removed for privacy
+      'remaining_transactions': remainingCount.toString(),
     },
   );
 }
