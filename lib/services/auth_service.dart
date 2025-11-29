@@ -1,11 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart' hide UserMetadata;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/app_user.dart';
+import '../config/auth_config.dart';
 
 /// Authentication service for managing user authentication and profile
 ///
 /// This service handles:
 /// - Email link (passwordless) authentication
+/// - Simple email-only authentication (for development/testing)
 /// - User registration and profile creation
 /// - User profile updates
 /// - Account soft deletion
@@ -53,12 +55,22 @@ class AuthService {
     required ActionCodeSettings actionCodeSettings,
   }) async {
     try {
+      print('DEBUG: Attempting to send sign-in link to $email');
+      print('DEBUG: ActionCodeSettings - URL: ${actionCodeSettings.url}, handleCodeInApp: ${actionCodeSettings.handleCodeInApp}');
+      
       await _auth.sendSignInLinkToEmail(
         email: email,
         actionCodeSettings: actionCodeSettings,
       );
+      
+      print('DEBUG: Sign-in link sent successfully to $email');
+      print('DEBUG: Check your email inbox and spam folder');
     } catch (e) {
-      print('Error sending sign-in link: $e');
+      print('ERROR: Failed to send sign-in link: $e');
+      if (e is FirebaseAuthException) {
+        print('ERROR: Firebase Auth Error Code: ${e.code}');
+        print('ERROR: Firebase Auth Error Message: ${e.message}');
+      }
       rethrow;
     }
   }
@@ -115,10 +127,15 @@ class AuthService {
         metadata: UserMetadata(loginCount: 1),
       );
 
+      // Use server timestamp for createdAt and lastLoginAt
+      final userDoc = appUser.toFirestore();
+      userDoc['createdAt'] = FieldValue.serverTimestamp();
+      userDoc['lastLoginAt'] = FieldValue.serverTimestamp();
+
       await _firestore
           .collection('users')
           .doc(user.uid)
-          .set(appUser.toFirestore());
+          .set(userDoc);
 
       return appUser;
     } catch (e) {
@@ -276,5 +293,89 @@ class AuthService {
       androidMinimumVersion: '21',
       iOSBundleId: 'com.artist.financemanager',
     );
+  }
+
+  /// Simple email authentication (for development/testing)
+  ///
+  /// Creates or signs in a user with just their email, bypassing email verification.
+  /// Only enabled when AuthConfig.useEmailLinkAuth is false.
+  ///
+  /// [email] - User's email address
+  /// [name] - User's display name (for new users)
+  Future<UserCredential> simpleEmailAuth({
+    required String email,
+    String? name,
+  }) async {
+    if (AuthConfig.useEmailLinkAuth) {
+      throw Exception('Simple email auth is disabled. Use email link authentication instead.');
+    }
+
+    // Validate email domain if whitelist is configured
+    if (AuthConfig.allowedEmailDomains.isNotEmpty) {
+      final domain = email.split('@').last;
+      if (!AuthConfig.allowedEmailDomains.contains(domain)) {
+        throw Exception('Email domain not allowed. Allowed domains: ${AuthConfig.allowedEmailDomains.join(", ")}');
+      }
+    }
+
+    try {
+      // Use a deterministic password based on email for simple auth
+      // This is insecure but acceptable for development/testing
+      final password = _generateDevPassword(email);
+
+      UserCredential? userCredential;
+
+      try {
+        // Try to sign in first
+        print('DEBUG: Attempting sign in for $email with generated password');
+        userCredential = await _auth.signInWithEmailAndPassword(
+          email: email,
+          password: password,
+        );
+        print('DEBUG: Sign in successful');
+      } on FirebaseAuthException catch (e) {
+        print('FirebaseAuthException during sign in: code=${e.code}, message=${e.message}');
+        if (e.code == 'user-not-found' || e.code == 'wrong-password') {
+          // User doesn't exist, create new account
+          print('DEBUG: User not found, creating new account for $email');
+          userCredential = await _auth.createUserWithEmailAndPassword(
+            email: email,
+            password: password,
+          );
+          print('DEBUG: Account created successfully');
+
+          // Create user profile in Firestore
+          if (name != null) {
+            final now = DateTime.now();
+            final appUser = AppUser(
+              uid: userCredential.user!.uid,
+              email: email,
+              name: name,
+              createdAt: now,
+              lastLoginAt: now,
+              metadata: UserMetadata(loginCount: 1),
+            );
+
+            await _firestore
+                .collection('users')
+                .doc(userCredential.user!.uid)
+                .set(appUser.toFirestore());
+          }
+        } else {
+          rethrow;
+        }
+      }
+
+      return userCredential;
+    } catch (e) {
+      print('Error with simple email auth: $e');
+      rethrow;
+    }
+  }
+
+  /// Generate a deterministic password for development
+  /// WARNING: This is NOT secure and should only be used for development/testing
+  String _generateDevPassword(String email) {
+    return 'dev_${email.hashCode}_password';
   }
 }

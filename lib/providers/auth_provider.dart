@@ -1,7 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/app_user.dart';
 import '../services/auth_service.dart';
+import '../config/auth_config.dart';
 
 /// Authentication state provider
 ///
@@ -55,28 +57,53 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Send sign-in email link
+  /// Send sign-in email link or perform simple login
   ///
   /// [email] - User's email address
-  /// [continueUrl] - URL to continue to after email verification
-  Future<bool> sendSignInLink(String email, String continueUrl) async {
+  /// [continueUrl] - URL to continue to after email verification (only used for email link auth)
+  /// [name] - User's display name (optional, for registration)
+  Future<bool> sendSignInLink(String email, String continueUrl, {String? name}) async {
     try {
       _isLoading = true;
       _error = null;
       notifyListeners();
 
-      final actionCodeSettings = _authService.getActionCodeSettings(continueUrl);
+      if (AuthConfig.useEmailLinkAuth) {
+        // Original email link flow
+        final actionCodeSettings = _authService.getActionCodeSettings(continueUrl);
 
-      await _authService.sendSignInLinkToEmail(
-        email: email,
-        actionCodeSettings: actionCodeSettings,
-      );
+        await _authService.sendSignInLinkToEmail(
+          email: email,
+          actionCodeSettings: actionCodeSettings,
+        );
 
-      _emailForSignIn = email;
+        _emailForSignIn = email;
+        
+        // Save email and name to SharedPreferences for email link verification
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('emailForSignIn', email);
+        if (name != null && name.isNotEmpty) {
+          await prefs.setString('nameForSignIn', name);
+        }
+        print('DEBUG: Saved email for sign-in: $email');
+        if (name != null) {
+          print('DEBUG: Saved name for sign-in: $name');
+        }
+      } else {
+        // Simple email auth flow - sign in directly
+        await _authService.simpleEmailAuth(email: email);
+
+        // Update last login
+        await _authService.updateLastLogin();
+
+        // Load the user data
+        await _loadCurrentUser();
+      }
+
       return true;
     } catch (e) {
       _error = _getErrorMessage(e);
-      print('Error sending sign-in link: $e');
+      print('Error with sign-in: $e');
       return false;
     } finally {
       _isLoading = false;
@@ -103,10 +130,35 @@ class AuthProvider with ChangeNotifier {
         emailLink: emailLink,
       );
 
-      // Update last login
-      await _authService.updateLastLogin();
+      // Check if user profile exists in Firestore, if not create it
+      final existingUser = await _authService.getCurrentAppUser();
+      
+      if (existingUser == null) {
+        // New user - create profile in Firestore
+        print('DEBUG: New user detected, creating profile in Firestore');
+        
+        // Try to get saved name from SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        final savedName = prefs.getString('nameForSignIn');
+        final userName = savedName ?? email.split('@').first;
+        
+        print('DEBUG: Creating user with name: $userName');
+        
+        final newUser = await _authService.registerUser(
+          email: email,
+          name: userName,
+        );
+        _currentUser = newUser;
+        
+        // Clear saved name after use
+        await prefs.remove('nameForSignIn');
+      } else {
+        // Existing user - update last login
+        await _authService.updateLastLogin();
+        _currentUser = existingUser;
+      }
 
-      // Load user data
+      // Load user data to ensure we have latest
       await _loadCurrentUser();
 
       _emailForSignIn = null;
@@ -131,24 +183,36 @@ class AuthProvider with ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      // Check if user already exists
-      final userStatus = await _authService.checkUserStatus(email);
+      if (AuthConfig.useEmailLinkAuth) {
+        // Original email link flow
+        // Check if user already exists
+        final userStatus = await _authService.checkUserStatus(email);
 
-      if (userStatus['exists'] == true && userStatus['isDeleted'] == false) {
-        throw Exception('User with this email already exists');
-      }
+        if (userStatus['exists'] == true && userStatus['isDeleted'] == false) {
+          throw Exception('User with this email already exists');
+        }
 
-      // If user exists but is deleted, we'll restore the account
-      if (userStatus['exists'] == true && userStatus['isDeleted'] == true) {
-        await _authService.restoreAccount();
-        await _authService.updateUserProfile(name: name);
+        // If user exists but is deleted, we'll restore the account
+        if (userStatus['exists'] == true && userStatus['isDeleted'] == true) {
+          await _authService.restoreAccount();
+          await _authService.updateUserProfile(name: name);
+        } else {
+          // Create new user
+          await _authService.registerUser(email: email, name: name);
+        }
+
+        // Load the user data
+        await _loadCurrentUser();
       } else {
-        // Create new user
-        await _authService.registerUser(email: email, name: name);
-      }
+        // Simple email auth flow - sign in/register directly
+        await _authService.simpleEmailAuth(email: email, name: name);
 
-      // Load the user data
-      await _loadCurrentUser();
+        // Update last login
+        await _authService.updateLastLogin();
+
+        // Load the user data
+        await _loadCurrentUser();
+      }
 
       return true;
     } catch (e) {

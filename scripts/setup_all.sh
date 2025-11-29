@@ -156,7 +156,7 @@ echo "   • Redeploy functions: ./scripts/deploy_functions.sh"
 echo ""
 
 info "Documentation:"
-echo "   • Setup guide: AUTH_SETUP.md"
+echo "   • Setup guide: docs/AUTH_SETUP.md"
 echo "   • Firebase console: https://console.firebase.google.com/project/$PROJECT_ID"
 echo "   • GCP console: https://console.cloud.google.com/home/dashboard?project=$PROJECT_ID"
 echo ""

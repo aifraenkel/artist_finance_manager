@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../config/auth_config.dart';
 import 'registration_screen.dart';
 import 'email_verification_screen.dart';
 
-/// Login screen for email link authentication
+/// Login screen for authentication
 ///
-/// Users enter their email to receive a sign-in link
+/// Supports both email link authentication and simple email auth (based on config)
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
 
@@ -43,17 +44,20 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (success && mounted) {
-      // Navigate to email verification screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => EmailVerificationScreen(email: email),
-        ),
-      );
+      if (AuthConfig.useEmailLinkAuth) {
+        // Navigate to email verification screen for email link flow
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => EmailVerificationScreen(email: email),
+          ),
+        );
+      }
+      // For simple auth, AuthProvider will handle navigation via auth state listener
     } else if (mounted) {
       // Show error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.error ?? 'Failed to send sign-in link'),
+          content: Text(authProvider.error ?? 'Failed to sign in'),
           backgroundColor: Colors.red,
         ),
       );
@@ -141,13 +145,17 @@ class _LoginScreenState extends State<LoginScreen> {
                                   strokeWidth: 2,
                                 ),
                               )
-                            : const Text('Send Sign-In Link'),
+                            : Text(AuthConfig.useEmailLinkAuth
+                                ? 'Send Sign-In Link'
+                                : 'Sign In'),
                       ),
                       const SizedBox(height: 16),
 
                       // Info text
                       Text(
-                        'We\'ll send a secure sign-in link to your email',
+                        AuthConfig.useEmailLinkAuth
+                            ? 'We\'ll send a secure sign-in link to your email'
+                            : 'Enter your email to sign in',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Colors.grey[600],
                             ),

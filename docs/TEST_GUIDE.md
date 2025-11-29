@@ -24,10 +24,9 @@ test/                                    → All tests
 │   ├── playwright.config.ts
 │   └── package.json
 ├── integration_test/                   → True integration tests (mobile only)
-│   ├── app_flow_test.dart
-│   ├── app_test.dart
-│   └── pages/                          → Page object helpers
-│       └── home_page.dart
+│   ├── auth_e2e_test.dart
+│   └── pages/                          → Page object helpers (if needed)
+│       └── auth_page.dart
 ├── models/                             → Model unit tests
 │   └── transaction_test.dart
 ├── services/                           → Service unit tests

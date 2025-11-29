@@ -85,6 +85,17 @@
         };
       }
 
+      // Disable Faro on localhost to avoid CORS issues
+      const isLocalhost = window.location.hostname === 'localhost' ||
+                         window.location.hostname === '127.0.0.1' ||
+                         window.location.hostname === '';
+
+      if (isLocalhost) {
+        console.log('Grafana Faro disabled on localhost - using no-op implementation');
+        createNoOpFaro();
+        return;
+      }
+
       // Only initialize if configuration is valid
       if (!GRAFANA_FARO_CONFIG.url || GRAFANA_FARO_CONFIG.url.includes('YOUR_')) {
         console.log('Grafana Faro not configured - skipping initialization');

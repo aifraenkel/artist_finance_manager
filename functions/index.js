@@ -9,6 +9,7 @@
 
 import functions from '@google-cloud/functions-framework';
 import { Firestore } from '@google-cloud/firestore';
+import { sendWelcomeEmail, sendAccountDeletionEmail, sendLoginNotificationEmail } from './email_service.js';
 
 const firestore = new Firestore();
 
@@ -35,15 +36,15 @@ functions.cloudEvent('onUserCreated', async (cloudEvent) => {
 
   console.log(`Sending welcome email to ${email}`);
 
-  // TODO: Integrate with email service (SendGrid, Mailgun, etc.)
-  // For now, just log the action
-  console.log({
-    to: email,
-    subject: 'Welcome to Artist Finance Manager!',
-    body: `Hello ${name},\n\nWelcome to Artist Finance Manager! We're excited to help you manage your project finances.\n\nGet started by adding your first transaction.\n\nBest regards,\nThe Artist Finance Manager Team`
-  });
-
-  return { success: true };
+  try {
+    await sendWelcomeEmail(email, name);
+    console.log('Welcome email sent successfully');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send welcome email:', error);
+    // Don't fail the function if email fails
+    return { success: false, error: error.message };
+  }
 });
 
 /**
@@ -79,14 +80,15 @@ functions.cloudEvent('onUserDeleted', async (cloudEvent) => {
 
   console.log(`Sending account deletion email to ${email}`);
 
-  // TODO: Integrate with email service
-  console.log({
-    to: email,
-    subject: 'Your Artist Finance Manager account has been deleted',
-    body: `Hello ${name},\n\nYour Artist Finance Manager account has been deleted as requested.\n\nYour data will be kept for 90 days in case you change your mind. You can recover your account by signing in again within this period.\n\nAfter 90 days, your account and all associated data will be permanently deleted.\n\nIf you didn't request this deletion, please contact support immediately.\n\nBest regards,\nThe Artist Finance Manager Team`
-  });
-
-  return { success: true };
+  try {
+    await sendAccountDeletionEmail(email, name);
+    console.log('Account deletion email sent successfully');
+    return { success: true };
+  } catch (error) {
+    console.error('Failed to send deletion email:', error);
+    // Don't fail the function if email fails
+    return { success: false, error: error.message };
+  }
 });
 
 /**
@@ -174,12 +176,8 @@ functions.http('sendLoginNotification', async (req, res) => {
 
     console.log(`Sending login notification to ${email}`);
 
-    // TODO: Integrate with email service
-    console.log({
-      to: email,
-      subject: 'New login to your Artist Finance Manager account',
-      body: `Hello ${name},\n\nWe detected a new login to your account.\n\nDevice: ${deviceInfo || 'Unknown'}\nIP Address: ${ipAddress || 'Unknown'}\nTime: ${new Date().toISOString()}\n\nIf this wasn't you, please secure your account immediately.\n\nBest regards,\nThe Artist Finance Manager Team`
-    });
+    await sendLoginNotificationEmail(email, name, deviceInfo, ipAddress);
+    console.log('Login notification sent successfully');
 
     res.status(200).json({ success: true });
   } catch (error) {

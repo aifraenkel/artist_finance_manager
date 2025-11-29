@@ -46,13 +46,13 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyBXf8qHJN_KGvXJZvXqP9yXYqP9yXYqP9',
-    appId: '1:456648586026:web:XXXXXXXXXXXXXXXXXX',
+    apiKey: 'AIzaSyByeWBa2uve6USy6mTUrK8oAyfmY55tHZM',
+    appId: '1:456648586026:web:941da4e3ac52b46407e453',
     messagingSenderId: '456648586026',
     projectId: 'artist-manager-479514',
     authDomain: 'artist-manager-479514.firebaseapp.com',
-    storageBucket: 'artist-manager-479514.appspot.com',
-    measurementId: 'G-XXXXXXXXXX',
+    storageBucket: 'artist-manager-479514.firebasestorage.app',
+    measurementId: 'G-LX4EY29TF0',
   );
 
   static const FirebaseOptions android = FirebaseOptions(

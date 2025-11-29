@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
+import '../../config/auth_config.dart';
 import 'email_verification_screen.dart';
 
 /// Registration screen for new users
 ///
-/// Users enter their name and email to create an account
+/// Supports both email link authentication and simple email auth (based on config)
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
 
@@ -37,30 +38,40 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final email = _emailController.text.trim();
     final name = _nameController.text.trim();
 
-    // Get the continue URL (current URL or default)
-    final continueUrl = Uri.base.toString();
+    bool success;
 
-    // Send sign-in link
-    final success = await authProvider.sendSignInLink(email, continueUrl);
+    if (AuthConfig.useEmailLinkAuth) {
+      // Get the continue URL (current URL or default)
+      final continueUrl = Uri.base.toString();
+
+      // Send sign-in link for email verification with name
+      success = await authProvider.sendSignInLink(email, continueUrl, name: name);
+    } else {
+      // Simple auth - register directly
+      success = await authProvider.registerUser(email, name);
+    }
 
     setState(() => _isLoading = false);
 
     if (success && mounted) {
-      // Navigate to email verification screen with registration data
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => EmailVerificationScreen(
-            email: email,
-            name: name,
-            isRegistration: true,
+      if (AuthConfig.useEmailLinkAuth) {
+        // Navigate to email verification screen
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => EmailVerificationScreen(
+              email: email,
+              name: name,
+              isRegistration: true,
+            ),
           ),
-        ),
-      );
+        );
+      }
+      // For simple auth, AuthProvider will handle navigation via auth state listener
     } else if (mounted) {
       // Show error
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.error ?? 'Failed to send verification email'),
+          content: Text(authProvider.error ?? 'Failed to register'),
           backgroundColor: Colors.red,
         ),
       );

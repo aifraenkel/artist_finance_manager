@@ -5,6 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
+    "start": "npx @google-cloud/functions-framework --target=cleanupDeletedUsers",
     "deploy": "gcloud functions deploy",
     "lint": "eslint ."
   },
@@ -13,7 +14,8 @@
   },
   "dependencies": {
     "@google-cloud/firestore": "^7.1.0",
-    "@google-cloud/functions-framework": "^3.3.0"
+    "@google-cloud/functions-framework": "^3.3.0",
+    "nodemailer": "^7.0.11"
   },
   "devDependencies": {
     "eslint": "^8.57.0"
