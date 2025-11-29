@@ -51,30 +51,344 @@ We've chosen **Google Cloud Run** as our deployment platform for the following r
 
 ## Prerequisites
 
-Before deploying, ensure you have:
+Before running deployment scripts, ensure you have the following tools installed:
 
-1. **Google Cloud Account** with billing enabled
-2. **gcloud CLI** installed and configured
-   ```bash
-   # Install gcloud CLI
-   # macOS: https://cloud.google.com/sdk/docs/install-sdk#mac
-   # Linux: https://cloud.google.com/sdk/docs/install-sdk#linux
-   # Windows: https://cloud.google.com/sdk/docs/install-sdk#windows
+### Required Tools
 
-   # Verify installation
-   gcloud --version
-   ```
+#### 1. Google Cloud SDK (gcloud CLI)
 
-3. **Docker** installed (for local builds and testing)
-   ```bash
-   # Verify installation
-   docker --version
-   ```
+The Google Cloud SDK is required by all deployment scripts.
 
-4. **Flutter SDK** (3.0.0 or higher)
-   ```bash
-   flutter --version
-   ```
+**Installation:**
+
+<details>
+<summary><strong>macOS</strong></summary>
+
+```bash
+# Using Homebrew (recommended)
+brew install --cask google-cloud-sdk
+
+# Or download installer
+curl https://sdk.cloud.google.com | bash
+exec -l $SHELL
+```
+
+</details>
+
+<details>
+<summary><strong>Linux</strong></summary>
+
+```bash
+# Debian/Ubuntu
+sudo apt-get update && sudo apt-get install -y apt-transport-https ca-certificates gnupg curl
+curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo gpg --dearmor -o /usr/share/keyrings/cloud.google.gpg
+echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] https://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+sudo apt-get update && sudo apt-get install -y google-cloud-cli
+
+# Or use installer script (any Linux)
+curl https://sdk.cloud.google.com | bash
+exec -l $SHELL
+```
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+Download and run the installer from: https://cloud.google.com/sdk/docs/install#windows
+
+Or use PowerShell:
+```powershell
+(New-Object Net.WebClient).DownloadFile("https://dl.google.com/dl/cloudsdk/channels/rapid/GoogleCloudSDKInstaller.exe", "$env:Temp\GoogleCloudSDKInstaller.exe")
+& $env:Temp\GoogleCloudSDKInstaller.exe
+```
+
+</details>
+
+**Verify installation:**
+```bash
+gcloud --version
+# Expected output: Google Cloud SDK X.X.X
+```
+
+**Initial setup:**
+```bash
+gcloud auth login
+gcloud config set project YOUR_PROJECT_ID
+```
+
+📖 [Official Documentation](https://cloud.google.com/sdk/docs/install)
+
+---
+
+#### 2. Docker
+
+Docker is required for building container images for Cloud Run deployment.
+
+**Installation:**
+
+<details>
+<summary><strong>macOS</strong></summary>
+
+```bash
+# Using Homebrew
+brew install --cask docker
+
+# Or download Docker Desktop from:
+# https://docs.docker.com/desktop/install/mac-install/
+```
+
+After installation, launch Docker Desktop from Applications.
+
+</details>
+
+<details>
+<summary><strong>Linux</strong></summary>
+
+```bash
+# Ubuntu/Debian
+sudo apt-get update
+sudo apt-get install -y docker.io
+sudo systemctl start docker
+sudo systemctl enable docker
+
+# Add your user to docker group (to run without sudo)
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+Download and install Docker Desktop from: https://docs.docker.com/desktop/install/windows-install/
+
+Requires WSL 2 backend. Follow the installer prompts.
+
+</details>
+
+**Verify installation:**
+```bash
+docker --version
+# Expected output: Docker version X.X.X, build XXXXXXX
+
+docker run hello-world
+# Should print "Hello from Docker!"
+```
+
+📖 [Official Documentation](https://docs.docker.com/get-docker/)
+
+---
+
+#### 3. Flutter SDK
+
+Flutter SDK (3.0.0 or higher) is required to build the web application.
+
+**Installation:**
+
+<details>
+<summary><strong>macOS</strong></summary>
+
+```bash
+# Using Homebrew (recommended)
+brew install --cask flutter
+
+# Or download manually from Flutter releases page:
+# https://docs.flutter.dev/get-started/install/macos
+cd ~/development
+# Download the latest stable release from the Flutter website
+unzip flutter_macos_*.zip
+export PATH="$PATH:$HOME/development/flutter/bin"
+```
+
+Add to your shell profile (`~/.zshrc` or `~/.bashrc`):
+```bash
+export PATH="$PATH:$HOME/development/flutter/bin"
+```
+
+</details>
+
+<details>
+<summary><strong>Linux</strong></summary>
+
+```bash
+# Using snap (recommended)
+sudo snap install flutter --classic
+
+# Or download manually from Flutter releases page:
+# https://docs.flutter.dev/get-started/install/linux
+cd ~/development
+# Download the latest stable release from the Flutter website
+tar xf flutter_linux_*.tar.xz
+export PATH="$PATH:$HOME/development/flutter/bin"
+```
+
+Add to `~/.bashrc`:
+```bash
+export PATH="$PATH:$HOME/development/flutter/bin"
+```
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+Download the Flutter SDK from: https://docs.flutter.dev/get-started/install/windows
+
+Extract to `C:\flutter` and add `C:\flutter\bin` to your PATH environment variable.
+
+Or use Chocolatey:
+```powershell
+choco install flutter
+```
+
+</details>
+
+**Verify installation:**
+```bash
+flutter --version
+# Expected output: Flutter X.X.X • channel stable
+
+flutter doctor
+# Should show green checkmarks for required components
+```
+
+📖 [Official Documentation](https://docs.flutter.dev/get-started/install)
+
+---
+
+#### 4. curl
+
+curl is used for health checks and API calls. It's usually pre-installed on most systems.
+
+**Installation (if needed):**
+
+<details>
+<summary><strong>macOS</strong></summary>
+
+```bash
+# Usually pre-installed, but if needed:
+brew install curl
+```
+
+</details>
+
+<details>
+<summary><strong>Linux</strong></summary>
+
+```bash
+# Debian/Ubuntu
+sudo apt-get install -y curl
+
+# RHEL/CentOS/Fedora
+sudo dnf install -y curl
+```
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+curl is included in Windows 10 (build 17063+) by default.
+
+For older versions, download from: https://curl.se/windows/
+
+</details>
+
+**Verify installation:**
+```bash
+curl --version
+# Expected output: curl X.X.X (platform) ...
+```
+
+📖 [Official Documentation](https://curl.se/docs/)
+
+---
+
+### Optional Tools
+
+#### GitHub CLI (gh)
+
+The GitHub CLI is optional but useful for automatically configuring GitHub secrets during GCP setup.
+
+**Installation:**
+
+<details>
+<summary><strong>macOS</strong></summary>
+
+```bash
+brew install gh
+```
+
+</details>
+
+<details>
+<summary><strong>Linux</strong></summary>
+
+```bash
+# Debian/Ubuntu
+curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
+sudo apt update
+sudo apt install gh
+```
+
+</details>
+
+<details>
+<summary><strong>Windows</strong></summary>
+
+```powershell
+# Using winget
+winget install --id GitHub.cli
+
+# Or using Chocolatey
+choco install gh
+```
+
+</details>
+
+**Verify installation:**
+```bash
+gh --version
+# Expected output: gh version X.X.X (YYYY-MM-DD)
+
+gh auth login
+# Follow prompts to authenticate
+```
+
+📖 [Official Documentation](https://cli.github.com/)
+
+---
+
+### Prerequisites Quick Check
+
+Run this command to verify all required tools are installed:
+
+```bash
+echo "Checking prerequisites..."
+echo ""
+echo "Google Cloud SDK:"
+gcloud --version 2>/dev/null | head -1 || echo "  ❌ NOT INSTALLED"
+echo ""
+echo "Docker:"
+docker --version 2>/dev/null || echo "  ❌ NOT INSTALLED"
+echo ""
+echo "Flutter:"
+flutter --version 2>/dev/null | head -1 || echo "  ❌ NOT INSTALLED"
+echo ""
+echo "curl:"
+curl --version 2>/dev/null | head -1 || echo "  ❌ NOT INSTALLED"
+echo ""
+echo "GitHub CLI (optional):"
+gh --version 2>/dev/null | head -1 || echo "  ⚠️  NOT INSTALLED (optional)"
+```
+
+### Additional Requirements
+
+- **Google Cloud Account** with billing enabled ([Create account](https://cloud.google.com/))
+- **Git** for version control ([Download](https://git-scm.com/downloads))
 
 ---
 

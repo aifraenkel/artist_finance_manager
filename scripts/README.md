@@ -49,6 +49,8 @@ nano scripts/.gcp_settings  # Edit PROJECT_ID and BILLING_ACCOUNT_ID
 - `gcloud` CLI installed and authenticated
 - `gh` CLI (optional, for GitHub secrets)
 
+See [DEPLOYMENT.md - Prerequisites](../docs/DEPLOYMENT.md#prerequisites) for detailed installation instructions.
+
 **What it does**:
 1. Creates GCP project (or verifies if exists)
 2. Links billing account
@@ -89,10 +91,13 @@ One-step local deployment to GCP Cloud Run.
 - `gcloud` CLI authenticated
 - `docker` installed
 - `flutter` SDK installed
+- `curl` (for health checks)
 - Environment variables:
   - `GCP_PROJECT_ID`
   - `GCP_REGION`
   - `GCP_SERVICE_NAME` (optional)
+
+See [DEPLOYMENT.md - Prerequisites](../docs/DEPLOYMENT.md#prerequisites) for detailed installation instructions.
 
 ---
 
@@ -121,7 +126,10 @@ Rollback to a previous Cloud Run revision.
 
 **Prerequisites**:
 - `gcloud` CLI authenticated
+- `curl` (for health checks)
 - Existing Cloud Run service
+
+See [DEPLOYMENT.md - Prerequisites](../docs/DEPLOYMENT.md#prerequisites) for detailed installation instructions.
 
 ---
 
@@ -189,7 +197,15 @@ Use GitHub Actions (automatic on push to `main`) or:
 
 ### "Command not found: gcloud"
 
-Install gcloud CLI: https://cloud.google.com/sdk/docs/install
+Install the Google Cloud SDK. See [DEPLOYMENT.md - Prerequisites](../docs/DEPLOYMENT.md#1-google-cloud-sdk-gcloud-cli) for detailed installation instructions.
+
+### "Command not found: docker"
+
+Install Docker. See [DEPLOYMENT.md - Prerequisites](../docs/DEPLOYMENT.md#2-docker) for detailed installation instructions.
+
+### "Command not found: flutter"
+
+Install the Flutter SDK. See [DEPLOYMENT.md - Prerequisites](../docs/DEPLOYMENT.md#3-flutter-sdk) for detailed installation instructions.
 
 ### "Not authenticated with gcloud"
 

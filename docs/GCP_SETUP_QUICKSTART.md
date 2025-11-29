@@ -8,11 +8,33 @@ For full details, see [DEPLOYMENT.md](DEPLOYMENT.md).
 
 ## Prerequisites Checklist
 
-- [ ] Google Cloud account with billing enabled
-- [ ] `gcloud` CLI installed and authenticated (`gcloud auth login`)
-- [ ] `docker` installed
-- [ ] `flutter` SDK installed
-- [ ] `gh` CLI installed (optional, for automatic GitHub secrets configuration)
+Before proceeding, ensure you have all required tools installed. For detailed installation instructions, see [DEPLOYMENT.md - Prerequisites](DEPLOYMENT.md#prerequisites).
+
+### Required Tools
+
+| Tool | Required | Verify Command | Installation Guide |
+|------|----------|----------------|-------------------|
+| Google Cloud SDK | ✅ | `gcloud --version` | [Install](DEPLOYMENT.md#1-google-cloud-sdk-gcloud-cli) |
+| Docker | ✅ | `docker --version` | [Install](DEPLOYMENT.md#2-docker) |
+| Flutter SDK | ✅ | `flutter --version` | [Install](DEPLOYMENT.md#3-flutter-sdk) |
+| curl | ✅ | `curl --version` | [Install](DEPLOYMENT.md#4-curl) |
+| GitHub CLI | ⚪ Optional | `gh --version` | [Install](DEPLOYMENT.md#github-cli-gh) |
+
+### Quick Verification
+
+```bash
+# Run this to check all prerequisites at once
+gcloud --version && docker --version && flutter --version && curl --version
+```
+
+### Authentication
+
+After installing the tools, authenticate with Google Cloud:
+
+```bash
+gcloud auth login
+gcloud auth application-default login
+```
 
 ---
 
