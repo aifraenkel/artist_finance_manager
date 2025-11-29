@@ -191,13 +191,14 @@ Flutter SDK (3.0.0 or higher) is required to build the web application.
 <summary><strong>macOS</strong></summary>
 
 ```bash
-# Using Homebrew
+# Using Homebrew (recommended)
 brew install --cask flutter
 
-# Or download manually
+# Or download manually from Flutter releases page:
+# https://docs.flutter.dev/get-started/install/macos
 cd ~/development
-curl -LO https://storage.googleapis.com/flutter_infra_release/releases/stable/macos/flutter_macos_arm64_3.24.0-stable.zip
-unzip flutter_macos_arm64_3.24.0-stable.zip
+# Download the latest stable release from the Flutter website
+unzip flutter_macos_*.zip
 export PATH="$PATH:$HOME/development/flutter/bin"
 ```
 
@@ -215,10 +216,11 @@ export PATH="$PATH:$HOME/development/flutter/bin"
 # Using snap (recommended)
 sudo snap install flutter --classic
 
-# Or download manually
+# Or download manually from Flutter releases page:
+# https://docs.flutter.dev/get-started/install/linux
 cd ~/development
-curl -LO https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.0-stable.tar.xz
-tar xf flutter_linux_3.24.0-stable.tar.xz
+# Download the latest stable release from the Flutter website
+tar xf flutter_linux_*.tar.xz
 export PATH="$PATH:$HOME/development/flutter/bin"
 ```
 
