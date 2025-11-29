@@ -16,7 +16,7 @@ echo "  - Removing Flutter test results..."
 rm -rf .tmp/
 rm -rf test-results/
 rm -rf test/results/
-rm -rf test/integration_test/results/
+# integration_test results are now in test/integration_test/
 rm -rf screenshots/
 rm -f *.mp4
 rm -f *.webm

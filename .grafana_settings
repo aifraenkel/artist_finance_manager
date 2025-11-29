@@ -1,0 +1,10 @@
+{
+  "faro": {
+    "url": "https://faro-collector-prod-us-east-2.grafana.net/collect/108e6a6709ac048a26198aa289d4b93f",
+    "app": {
+      "name": "artist-finance-manager-web",
+      "version": "1.0.0",
+      "environment": "production"
+    }
+  }
+}

@@ -61,7 +61,7 @@ Before you begin, ensure you have the following installed:
 
 ## 🛠️ Installation & Setup
 
-For detailed setup instructions, see [SETUP_GUIDE.md](SETUP_GUIDE.md).
+For detailed setup instructions, see [SETUP_GUIDE.md](docs/SETUP_GUIDE.md).
 
 **Quick start:**
 
@@ -211,7 +211,7 @@ The web version includes **Grafana Faro** integration for real-time observabilit
 
 ### Setup
 1. Create a free Grafana Cloud account at [grafana.com](https://grafana.com)
-2. Follow the detailed setup guide in [GRAFANA_SETUP.md](GRAFANA_SETUP.md)
+2. Follow the detailed setup guide in [GRAFANA_SETUP.md](docs/GRAFANA_SETUP.md)
 3. Configure your Faro collector URL in `web/index.html`
 4. Build and deploy - observability is automatic!
 
@@ -254,7 +254,7 @@ flutter run -d chrome
 
 ## 🧪 Testing
 
-This project has comprehensive test coverage including unit tests, widget tests, integration tests, and E2E browser tests. For detailed testing documentation, see [TEST_GUIDE.md](TEST_GUIDE.md).
+This project has comprehensive test coverage including unit tests, widget tests, integration tests, and E2E browser tests. For detailed testing documentation, see [TEST_GUIDE.md](docs/TEST_GUIDE.md).
 
 **Quick start:**
 ```bash
