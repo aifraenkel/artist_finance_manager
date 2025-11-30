@@ -1,10 +1,9 @@
 /**
  * Email Template Service
  * Provides HTML email templates for various notifications
- * Import sendEmail from email_service_smtp.js or email_service_sendgrid.js
+ * Import sendEmail from email_service_sendgrid.js
  */
-
-import { sendEmail } from './email_service_smtp.js';
+import { sendEmail } from './email_service_sendgrid.js';
 
 /**
  * Send welcome email to new user

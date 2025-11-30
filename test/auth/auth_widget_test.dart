@@ -40,7 +40,13 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   void clearError() => _error = null;
 
   @override
-  Future<bool> sendSignInLink(String email, String continueUrl) async {
+  Future<bool> sendSignInLink(String email, String continueUrl, {String? name}) async {
+    await Future.delayed(const Duration(milliseconds: 50));
+    return true;
+  }
+
+  @override
+  Future<bool> verifyRegistrationToken(String token) async {
     await Future.delayed(const Duration(milliseconds: 50));
     return true;
   }
@@ -68,9 +74,6 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
 
   @override
   Future<bool> deleteAccount() async => true;
-
-  @override
-  Future<bool> updateUserName(String newName) async => true;
 
   @override
   Future<bool> updateProfile({required String name}) async => true;

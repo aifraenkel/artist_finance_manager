@@ -5,13 +5,15 @@ import '../config/auth_config.dart';
 
 /// Authentication service for managing user authentication and profile
 ///
-/// This service handles:
-/// - Email link (passwordless) authentication
-/// - Simple email-only authentication (for development/testing)
-/// - User registration and profile creation
+/// This service handles server-side token-based email authentication:
+/// - Email token (passwordless from user perspective) authentication
+/// - User registration and profile creation via backend-verified tokens
 /// - User profile updates
-/// - Account soft deletion
+/// - Account soft deletion  
 /// - Session management
+///
+/// Note: Firebase passwords are used internally for compatibility but are
+/// generated deterministically from backend-verified email tokens.
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -308,14 +310,6 @@ class AuthService {
   }) async {
     if (AuthConfig.useEmailLinkAuth) {
       throw Exception('Simple email auth is disabled. Use email link authentication instead.');
-    }
-
-    // Validate email domain if whitelist is configured
-    if (AuthConfig.allowedEmailDomains.isNotEmpty) {
-      final domain = email.split('@').last;
-      if (!AuthConfig.allowedEmailDomains.contains(domain)) {
-        throw Exception('Email domain not allowed. Allowed domains: ${AuthConfig.allowedEmailDomains.join(", ")}');
-      }
     }
 
     try {

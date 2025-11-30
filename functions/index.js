@@ -10,6 +10,15 @@
 import functions from '@google-cloud/functions-framework';
 import { Firestore } from '@google-cloud/firestore';
 import { sendWelcomeEmail, sendAccountDeletionEmail, sendLoginNotificationEmail } from './email_service.js';
+import {
+  createPendingRegistration,
+  verifyRegistrationToken,
+  cleanupExpiredRegistrations,
+  hasPendingRegistration,
+  cancelPendingRegistration
+} from './registration_service.js';
+import { generateRegistrationEmail, generateSignInEmail } from './email_templates.js';
+import { sendEmail } from './email_service_sendgrid.js';
 
 const firestore = new Firestore();
 
@@ -97,6 +106,17 @@ functions.cloudEvent('onUserDeleted', async (cloudEvent) => {
  * Permanently deletes users who were soft-deleted more than 90 days ago
  */
 functions.http('cleanupDeletedUsers', async (req, res) => {
+  // Enable CORS
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
   try {
     const now = new Date();
     const retentionPeriod = 90 * 24 * 60 * 60 * 1000; // 90 days in milliseconds
@@ -151,6 +171,10 @@ functions.http('cleanupDeletedUsers', async (req, res) => {
     });
   } catch (error) {
     console.error('Error cleaning up deleted users:', error);
+    // Ensure CORS headers on error
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
     res.status(500).json({
       success: false,
       error: error.message
@@ -163,15 +187,48 @@ functions.http('cleanupDeletedUsers', async (req, res) => {
  * Triggered by HTTP request when user logs in from a new device
  */
 functions.http('sendLoginNotification', async (req, res) => {
-  try {
-    const { email, name, deviceInfo, ipAddress } = req.body;
+  // Enable CORS
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
 
-    if (!email || !name) {
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  try {
+    const { email } = req.body;
+    let { name, deviceInfo, ipAddress, userAgent, ip, timestamp } = req.body;
+
+    if (!email) {
       res.status(400).json({
         success: false,
-        error: 'Missing required fields'
+        error: 'Missing required field: email'
       });
       return;
+    }
+
+    // Derive missing fields
+    const forwarded = req.headers['x-forwarded-for'];
+    const derivedIp = forwarded ? String(forwarded).split(',')[0].trim() : req.connection?.remoteAddress || req.socket?.remoteAddress || ipAddress || ip || 'Unknown IP';
+    ipAddress = ipAddress || ip || derivedIp;
+    deviceInfo = deviceInfo || userAgent || req.headers['user-agent'] || 'Unknown device';
+
+    if (!name) {
+      // Try to resolve name from users collection
+      try {
+        const snapshot = await firestore.collection('users').where('email', '==', email).limit(1).get();
+        if (!snapshot.empty) {
+          name = snapshot.docs[0].data().name || 'User';
+        } else {
+          name = 'User';
+        }
+      } catch (lookupErr) {
+        console.warn('Name lookup failed, defaulting to "User"', lookupErr);
+        name = 'User';
+      }
     }
 
     console.log(`Sending login notification to ${email}`);
@@ -179,12 +236,339 @@ functions.http('sendLoginNotification', async (req, res) => {
     await sendLoginNotificationEmail(email, name, deviceInfo, ipAddress);
     console.log('Login notification sent successfully');
 
-    res.status(200).json({ success: true });
+    res.status(200).json({ success: true, timestamp: timestamp || new Date().toISOString() });
   } catch (error) {
     console.error('Error sending login notification:', error);
+    // Ensure CORS headers on error
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
     res.status(500).json({
       success: false,
       error: error.message
+    });
+  }
+});
+
+/**
+ * Create a registration request
+ * HTTP endpoint called by the client to initiate registration
+ *
+ * POST /createRegistration
+ * Body: { email, name, continueUrl }
+ * Returns: { success, message }
+ */
+functions.http('createRegistration', async (req, res) => {
+  // Enable CORS
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  try {
+    const { email, name, continueUrl } = req.body;
+
+    // Validate input
+    if (!email || !name || !continueUrl) {
+      res.status(400).json({
+        success: false,
+        error: 'Missing required fields: email, name, continueUrl'
+      });
+      return;
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      res.status(400).json({
+        success: false,
+        error: 'Invalid email format'
+      });
+      return;
+    }
+
+    // Validate name length
+    if (name.trim().length < 2) {
+      res.status(400).json({
+        success: false,
+        error: 'Name must be at least 2 characters'
+      });
+      return;
+    }
+
+    console.log(`Creating registration for ${email}`);
+
+    // Check if user already exists
+    const usersSnapshot = await firestore
+      .collection('users')
+      .where('email', '==', email)
+      .limit(1)
+      .get();
+
+    if (!usersSnapshot.empty) {
+      res.status(409).json({
+        success: false,
+        error: 'USER_EXISTS',
+        message: 'A user with this email already exists. Please sign in instead.'
+      });
+      return;
+    }
+
+    // Cancel any existing pending registrations for this email
+    await cancelPendingRegistration(email);
+
+    // Create pending registration
+    const { token, expiresAt } = await createPendingRegistration(email, name, continueUrl);
+
+    // Build verification URL with token
+    const verificationUrl = `${continueUrl}?registrationToken=${token}`;
+
+    // Generate email content
+    const { html, text } = generateRegistrationEmail(name, verificationUrl);
+
+    // Send email
+    await sendEmail(
+      email,
+      'Complete Your Registration - Artist Finance Manager',
+      html,
+      text
+    );
+
+    console.log(`Registration email sent to ${email}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Registration email sent successfully',
+      expiresAt: expiresAt.toISOString()
+    });
+  } catch (error) {
+    console.error('Error creating registration:', error);
+    // Ensure CORS headers are set even on error
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create registration',
+      details: error.message
+    });
+  }
+});
+
+/**
+ * Verify a registration token
+ * HTTP endpoint called by the client when user clicks the email link
+ *
+ * POST /verifyRegistrationToken
+ * Body: { token }
+ * Returns: { success, email, name, continueUrl }
+ */
+functions.http('verifyRegistrationToken', async (req, res) => {
+  // Enable CORS
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      res.status(400).json({
+        success: false,
+        error: 'Missing registration token'
+      });
+      return;
+    }
+
+    // Get IP address for logging
+    const ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+
+    console.log(`Verifying registration token from IP: ${ipAddress}`);
+
+    // Verify token and get registration data
+    const registrationData = await verifyRegistrationToken(token, ipAddress);
+
+    console.log(`Token verified successfully for ${registrationData.email}`);
+
+    res.status(200).json({
+      success: true,
+      ...registrationData
+    });
+  } catch (error) {
+    console.error('Error verifying registration token:', error);
+
+    // Ensure CORS headers are set even on error
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+    // Extract error type from message
+    const errorMessage = error.message;
+    let statusCode = 500;
+    let errorCode = 'VERIFICATION_FAILED';
+
+    if (errorMessage.includes('INVALID_TOKEN')) {
+      statusCode = 404;
+      errorCode = 'INVALID_TOKEN';
+    } else if (errorMessage.includes('TOKEN_EXPIRED')) {
+      statusCode = 410;
+      errorCode = 'TOKEN_EXPIRED';
+    } else if (errorMessage.includes('TOKEN_ALREADY_USED')) {
+      statusCode = 409;
+      errorCode = 'TOKEN_ALREADY_USED';
+    }
+
+    res.status(statusCode).json({
+      success: false,
+      error: errorCode,
+      message: errorMessage
+    });
+  }
+});
+
+/**
+ * Clean up expired registration tokens
+ * Scheduled function to run daily
+ * Can also be triggered manually via HTTP
+ */
+functions.http('cleanupExpiredRegistrations', async (req, res) => {
+  // Enable CORS
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  try {
+    console.log('Starting cleanup of expired registrations');
+
+    const deletedCount = await cleanupExpiredRegistrations();
+
+    console.log(`Cleanup completed: ${deletedCount} registrations deleted`);
+
+    res.status(200).json({
+      success: true,
+      deletedCount,
+      message: `Deleted ${deletedCount} expired registrations`
+    });
+  } catch (error) {
+    console.error('Error cleaning up expired registrations:', error);
+    // Ensure CORS headers on error
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    res.status(500).json({
+      success: false,
+      error: error.message
+    });
+  }
+});
+
+/**
+ * Create a sign-in request (for existing users)
+ * HTTP endpoint called by the client to send sign-in link
+ *
+ * POST /createSignInRequest
+ * Body: { email, continueUrl }
+ * Returns: { success, message }
+ */
+functions.http('createSignInRequest', async (req, res) => {
+  // Enable CORS
+  res.set('Access-Control-Allow-Origin', '*');
+  res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.set('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle preflight request
+  if (req.method === 'OPTIONS') {
+    res.status(204).send('');
+    return;
+  }
+
+  try {
+    const { email, continueUrl } = req.body;
+
+    // Validate input
+    if (!email || !continueUrl) {
+      res.status(400).json({
+        success: false,
+        error: 'Missing required fields: email, continueUrl'
+      });
+      return;
+    }
+
+    console.log(`Creating sign-in request for ${email}`);
+
+    // Check if user exists
+    const usersSnapshot = await firestore
+      .collection('users')
+      .where('email', '==', email)
+      .limit(1)
+      .get();
+
+    if (usersSnapshot.empty) {
+      res.status(404).json({
+        success: false,
+        error: 'USER_NOT_FOUND',
+        message: 'No account found with this email. Please register first.'
+      });
+      return;
+    }
+
+    const userData = usersSnapshot.docs[0].data();
+    const userName = userData.name;
+
+    // Cancel any existing pending sign-in requests for this email
+    await cancelPendingRegistration(email);
+
+    // Create pending sign-in (reuse registration system)
+    const { token, expiresAt } = await createPendingRegistration(email, userName, continueUrl);
+
+    // Build sign-in URL with token
+    const signInUrl = `${continueUrl}?signInToken=${token}`;
+
+    // Generate email content
+    const { html, text } = generateSignInEmail(userName, signInUrl);
+
+    // Send email
+    await sendEmail(
+      email,
+      'Sign In to Your Account - Artist Finance Manager',
+      html,
+      text
+    );
+
+    console.log(`Sign-in email sent to ${email}`);
+
+    res.status(200).json({
+      success: true,
+      message: 'Sign-in email sent successfully',
+      expiresAt: expiresAt.toISOString()
+    });
+  } catch (error) {
+    console.error('Error creating sign-in request:', error);
+    // Ensure CORS headers are set even on error
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
+    res.status(500).json({
+      success: false,
+      error: 'Failed to create sign-in request',
+      details: error.message
     });
   }
 });

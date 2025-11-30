@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/app_user.dart';
 import '../services/auth_service.dart';
+import '../services/registration_api_service.dart';
 import '../config/auth_config.dart';
 
 /// Authentication state provider
@@ -11,6 +12,7 @@ import '../config/auth_config.dart';
 /// authentication operations throughout the app.
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService();
+  final RegistrationApiService _registrationApi = RegistrationApiService();
 
   AppUser? _currentUser;
   bool _isLoading = true;
@@ -301,6 +303,58 @@ class AuthProvider with ChangeNotifier {
   void setEmailForSignIn(String email) {
     _emailForSignIn = email;
     notifyListeners();
+  }
+
+  /// Verify registration token from email link
+  ///
+  /// This is called when user clicks the registration link from their email.
+  /// It verifies the token with the backend, retrieves the email and name,
+  /// then creates the Firebase user and Firestore profile.
+  ///
+  /// [token] - Registration token from email link
+  Future<bool> verifyRegistrationToken(String token) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      print('DEBUG: Verifying registration token with backend');
+
+      // Call backend to verify token and get email/name
+      final response = await _registrationApi.verifyRegistrationToken(token: token);
+
+      final email = response['email'] as String;
+      final name = response['name'] as String;
+
+      print('DEBUG: Token verified for $email, name: $name');
+
+      // Create Firebase user using simple auth (with deterministic password)
+      // This allows the user to complete registration on any device
+      await _authService.simpleEmailAuth(email: email, name: name);
+
+      print('DEBUG: Firebase user created successfully');
+
+      // Update last login
+      await _authService.updateLastLogin();
+
+      // Load the user data
+      await _loadCurrentUser();
+
+      print('DEBUG: Registration complete');
+
+      return true;
+    } on RegistrationException catch (e) {
+      _error = e.message;
+      print('Registration error: ${e.code} - ${e.message}');
+      return false;
+    } catch (e) {
+      _error = _getErrorMessage(e);
+      print('Error verifying registration token: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
   }
 
   /// Get user-friendly error message

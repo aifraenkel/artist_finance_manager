@@ -39,6 +39,15 @@ service cloud.firestore {
       allow delete: if isOwner(userId);
     }
 
+    // Pending registrations collection
+    // Only Cloud Functions can access this collection
+    // The client never directly reads or writes these documents
+    match /pendingRegistrations/{token} {
+      // Deny all client access
+      // Cloud Functions have admin access and bypass these rules
+      allow read, write: if false;
+    }
+
     // Deny all other access
     match /{document=**} {
       allow read, write: if false;

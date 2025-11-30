@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../providers/auth_provider.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/home_screen.dart';
@@ -8,7 +7,7 @@ import '../screens/home_screen.dart';
 /// Authentication wrapper widget
 ///
 /// Routes users to the appropriate screen based on authentication state
-/// Also handles incoming email authentication links
+/// Also handles incoming registration/sign-in tokens and email authentication links
 class AuthWrapper extends StatefulWidget {
   const AuthWrapper({super.key});
 
@@ -22,56 +21,90 @@ class _AuthWrapperState extends State<AuthWrapper> {
   @override
   void initState() {
     super.initState();
-    _checkForEmailLink();
+    _checkForAuthenticationLinks();
   }
 
-  Future<void> _checkForEmailLink() async {
+  Future<void> _checkForAuthenticationLinks() async {
     final uri = Uri.base;
     final link = uri.toString();
 
-    // Check if URL contains email link parameters
+    // Check for registration token (new server-side flow)
+    if (uri.queryParameters.containsKey('registrationToken')) {
+      final token = uri.queryParameters['registrationToken']!;
+      print('DEBUG: Registration token detected: ${token.substring(0, 10)}...');
+      await _handleRegistrationToken(token);
+      return;
+    }
+
+    // Check for sign-in token (new server-side flow)
+    if (uri.queryParameters.containsKey('signInToken')) {
+      final token = uri.queryParameters['signInToken']!;
+      print('DEBUG: Sign-in token detected: ${token.substring(0, 10)}...');
+      await _handleRegistrationToken(token); // Same handler works for both
+      return;
+    }
+
+    // Check if URL contains old-style Firebase email link parameters (fallback)
     if (link.contains('apiKey') && link.contains('oobCode') && link.contains('mode=signIn')) {
-      print('DEBUG: Email link detected in URL: $link');
-      await _handleEmailLink(link);
+      print('DEBUG: Firebase email link detected in URL: $link');
+      await _handleFirebaseEmailLink(link);
     }
   }
 
-  Future<void> _handleEmailLink(String emailLink) async {
+  Future<void> _handleRegistrationToken(String token) async {
     if (_isProcessingEmailLink) return;
 
     setState(() => _isProcessingEmailLink = true);
 
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
-    // Get saved email from local storage
-    final prefs = await SharedPreferences.getInstance();
-    String? email = prefs.getString('emailForSignIn');
+    print('DEBUG: Verifying registration/sign-in token');
 
-    print('DEBUG: Retrieved saved email: $email');
+    // Verify token with backend - it will return email and name
+    final success = await authProvider.verifyRegistrationToken(token);
 
-    // If email not found, prompt user to enter it
-    if (email == null || email.isEmpty) {
-      print('DEBUG: No saved email found, prompting user');
-      setState(() => _isProcessingEmailLink = false);
-      
-      if (mounted) {
-        email = await _promptForEmail();
-        if (email == null || email.isEmpty) {
+    setState(() => _isProcessingEmailLink = false);
+
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(authProvider.error ?? 'Failed to verify registration'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } else {
+      print('DEBUG: Registration/sign-in completed successfully!');
+    }
+  }
+
+  Future<void> _handleFirebaseEmailLink(String emailLink) async {
+    if (_isProcessingEmailLink) return;
+
+    setState(() => _isProcessingEmailLink = true);
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+
+    // Prompt user for email (we no longer store it in localStorage)
+    String? email;
+    if (mounted) {
+      email = await _promptForEmail();
+      if (email == null || email.isEmpty) {
+        setState(() => _isProcessingEmailLink = false);
+        if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
               content: Text('Email is required to complete sign-in'),
               backgroundColor: Colors.red,
             ),
           );
-          return;
         }
-        setState(() => _isProcessingEmailLink = true);
-      } else {
         return;
       }
+    } else {
+      return;
     }
 
-    print('DEBUG: Attempting to sign in with email link for: $email');
+    print('DEBUG: Attempting to sign in with Firebase email link for: $email');
 
     // Sign in with email link
     final signInSuccess = await authProvider.signInWithEmailLink(email, emailLink);
@@ -86,9 +119,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
         ),
       );
     } else {
-      print('DEBUG: Sign-in with email link successful!');
-      // Clear the saved email
-      await prefs.remove('emailForSignIn');
+      print('DEBUG: Sign-in with Firebase email link successful!');
     }
   }
 
