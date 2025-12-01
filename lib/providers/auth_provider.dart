@@ -58,39 +58,35 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Send sign-in email link
+  /// Send sign-in email link (for existing users)
   ///
   /// [email] - User's email address
   /// [continueUrl] - URL to continue to after email verification
-  /// [name] - User's display name (optional, for registration)
+  /// [name] - User's display name (optional, not used for sign-in)
   Future<bool> sendSignInLink(String email, String continueUrl, {String? name}) async {
     try {
       _isLoading = true;
       _error = null;
       notifyListeners();
 
-      // Email link authentication flow
-      final actionCodeSettings = _authService.getActionCodeSettings(continueUrl);
-
-      await _authService.sendSignInLinkToEmail(
+      // Use our server-side token-based flow
+      await _registrationApi.createSignInRequest(
         email: email,
-        actionCodeSettings: actionCodeSettings,
+        continueUrl: continueUrl,
       );
 
       _emailForSignIn = email;
 
-      // Save email and name to SharedPreferences for email link verification
+      // Save email to SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('emailForSignIn', email);
-      if (name != null && name.isNotEmpty) {
-        await prefs.setString('nameForSignIn', name);
-      }
-      print('DEBUG: Saved email for sign-in: $email');
-      if (name != null) {
-        print('DEBUG: Saved name for sign-in: $name');
-      }
+      print('DEBUG: Sign-in request sent for: $email');
 
       return true;
+    } on RegistrationException catch (e) {
+      _error = e.message;
+      print('Error with sign-in: ${e.code} - ${e.message}');
+      return false;
     } catch (e) {
       _error = _getErrorMessage(e);
       print('Error with sign-in: $e');
