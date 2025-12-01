@@ -148,3 +148,20 @@ gcp-key.json
 .gcp_settings
 .gcp_setup.log
 .gcp_setup.state
+
+# Firebase Functions node_modules
+functions/node_modules/
+functions/package-lock.json
+
+# Local SMTP server
+smtp-server/node_modules/
+smtp-server/package-lock.json
+smtp-server/emails/
+
+# Firebase config (contains secrets)
+functions/.env
+
+# Test artifacts
+test/screenshots/
+test/auth/results/
+functions/.env.yaml
