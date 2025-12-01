@@ -58,6 +58,47 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
+  /// Send registration email link (for new users)
+  ///
+  /// [email] - User's email address
+  /// [name] - User's display name
+  /// [continueUrl] - URL to continue to after email verification
+  Future<bool> sendRegistrationLink(String email, String name, String continueUrl) async {
+    try {
+      _isLoading = true;
+      _error = null;
+      notifyListeners();
+
+      // Use our server-side token-based flow for registration
+      await _registrationApi.createRegistration(
+        email: email,
+        name: name,
+        continueUrl: continueUrl,
+      );
+
+      _emailForSignIn = email;
+
+      // Save email and name to SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('emailForSignIn', email);
+      await prefs.setString('nameForSignIn', name);
+      print('DEBUG: Registration request sent for: $email');
+
+      return true;
+    } on RegistrationException catch (e) {
+      _error = e.message;
+      print('Error with registration: ${e.code} - ${e.message}');
+      return false;
+    } catch (e) {
+      _error = _getErrorMessage(e);
+      print('Error with registration: $e');
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   /// Send sign-in email link (for existing users)
   ///
   /// [email] - User's email address

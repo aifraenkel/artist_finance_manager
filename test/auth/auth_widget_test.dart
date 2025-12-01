@@ -45,6 +45,12 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   }
 
   @override
+  Future<bool> sendRegistrationLink(String email, String name, String continueUrl) async {
+    await Future.delayed(const Duration(milliseconds: 50));
+    return true;
+  }
+
+  @override
   Future<bool> verifyRegistrationToken(String token) async {
     await Future.delayed(const Duration(milliseconds: 50));
     return true;

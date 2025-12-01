@@ -40,8 +40,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     // Get the continue URL (current URL or default)
     final continueUrl = Uri.base.toString();
 
-    // Send sign-in link for email verification with name
-    final success = await authProvider.sendSignInLink(email, continueUrl, name: name);
+    // Send registration link for new user
+    final success = await authProvider.sendRegistrationLink(email, name, continueUrl);
 
     setState(() => _isLoading = false);
 
