@@ -9,6 +9,7 @@
 
 import functions from '@google-cloud/functions-framework';
 import { Firestore } from '@google-cloud/firestore';
+import admin from 'firebase-admin';
 import { sendWelcomeEmail, sendAccountDeletionEmail, sendLoginNotificationEmail } from './email_service.js';
 import {
   createPendingRegistration,
@@ -19,6 +20,11 @@ import {
 } from './registration_service.js';
 import { generateRegistrationEmail, generateSignInEmail } from './email_templates.js';
 import { sendEmail } from './email_service_sendgrid.js';
+
+// Initialize Firebase Admin SDK
+if (!admin.apps.length) {
+  admin.initializeApp();
+}
 
 const firestore = new Firestore();
 
@@ -401,9 +407,65 @@ functions.http('verifyRegistrationToken', async (req, res) => {
 
     console.log(`Token verified successfully for ${registrationData.email}`);
 
+    const { email, name } = registrationData;
+
+    // Create or get Firebase Auth user
+    let firebaseUser;
+    try {
+      firebaseUser = await admin.auth().getUserByEmail(email);
+      console.log(`Existing Firebase user found: ${firebaseUser.uid}`);
+      
+      // Update last login in Firestore
+      const userRef = firestore.collection('users').doc(firebaseUser.uid);
+      const userDoc = await userRef.get();
+      if (userDoc.exists) {
+        await userRef.update({
+          lastLoginAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        console.log(`Updated lastLoginAt for ${email}`);
+      }
+    } catch (error) {
+      if (error.code === 'auth/user-not-found') {
+        // Create new Firebase user
+        firebaseUser = await admin.auth().createUser({
+          email: email,
+          emailVerified: true, // Email is verified via token
+          displayName: name,
+        });
+        console.log(`Created new Firebase user: ${firebaseUser.uid}`);
+
+        // Create Firestore user profile
+        await firestore.collection('users').doc(firebaseUser.uid).set({
+          uid: firebaseUser.uid,
+          email: email,
+          name: name,
+          createdAt: admin.firestore.FieldValue.serverTimestamp(),
+          lastLoginAt: admin.firestore.FieldValue.serverTimestamp(),
+          metadata: {
+            loginCount: 1
+          }
+        });
+        console.log(`Created Firestore profile for ${email}`);
+      } else {
+        throw error;
+      }
+    }
+
+    // Generate a passwordless sign-in link for the user
+    const actionCodeSettings = {
+      url: registrationData.continueUrl,
+      handleCodeInApp: true,
+    };
+
+    const signInLink = await admin.auth().generateSignInWithEmailLink(email, actionCodeSettings);
+    console.log(`Generated sign-in link for ${email}`);
+
     res.status(200).json({
       success: true,
-      ...registrationData
+      email: email,
+      name: name,
+      signInLink: signInLink,
+      continueUrl: registrationData.continueUrl
     });
   } catch (error) {
     console.error('Error verifying registration token:', error);

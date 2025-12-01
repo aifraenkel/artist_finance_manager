@@ -284,17 +284,10 @@ class AuthProvider with ChangeNotifier {
   /// Verify registration token from email link
   ///
   /// This is called when user clicks the registration link from their email.
-  /// It verifies the token with the backend, retrieves the email and name,
-  /// then creates the Firebase user and Firestore profile.
+  /// It verifies the token with the backend, which creates the Firebase user
+  /// and returns a Firebase Auth sign-in link.
   ///
   /// [token] - Registration token from email link
-  ///
-  /// TODO: This method requires Firebase Admin SDK on the backend to generate
-  /// custom tokens for authentication. The backend should:
-  /// 1. Verify the registration token
-  /// 2. Create/update Firebase Auth user via Admin SDK
-  /// 3. Generate and return a custom token
-  /// 4. Client uses custom token to sign in via signInWithCustomToken()
   Future<bool> verifyRegistrationToken(String token) async {
     try {
       _isLoading = true;
@@ -303,26 +296,33 @@ class AuthProvider with ChangeNotifier {
 
       print('DEBUG: Verifying registration token with backend');
 
-      // Call backend to verify token and get email/name
+      // Call backend to verify token and get sign-in link
       final response = await _registrationApi.verifyRegistrationToken(token: token);
 
       final email = response['email'] as String;
       final name = response['name'] as String;
+      final signInLink = response['signInLink'] as String;
 
       print('DEBUG: Token verified for $email, name: $name');
+      print('DEBUG: Received sign-in link from backend');
 
-      // TODO: Backend should return a customToken field
-      // For now, throw an error indicating this needs to be implemented
-      throw Exception('Backend must be updated to return Firebase custom token. '
-          'The verifyRegistrationToken endpoint needs to use Firebase Admin SDK '
-          'to create the user and return a custom token for authentication.');
+      // Sign in with the email link from backend
+      await _authService.signInWithEmailLink(
+        email: email,
+        emailLink: signInLink,
+      );
 
-      // Future implementation:
-      // final customToken = response['customToken'] as String;
-      // final userCredential = await _auth.signInWithCustomToken(customToken);
-      // await _loadCurrentUser();
+      print('DEBUG: Firebase user signed in successfully');
 
-      // return true;
+      // Update last login
+      await _authService.updateLastLogin();
+
+      // Load the user data
+      await _loadCurrentUser();
+
+      print('DEBUG: Registration complete');
+
+      return true;
     } on RegistrationException catch (e) {
       _error = e.message;
       print('Registration error: ${e.code} - ${e.message}');
