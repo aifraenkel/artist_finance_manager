@@ -26,15 +26,31 @@ artist_finance_manager/
 ├── lib/
 │   ├── main.dart                 # App entry point & MaterialApp configuration
 │   ├── models/
-│   │   └── transaction.dart      # Transaction data model with JSON serialization
+│   │   ├── transaction.dart      # Transaction data model with JSON serialization
+│   │   └── app_user.dart         # User profile data model
 │   ├── services/
+│   │   ├── auth_service.dart     # Firebase authentication service
+│   │   ├── registration_api_service.dart  # Server-side registration API
 │   │   └── storage_service.dart  # Local storage abstraction layer
+│   ├── providers/
+│   │   └── auth_provider.dart    # Authentication state management
 │   ├── screens/
-│   │   └── home_screen.dart      # Main app screen (stateful widget)
+│   │   ├── home_screen.dart      # Main app screen (stateful widget)
+│   │   ├── auth/                 # Authentication screens
+│   │   │   ├── login_screen.dart
+│   │   │   ├── registration_screen.dart
+│   │   │   └── email_verification_screen.dart
+│   │   └── profile/
+│   │       └── profile_screen.dart  # User profile management
 │   └── widgets/
+│       ├── auth_wrapper.dart     # Authentication state wrapper
 │       ├── summary_cards.dart    # Income/Expense/Balance display cards
 │       ├── transaction_form.dart # Transaction input form
 │       └── transaction_list.dart # Transaction history list view
+├── functions/                    # Cloud Functions (Node.js)
+│   ├── index.js                  # Function entry points
+│   ├── registration_service.js   # Token-based registration logic
+│   └── email_templates.js        # Email template generation
 ├── test/                         # All test files
 ├── android/                      # Android platform-specific files
 ├── ios/                          # iOS platform-specific files
@@ -60,11 +76,28 @@ artist_finance_manager/
   - Adaptive components
   - Theme support (light mode with dark mode ready)
 
+### Authentication & Backend
+- **Firebase Authentication**: User authentication
+  - Email link (passwordless) authentication
+  - Cross-platform session management
+  - Automatic token refresh
+- **Cloud Firestore**: NoSQL database
+  - User profile storage
+  - Real-time sync capability
+  - Security rules for user-level access control
+- **Cloud Functions**: Serverless backend
+  - Token-based registration flow
+  - Email notifications
+  - Scheduled cleanup jobs
+
 ### Data Persistence
 - **SharedPreferences**: Local key-value storage
   - Platform-agnostic API
   - Persists data across app sessions
   - JSON serialization for complex objects
+- **Cloud Firestore**: Cloud storage for authenticated users
+  - User profiles and preferences
+  - Automatic sync across devices
 
 ### Platform-Specific Storage
 - **iOS/Android**: Native SharedPreferences
@@ -180,18 +213,24 @@ See [TEST_GUIDE.md](TEST_GUIDE.md) for detailed testing documentation.
 
 ## 🔐 Security & Privacy
 
-### Privacy-First Design
-- **No Backend**: All data stays on device
-- **No Analytics**: No tracking or data collection
-- **No Network Calls**: Completely offline-capable
-- **Local Storage Only**: User has full control
+### Authentication Security
+- **Passwordless Authentication**: Email link authentication eliminates password-related vulnerabilities
+- **Server-Side Token Verification**: Registration tokens are verified server-side
+- **Token Expiration**: 24-hour expiration for registration tokens
+- **Single-Use Tokens**: Tokens can only be used once
+- **Firestore Security Rules**: User-level access control on all data
 
-### Future Backend Considerations
-When/if backend sync is added:
-- End-to-end encryption for data in transit
-- User authentication (Firebase Auth, Supabase Auth)
-- Row-level security for multi-user scenarios
-- GDPR compliance for data handling
+### Privacy-First Design
+- **Data Minimization**: Only essential user data collected
+- **User Control**: Soft delete with 90-day recovery period
+- **Privacy-Respecting Analytics**: Grafana Faro tracks usage patterns without PII
+- **No Third-Party Data Sharing**: Data stays within Firebase/GCP ecosystem
+
+### Data Protection
+- **Encrypted in Transit**: All data encrypted via HTTPS
+- **Encrypted at Rest**: Firebase/GCP encrypts stored data
+- **Access Control**: Firestore rules enforce user-level data isolation
+- **GDPR Considerations**: Built with data protection regulations in mind
 
 ## 🔄 Future Architecture Enhancements
 
