@@ -5,7 +5,6 @@ import 'package:artist_finance_manager/providers/auth_provider.dart';
 import 'package:artist_finance_manager/screens/auth/login_screen.dart';
 import 'package:artist_finance_manager/screens/auth/registration_screen.dart';
 import 'package:artist_finance_manager/models/app_user.dart';
-import 'package:artist_finance_manager/config/auth_config.dart';
 
 /**
  * Authentication Widget Tests
@@ -100,10 +99,7 @@ void main() {
 
       expect(find.text('Artist Finance Manager'), findsOneWidget);
       expect(find.byType(TextFormField), findsOneWidget);
-
-      // Button text depends on auth config
-      final expectedButtonText = AuthConfig.useEmailLinkAuth ? 'Send Sign-In Link' : 'Sign In';
-      expect(find.widgetWithText(ElevatedButton, expectedButtonText), findsOneWidget);
+      expect(find.widgetWithText(ElevatedButton, 'Send Sign-In Link'), findsOneWidget);
     });
 
     testWidgets('Registration form validates required fields', (WidgetTester tester) async {
@@ -140,9 +136,7 @@ void main() {
       await tester.enterText(find.byType(TextFormField), 'not-an-email');
       await tester.pumpAndSettle();
 
-      // Button text depends on auth config
-      final expectedButtonText = AuthConfig.useEmailLinkAuth ? 'Send Sign-In Link' : 'Sign In';
-      final button = find.widgetWithText(ElevatedButton, expectedButtonText);
+      final button = find.widgetWithText(ElevatedButton, 'Send Sign-In Link');
       await tester.tap(button);
       await tester.pumpAndSettle();
 
@@ -161,16 +155,9 @@ void main() {
       await tester.tap(registerButton);
       await tester.pumpAndSettle();
 
-      if (AuthConfig.useEmailLinkAuth) {
-        // Email link flow: should navigate to EmailVerificationScreen
-        expect(find.text('Check Your Email'), findsOneWidget);
-        expect(find.textContaining('john@example.com'), findsOneWidget);
-      } else {
-        // Simple auth flow: user is registered, mock should have user data
-        expect(mockAuthProvider.currentUser, isNotNull);
-        expect(mockAuthProvider.currentUser?.email, 'john@example.com');
-        expect(mockAuthProvider.currentUser?.name, 'John Doe');
-      }
+      // Email link flow: should navigate to EmailVerificationScreen
+      expect(find.text('Check Your Email'), findsOneWidget);
+      expect(find.textContaining('john@example.com'), findsOneWidget);
     });
   });
 }

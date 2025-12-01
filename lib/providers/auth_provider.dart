@@ -4,7 +4,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/app_user.dart';
 import '../services/auth_service.dart';
 import '../services/registration_api_service.dart';
-import '../config/auth_config.dart';
 
 /// Authentication state provider
 ///
@@ -59,10 +58,10 @@ class AuthProvider with ChangeNotifier {
     }
   }
 
-  /// Send sign-in email link or perform simple login
+  /// Send sign-in email link
   ///
   /// [email] - User's email address
-  /// [continueUrl] - URL to continue to after email verification (only used for email link auth)
+  /// [continueUrl] - URL to continue to after email verification
   /// [name] - User's display name (optional, for registration)
   Future<bool> sendSignInLink(String email, String continueUrl, {String? name}) async {
     try {
@@ -70,36 +69,25 @@ class AuthProvider with ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      if (AuthConfig.useEmailLinkAuth) {
-        // Original email link flow
-        final actionCodeSettings = _authService.getActionCodeSettings(continueUrl);
+      // Email link authentication flow
+      final actionCodeSettings = _authService.getActionCodeSettings(continueUrl);
 
-        await _authService.sendSignInLinkToEmail(
-          email: email,
-          actionCodeSettings: actionCodeSettings,
-        );
+      await _authService.sendSignInLinkToEmail(
+        email: email,
+        actionCodeSettings: actionCodeSettings,
+      );
 
-        _emailForSignIn = email;
-        
-        // Save email and name to SharedPreferences for email link verification
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('emailForSignIn', email);
-        if (name != null && name.isNotEmpty) {
-          await prefs.setString('nameForSignIn', name);
-        }
-        print('DEBUG: Saved email for sign-in: $email');
-        if (name != null) {
-          print('DEBUG: Saved name for sign-in: $name');
-        }
-      } else {
-        // Simple email auth flow - sign in directly
-        await _authService.simpleEmailAuth(email: email);
+      _emailForSignIn = email;
 
-        // Update last login
-        await _authService.updateLastLogin();
-
-        // Load the user data
-        await _loadCurrentUser();
+      // Save email and name to SharedPreferences for email link verification
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('emailForSignIn', email);
+      if (name != null && name.isNotEmpty) {
+        await prefs.setString('nameForSignIn', name);
+      }
+      print('DEBUG: Saved email for sign-in: $email');
+      if (name != null) {
+        print('DEBUG: Saved name for sign-in: $name');
       }
 
       return true;
@@ -185,36 +173,24 @@ class AuthProvider with ChangeNotifier {
       _error = null;
       notifyListeners();
 
-      if (AuthConfig.useEmailLinkAuth) {
-        // Original email link flow
-        // Check if user already exists
-        final userStatus = await _authService.checkUserStatus(email);
+      // Check if user already exists
+      final userStatus = await _authService.checkUserStatus(email);
 
-        if (userStatus['exists'] == true && userStatus['isDeleted'] == false) {
-          throw Exception('User with this email already exists');
-        }
-
-        // If user exists but is deleted, we'll restore the account
-        if (userStatus['exists'] == true && userStatus['isDeleted'] == true) {
-          await _authService.restoreAccount();
-          await _authService.updateUserProfile(name: name);
-        } else {
-          // Create new user
-          await _authService.registerUser(email: email, name: name);
-        }
-
-        // Load the user data
-        await _loadCurrentUser();
-      } else {
-        // Simple email auth flow - sign in/register directly
-        await _authService.simpleEmailAuth(email: email, name: name);
-
-        // Update last login
-        await _authService.updateLastLogin();
-
-        // Load the user data
-        await _loadCurrentUser();
+      if (userStatus['exists'] == true && userStatus['isDeleted'] == false) {
+        throw Exception('User with this email already exists');
       }
+
+      // If user exists but is deleted, we'll restore the account
+      if (userStatus['exists'] == true && userStatus['isDeleted'] == true) {
+        await _authService.restoreAccount();
+        await _authService.updateUserProfile(name: name);
+      } else {
+        // Create new user
+        await _authService.registerUser(email: email, name: name);
+      }
+
+      // Load the user data
+      await _loadCurrentUser();
 
       return true;
     } catch (e) {
@@ -312,6 +288,13 @@ class AuthProvider with ChangeNotifier {
   /// then creates the Firebase user and Firestore profile.
   ///
   /// [token] - Registration token from email link
+  ///
+  /// TODO: This method requires Firebase Admin SDK on the backend to generate
+  /// custom tokens for authentication. The backend should:
+  /// 1. Verify the registration token
+  /// 2. Create/update Firebase Auth user via Admin SDK
+  /// 3. Generate and return a custom token
+  /// 4. Client uses custom token to sign in via signInWithCustomToken()
   Future<bool> verifyRegistrationToken(String token) async {
     try {
       _isLoading = true;
@@ -328,21 +311,18 @@ class AuthProvider with ChangeNotifier {
 
       print('DEBUG: Token verified for $email, name: $name');
 
-      // Create Firebase user using simple auth (with deterministic password)
-      // This allows the user to complete registration on any device
-      await _authService.simpleEmailAuth(email: email, name: name);
+      // TODO: Backend should return a customToken field
+      // For now, throw an error indicating this needs to be implemented
+      throw Exception('Backend must be updated to return Firebase custom token. '
+          'The verifyRegistrationToken endpoint needs to use Firebase Admin SDK '
+          'to create the user and return a custom token for authentication.');
 
-      print('DEBUG: Firebase user created successfully');
+      // Future implementation:
+      // final customToken = response['customToken'] as String;
+      // final userCredential = await _auth.signInWithCustomToken(customToken);
+      // await _loadCurrentUser();
 
-      // Update last login
-      await _authService.updateLastLogin();
-
-      // Load the user data
-      await _loadCurrentUser();
-
-      print('DEBUG: Registration complete');
-
-      return true;
+      // return true;
     } on RegistrationException catch (e) {
       _error = e.message;
       print('Registration error: ${e.code} - ${e.message}');

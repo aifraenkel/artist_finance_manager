@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
-import '../../config/auth_config.dart';
 import 'email_verification_screen.dart';
 
 /// Registration screen for new users
 ///
-/// Supports both email link authentication and simple email auth (based on config)
+/// Supports email link authentication (passwordless one-time link)
 class RegistrationScreen extends StatefulWidget {
   const RegistrationScreen({super.key});
 
@@ -38,35 +37,25 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final email = _emailController.text.trim();
     final name = _nameController.text.trim();
 
-    bool success;
+    // Get the continue URL (current URL or default)
+    final continueUrl = Uri.base.toString();
 
-    if (AuthConfig.useEmailLinkAuth) {
-      // Get the continue URL (current URL or default)
-      final continueUrl = Uri.base.toString();
-
-      // Send sign-in link for email verification with name
-      success = await authProvider.sendSignInLink(email, continueUrl, name: name);
-    } else {
-      // Simple auth - register directly
-      success = await authProvider.registerUser(email, name);
-    }
+    // Send sign-in link for email verification with name
+    final success = await authProvider.sendSignInLink(email, continueUrl, name: name);
 
     setState(() => _isLoading = false);
 
     if (success && mounted) {
-      if (AuthConfig.useEmailLinkAuth) {
-        // Navigate to email verification screen
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => EmailVerificationScreen(
-              email: email,
-              name: name,
-              isRegistration: true,
-            ),
+      // Navigate to email verification screen
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(
+          builder: (context) => EmailVerificationScreen(
+            email: email,
+            name: name,
+            isRegistration: true,
           ),
-        );
-      }
-      // For simple auth, AuthProvider will handle navigation via auth state listener
+        ),
+      );
     } else if (mounted) {
       // Show error
       ScaffoldMessenger.of(context).showSnackBar(

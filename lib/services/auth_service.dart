@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' hide UserMetadata;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/app_user.dart';
-import '../config/auth_config.dart';
 
 /// Authentication service for managing user authentication and profile
 ///
@@ -297,79 +296,4 @@ class AuthService {
     );
   }
 
-  /// Simple email authentication (for development/testing)
-  ///
-  /// Creates or signs in a user with just their email, bypassing email verification.
-  /// Only enabled when AuthConfig.useEmailLinkAuth is false.
-  ///
-  /// [email] - User's email address
-  /// [name] - User's display name (for new users)
-  Future<UserCredential> simpleEmailAuth({
-    required String email,
-    String? name,
-  }) async {
-    if (AuthConfig.useEmailLinkAuth) {
-      throw Exception('Simple email auth is disabled. Use email link authentication instead.');
-    }
-
-    try {
-      // Use a deterministic password based on email for simple auth
-      // This is insecure but acceptable for development/testing
-      final password = _generateDevPassword(email);
-
-      UserCredential? userCredential;
-
-      try {
-        // Try to sign in first
-        print('DEBUG: Attempting sign in for $email with generated password');
-        userCredential = await _auth.signInWithEmailAndPassword(
-          email: email,
-          password: password,
-        );
-        print('DEBUG: Sign in successful');
-      } on FirebaseAuthException catch (e) {
-        print('FirebaseAuthException during sign in: code=${e.code}, message=${e.message}');
-        if (e.code == 'user-not-found' || e.code == 'wrong-password') {
-          // User doesn't exist, create new account
-          print('DEBUG: User not found, creating new account for $email');
-          userCredential = await _auth.createUserWithEmailAndPassword(
-            email: email,
-            password: password,
-          );
-          print('DEBUG: Account created successfully');
-
-          // Create user profile in Firestore
-          if (name != null) {
-            final now = DateTime.now();
-            final appUser = AppUser(
-              uid: userCredential.user!.uid,
-              email: email,
-              name: name,
-              createdAt: now,
-              lastLoginAt: now,
-              metadata: UserMetadata(loginCount: 1),
-            );
-
-            await _firestore
-                .collection('users')
-                .doc(userCredential.user!.uid)
-                .set(appUser.toFirestore());
-          }
-        } else {
-          rethrow;
-        }
-      }
-
-      return userCredential;
-    } catch (e) {
-      print('Error with simple email auth: $e');
-      rethrow;
-    }
-  }
-
-  /// Generate a deterministic password for development
-  /// WARNING: This is NOT secure and should only be used for development/testing
-  String _generateDevPassword(String email) {
-    return 'dev_${email.hashCode}_password';
-  }
 }
