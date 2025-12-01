@@ -35,8 +35,11 @@ class _LoginScreenState extends State<LoginScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final email = _emailController.text.trim();
 
-    // Get the continue URL (current URL or default)
-    final continueUrl = Uri.base.toString();
+    // Get the continue URL (clean URL without query parameters)
+    final uri = Uri.base;
+    final continueUrl = uri.scheme.startsWith('http')
+        ? uri.origin + uri.path
+        : uri.toString().split('?').first;
 
     final success = await authProvider.sendSignInLink(email, continueUrl);
 

@@ -37,8 +37,11 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     final email = _emailController.text.trim();
     final name = _nameController.text.trim();
 
-    // Get the continue URL (current URL or default)
-    final continueUrl = Uri.base.toString();
+    // Get the continue URL (clean URL without query parameters)
+    final uri = Uri.base;
+    final continueUrl = uri.scheme.startsWith('http')
+        ? uri.origin + uri.path
+        : uri.toString().split('?').first;
 
     // Send registration link for new user
     final success = await authProvider.sendRegistrationLink(email, name, continueUrl);
