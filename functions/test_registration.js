@@ -11,11 +11,15 @@ const firestore = new Firestore();
 
 async function testRegistrationFlow() {
   try {
-    console.log('Creating pending registration for aifraenkel@gmail.com...');
+    // Get email and name from command line arguments or use defaults
+    const email = process.argv[2] || 'aifraenkel@gmail.com';
+    const name = process.argv[3] || 'Test User';
+    
+    console.log(`Creating pending registration for ${email}...`);
     
     const { token, expiresAt } = await createPendingRegistration(
-      'aifraenkel@gmail.com',
-      'Test User',
+      email,
+      name,
       'https://artist-manager-479514.web.app'
     );
     

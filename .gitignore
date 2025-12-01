@@ -164,3 +164,4 @@ functions/.env
 # Test artifacts
 test/screenshots/
 test/auth/results/
+functions/.env.yaml

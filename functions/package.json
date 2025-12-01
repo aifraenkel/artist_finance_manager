@@ -10,7 +10,9 @@
     "lint": "eslint .",
     "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js",
     "test:watch": "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-    "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage"
+      "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
+      "test:e2e": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testMatch='**/*.e2e.test.js' --runInBand",
+      "test:unit": "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathIgnorePatterns='.e2e.test.js'"
   },
   "engines": {
     "node": "20"
