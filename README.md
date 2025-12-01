@@ -11,13 +11,29 @@ The goal of this app is to enable artists to easily manage costs and income from
 
 ## ✨ Features
 
-- 💸 **Track Expenses**: Record art-related costs (venue, musicians, materials, food & drinks, book printing, podcast, etc.)
-- 💰 **Track Income**: Log revenue from book sales, event tickets, and more
-- 📊 **Real-time Summary**: View income, expenses, and balance at a glance
-- 📱 **Cross-Platform**: Works on iOS, Android, and Web
-- 💾 **Local Storage**: All data stored locally on your device (no backend required)
-- 🎨 **Beautiful UI**: Modern, responsive design that adapts to any screen size
-- 🔒 **Privacy First**: Your financial data never leaves your device
+### 🔐 Authentication & User Management
+- **Passwordless Sign-In**: Secure email link authentication (no passwords to remember)
+- **Server-Side Token Verification**: Backend-verified registration tokens for enhanced security
+- **Cross-Device Authentication**: Start registration on one device, complete on another
+- **User Profile Management**: Update profile information and manage account settings
+- **Soft Delete with Recovery**: 90-day recovery period for deleted accounts
+- **Session Persistence**: Stay logged in across app restarts
+
+### 💰 Finance Management
+- **Track Expenses**: Record art-related costs (venue, musicians, materials, food & drinks, book printing, podcast, etc.)
+- **Track Income**: Log revenue from book sales, event tickets, and more
+- **Real-time Summary**: View income, expenses, and balance at a glance
+- **Transaction History**: View all transactions in chronological order with category, description, date, and amount
+
+### 📱 Cross-Platform Experience
+- **Works Everywhere**: iOS, Android, and Web from a single codebase
+- **Responsive Design**: Beautiful UI that adapts to any screen size
+- **Offline-First**: Local storage for fast access, with cloud sync capability
+
+### 📊 Observability (Web)
+- **Performance Monitoring**: Track load times and Web Vitals via Grafana Faro
+- **Error Tracking**: Automatic JavaScript error capture and logging
+- **Usage Analytics**: Understand feature usage patterns (privacy-respecting)
 
 ## 🚀 Demo the App
 
@@ -33,7 +49,7 @@ The app can be demoed in multiple ways:
 - Build and install on Android devices
 - Full native app experience
 
-**Note:** Data is stored locally in each platform, so your transactions won't sync between devices. This is perfect for demos and personal use without needing a backend server.
+**Note:** With user authentication, your data is stored securely in the cloud and syncs across all your devices. For local-only usage without signing in, data is stored locally on each device.
 
 ## 📋 Prerequisites
 
