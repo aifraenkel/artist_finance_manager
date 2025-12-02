@@ -183,16 +183,17 @@ class FirestoreSyncService implements SyncService {
   @override
   Future<void> clearAll() async {
     try {
-      // Get all documents in the transactions subcollection
-      final querySnapshot = await _transactionsRef().get();
-
-      // Use a batch to delete all documents
-      final batch = _firestore.batch();
-      for (final doc in querySnapshot.docs) {
-        batch.delete(doc.reference);
-      }
-
-      await batch.commit();
+      const batchLimit = 500;
+      QuerySnapshot querySnapshot;
+      do {
+        querySnapshot = await _transactionsRef().limit(batchLimit).get();
+        if (querySnapshot.docs.isEmpty) break;
+        final batch = _firestore.batch();
+        for (final doc in querySnapshot.docs) {
+          batch.delete(doc.reference);
+        }
+        await batch.commit();
+      } while (querySnapshot.docs.length == batchLimit);
     } on FirebaseException catch (e) {
       throw _handleFirestoreError(e, 'clearAll');
     }
