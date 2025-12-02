@@ -13,7 +13,7 @@
  * which should be installed separately for rules testing.
  */
 
-import { jest, describe, it, expect, beforeAll, afterAll, beforeEach, afterEach } from '@jest/globals';
+import { describe, it, expect } from '@jest/globals';
 
 /**
  * Mock tests for Firestore security rules
