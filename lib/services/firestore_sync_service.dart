@@ -238,8 +238,15 @@ class FirestoreSyncService implements SyncService {
   Transaction _transactionFromFirestore(
       QueryDocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data();
+    final id = int.tryParse(doc.id);
+    if (id == null) {
+      throw SyncException(
+        code: SyncException.unknown,
+        message: 'Invalid transaction ID format: ${doc.id}',
+      );
+    }
     return Transaction(
-      id: int.parse(doc.id),
+      id: id,
       description: data['description'] as String,
       amount: (data['amount'] as num).toDouble(),
       type: data['type'] as String,
