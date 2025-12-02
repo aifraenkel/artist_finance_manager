@@ -164,6 +164,14 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: Colors.green,
           ),
         );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sync unavailable'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.orange,
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
