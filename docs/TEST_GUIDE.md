@@ -30,7 +30,8 @@ test/                                    → All tests
 ├── models/                             → Model unit tests
 │   └── transaction_test.dart
 ├── services/                           → Service unit tests
-│   └── storage_service_test.dart
+│   ├── storage_service_test.dart      → Storage with sync tests
+│   └── sync_service_test.dart         → SyncService interface tests
 └── widget_test.dart                    → Basic widget tests
 ```
 
