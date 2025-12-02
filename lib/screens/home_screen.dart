@@ -27,7 +27,10 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeStorage();
+    // Use post-frame callback to safely access Provider context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeStorage();
+    });
   }
 
   Future<void> _initializeStorage() async {
@@ -192,12 +195,12 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  void _addTransaction(
+  Future<void> _addTransaction(
     String description,
     double amount,
     String type,
     String category,
-  ) {
+  ) async {
     final newTransaction = Transaction(
       id: DateTime.now().millisecondsSinceEpoch,
       description: description,
@@ -212,7 +215,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     // Use optimized add method when in cloud sync mode
-    _storageService.addTransaction(newTransaction, _transactions);
+    await _storageService.addTransaction(newTransaction, _transactions);
 
     // Track transaction added event (privacy-safe: no actual amounts)
     _observability.trackEvent(
@@ -234,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _deleteTransaction(int id) {
+  Future<void> _deleteTransaction(int id) async {
     // Find transaction index
     final index = _transactions.indexWhere((t) => t.id == id);
 
@@ -256,7 +259,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     // Use optimized delete method when in cloud sync mode
-    _storageService.deleteTransaction(id, _transactions);
+    await _storageService.deleteTransaction(id, _transactions);
 
     // Track transaction deleted event (privacy-safe: no actual amounts)
     _observability.trackEvent(
