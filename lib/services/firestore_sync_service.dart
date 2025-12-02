@@ -73,12 +73,12 @@ class FirestoreSyncService implements SyncService {
   @override
   Future<List<Transaction>> loadTransactions() async {
     try {
+      // Get all transactions, excluding metadata document
       final querySnapshot = await _transactionsRef()
-          .where(FieldPath.documentId, isNotEqualTo: _metadataDoc)
-          .orderBy(FieldPath.documentId)
           .orderBy('date', descending: true)
           .get();
 
+      // Filter out metadata document and map to Transaction objects
       return querySnapshot.docs
           .where((doc) => doc.id != _metadataDoc)
           .map((doc) => _transactionFromFirestore(doc))
