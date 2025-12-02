@@ -92,7 +92,7 @@ class FirestoreSyncService implements SyncService {
   Future<void> saveTransactions(List<Transaction> transactions) async {
     try {
       // Firestore batch limit is 500 operations per batch.
-      const batchLimit = 450; // Leave room for creates and metadata
+      const batchLimit = 450; // Leave room for metadata operations
 
       // First, delete all existing transactions (except metadata) in batches
       final existingDocs = await _transactionsRef().get();
@@ -107,25 +107,37 @@ class FirestoreSyncService implements SyncService {
       }
 
       // Then add all new transactions in batches
-      for (var i = 0; i < transactions.length; i += batchLimit) {
-        final chunk = transactions.skip(i).take(batchLimit);
-        final createBatch = _firestore.batch();
-        for (final transaction in chunk) {
-          final docRef = _transactionsRef().doc(transaction.id.toString());
-          createBatch.set(docRef, _transactionToFirestore(transaction));
+      if (transactions.isNotEmpty) {
+        for (var i = 0; i < transactions.length; i += batchLimit) {
+          final chunk = transactions.skip(i).take(batchLimit);
+          final isLastBatch = i + batchLimit >= transactions.length;
+          final createBatch = _firestore.batch();
+          for (final transaction in chunk) {
+            final docRef = _transactionsRef().doc(transaction.id.toString());
+            createBatch.set(docRef, _transactionToFirestore(transaction));
+          }
+          // Update sync metadata on the last batch
+          if (isLastBatch) {
+            createBatch.set(
+              _metadataRef(),
+              {
+                'lastSyncTime': FieldValue.serverTimestamp(),
+                'transactionCount': transactions.length,
+              },
+              SetOptions(merge: true),
+            );
+          }
+          await createBatch.commit();
         }
-        // If this is the last batch, update sync metadata
-        if (i + batchLimit >= transactions.length) {
-          createBatch.set(
-            _metadataRef(),
-            {
-              'lastSyncTime': FieldValue.serverTimestamp(),
-              'transactionCount': transactions.length,
-            },
-            SetOptions(merge: true),
-          );
-        }
-        await createBatch.commit();
+      } else {
+        // If no transactions, still update metadata
+        await _metadataRef().set(
+          {
+            'lastSyncTime': FieldValue.serverTimestamp(),
+            'transactionCount': 0,
+          },
+          SetOptions(merge: true),
+        );
       }
     } on FirebaseException catch (e) {
       throw _handleFirestoreError(e, 'saveTransactions');
