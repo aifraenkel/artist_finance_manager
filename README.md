@@ -30,6 +30,13 @@ The goal of this app is to enable artists to easily manage costs and income from
 - **Responsive Design**: Beautiful UI that adapts to any screen size
 - **Offline-First**: Local storage for fast access, with cloud sync capability
 
+### ☁️ Cloud Sync (Authenticated Users)
+- **Cross-Device Access**: Access your financial data from any device
+- **Automatic Sync**: Transactions automatically sync when connected
+- **Data Isolation**: Your data is securely isolated from other users
+- **Local-First**: Works offline, syncs when connectivity is restored
+- **Manual Refresh**: Sync button to force refresh from cloud
+
 ### 📊 Observability (Web)
 - **Performance Monitoring**: Track load times and Web Vitals via Grafana Faro
 - **Error Tracking**: Automatic JavaScript error capture and logging

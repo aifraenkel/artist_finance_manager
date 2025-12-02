@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
 import '../services/storage_service.dart';
+import '../services/firestore_sync_service.dart';
 import '../services/observability_service.dart';
 import '../widgets/summary_cards.dart';
 import '../widgets/transaction_form.dart';
@@ -17,16 +18,37 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final StorageService _storageService = StorageService();
+  late StorageService _storageService;
   final ObservabilityService _observability = ObservabilityService();
   List<Transaction> _transactions = [];
   bool _isLoading = true;
+  bool _isSyncing = false;
 
   @override
   void initState() {
     super.initState();
-    // init state
-    _loadTransactions();
+    // Use post-frame callback to safely access Provider context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeStorage();
+    });
+  }
+
+  Future<void> _initializeStorage() async {
+    // Create storage service with optional sync service
+    final syncService = FirestoreSyncService();
+    _storageService = StorageService(syncService: syncService);
+    await _storageService.initialize();
+
+    // Check if user is authenticated and enable cloud sync
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.isAuthenticated) {
+      final isSyncAvailable = await _storageService.isSyncAvailable();
+      if (isSyncAvailable) {
+        await _storageService.setStorageMode(StorageMode.cloudSync);
+      }
+    }
+
+    await _loadTransactions();
   }
 
   Future<void> _loadTransactions() async {
@@ -51,7 +73,10 @@ class _HomeScreenState extends State<HomeScreen> {
       _observability.trackMeasurement(
         'transactions_load_time_ms',
         loadDuration.toDouble(),
-        attributes: {'transaction_count': transactions.length.toString()},
+        attributes: {
+          'transaction_count': transactions.length.toString(),
+          'storage_mode': _storageService.storageMode.name,
+        },
       );
 
       _observability.trackEvent(
@@ -59,6 +84,7 @@ class _HomeScreenState extends State<HomeScreen> {
         attributes: {
           'count': transactions.length,
           'load_time_ms': loadDuration,
+          'storage_mode': _storageService.storageMode.name,
         },
       );
     } catch (e, stackTrace) {
@@ -85,12 +111,96 @@ class _HomeScreenState extends State<HomeScreen> {
     await _storageService.saveTransactions(_transactions);
   }
 
-  void _addTransaction(
+  /// Syncs local data to the cloud.
+  /// Called when user logs in to upload existing local data.
+  Future<void> _syncToCloud() async {
+    setState(() {
+      _isSyncing = true;
+    });
+
+    try {
+      final success = await _storageService.forceSyncToCloud();
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data synced to cloud'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to sync data'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSyncing = false;
+        });
+      }
+    }
+  }
+
+  /// Refreshes data from the cloud.
+  Future<void> _refreshFromCloud() async {
+    setState(() {
+      _isSyncing = true;
+    });
+
+    try {
+      final transactions = await _storageService.forceSyncFromCloud();
+      if (transactions != null && mounted) {
+        setState(() {
+          _transactions = transactions;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Data refreshed from cloud'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.green,
+          ),
+        );
+      } else if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Sync unavailable'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to refresh data'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSyncing = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _addTransaction(
     String description,
     double amount,
     String type,
     String category,
-  ) {
+  ) async {
     final newTransaction = Transaction(
       id: DateTime.now().millisecondsSinceEpoch,
       description: description,
@@ -104,7 +214,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _transactions.insert(0, newTransaction);
     });
 
-    _saveTransactions();
+    // Use optimized add method when in cloud sync mode
+    await _storageService.addTransaction(newTransaction, _transactions);
 
     // Track transaction added event (privacy-safe: no actual amounts)
     _observability.trackEvent(
@@ -113,6 +224,7 @@ class _HomeScreenState extends State<HomeScreen> {
         'type': type,
         'category': category,
         'total_transactions': _transactions.length,
+        'storage_mode': _storageService.storageMode.name,
       },
     );
 
@@ -125,7 +237,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _deleteTransaction(int id) {
+  Future<void> _deleteTransaction(int id) async {
     // Find transaction index
     final index = _transactions.indexWhere((t) => t.id == id);
 
@@ -146,7 +258,8 @@ class _HomeScreenState extends State<HomeScreen> {
       _transactions.removeAt(index);
     });
 
-    _saveTransactions();
+    // Use optimized delete method when in cloud sync mode
+    await _storageService.deleteTransaction(id, _transactions);
 
     // Track transaction deleted event (privacy-safe: no actual amounts)
     _observability.trackEvent(
@@ -155,6 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
         'type': transaction.type,
         'category': transaction.category,
         'remaining_transactions': _transactions.length,
+        'storage_mode': _storageService.storageMode.name,
       },
     );
 
@@ -189,6 +303,38 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
+          // Sync indicator and refresh button
+          Consumer<AuthProvider>(
+            builder: (context, authProvider, child) {
+              if (!authProvider.isAuthenticated) {
+                return const SizedBox.shrink();
+              }
+
+              return Row(
+                children: [
+                  if (_isSyncing)
+                    const Padding(
+                      padding: EdgeInsets.only(right: 8.0),
+                      child: SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white70),
+                        ),
+                      ),
+                    )
+                  else
+                    IconButton(
+                      icon: const Icon(Icons.sync),
+                      tooltip: 'Sync with cloud',
+                      onPressed: _refreshFromCloud,
+                    ),
+                ],
+              );
+            },
+          ),
           Consumer<AuthProvider>(
             builder: (context, authProvider, child) {
               final user = authProvider.currentUser;

@@ -31,7 +31,9 @@ artist_finance_manager/
 │   ├── services/
 │   │   ├── auth_service.dart     # Firebase authentication service
 │   │   ├── registration_api_service.dart  # Server-side registration API
-│   │   └── storage_service.dart  # Local storage abstraction layer
+│   │   ├── storage_service.dart  # Local storage abstraction layer with sync support
+│   │   ├── sync_service.dart     # Abstract interface for cloud sync
+│   │   └── firestore_sync_service.dart  # Firestore implementation of sync
 │   ├── providers/
 │   │   └── auth_provider.dart    # Authentication state management
 │   ├── screens/
@@ -51,6 +53,7 @@ artist_finance_manager/
 │   ├── index.js                  # Function entry points
 │   ├── registration_service.js   # Token-based registration logic
 │   └── email_templates.js        # Email template generation
+├── firestore.rules               # Firestore security rules (user data isolation)
 ├── test/                         # All test files
 ├── android/                      # Android platform-specific files
 ├── ios/                          # iOS platform-specific files
@@ -97,7 +100,21 @@ artist_finance_manager/
   - JSON serialization for complex objects
 - **Cloud Firestore**: Cloud storage for authenticated users
   - User profiles and preferences
-  - Automatic sync across devices
+  - **Transaction sync across devices** (new!)
+  - Real-time data synchronization
+  - Automatic offline support
+
+### Data Synchronization
+- **Local-First Architecture**: Data is always stored locally first
+  - Fast, responsive UI even without network
+  - Changes sync to cloud when available
+- **Cloud Sync via SyncService**: Abstract interface for backend flexibility
+  - `FirestoreSyncService`: Current implementation using Cloud Firestore
+  - Easy to swap to different backends (REST API, etc.)
+  - Data migration feasible via Firestore export/import
+- **Storage Modes**:
+  - `localOnly`: Data stored only on device (default for unauthenticated users)
+  - `cloudSync`: Data synced to cloud (enabled when authenticated)
 
 ### Platform-Specific Storage
 - **iOS/Android**: Native SharedPreferences
@@ -129,8 +146,12 @@ artist_finance_manager/
 ### Service Layer
 - **Repository Pattern**: StorageService abstracts data persistence
   - Single source of truth for data operations
-  - Easy to swap implementations (local → cloud)
+  - Supports both local-only and cloud-sync modes
   - Testable with mocks
+- **Dependency Inversion**: SyncService interface
+  - Abstract interface for cloud synchronization
+  - Implementations can be swapped without changing consuming code
+  - Follows SOLID principles for maintainability
 
 ### Widget Composition
 - **Reusable Widgets**: Modular UI components
@@ -141,6 +162,7 @@ artist_finance_manager/
 
 ## 🔄 Data Flow
 
+### Local Storage Flow
 ```
 User Action (UI)
     ↓
@@ -153,6 +175,25 @@ Storage Service
 SharedPreferences (Platform-specific)
     ↓
 UI Rebuild
+```
+
+### Cloud Sync Flow (Authenticated Users)
+```
+User Action (UI)
+    ↓
+Widget Event Handler
+    ↓
+State Update (setState)
+    ↓
+StorageService (local-first)
+    ├── Save to SharedPreferences (local)
+    └── Sync via SyncService (cloud)
+            ↓
+        FirestoreSyncService
+            ↓
+        Cloud Firestore
+            ↓
+        Synced across devices
 ```
 
 ### Example: Adding a Transaction
@@ -240,11 +281,19 @@ See [TEST_GUIDE.md](TEST_GUIDE.md) for detailed testing documentation.
   - Complex state dependencies
   - Better testability
 
-### Data Layer Evolution
-- **Repository Pattern Extension**:
-  - `LocalDataSource` (current SharedPreferences)
-  - `RemoteDataSource` (future backend)
-  - `Repository` (coordination layer with sync logic)
+### Backend Migration
+The `SyncService` interface allows for easy backend migration:
+- **Current**: Cloud Firestore via `FirestoreSyncService`
+- **Alternative Options**:
+  - REST API implementation
+  - GraphQL implementation
+  - Other cloud providers
+- **Migration Process**:
+  1. Export data from Firestore using Firebase Admin SDK
+  2. Transform data format if needed
+  3. Import to new backend
+  4. Implement new `SyncService`
+  5. Update app to use new implementation
 
 ### Modularization
 - Break into feature modules:
