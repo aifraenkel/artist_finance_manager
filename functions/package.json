@@ -1,6 +1,6 @@
 {
   "name": "artist-finance-manager-functions",
-  "description": "Cloud Functions for Artist Finance Manager",
+  "description": "Cloud Functions for Art Finance Hub",
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",

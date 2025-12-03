@@ -5,7 +5,7 @@ import sgMail from '@sendgrid/mail';
 
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const SENDER_EMAIL = process.env.SENDER_EMAIL || 'noreply@artist-finance-manager.local';
-const SENDER_NAME = process.env.SENDER_NAME || 'Artist Finance Manager';
+const SENDER_NAME = process.env.SENDER_NAME || 'Art Finance Hub';
 
 if (!SENDGRID_API_KEY) {
   console.warn('SENDGRID_API_KEY is not set. Emails will fail.');

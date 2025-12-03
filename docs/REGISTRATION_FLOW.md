@@ -2,7 +2,7 @@
 
 ## Overview
 
-Artist Finance Manager uses a server-side token-based registration system that eliminates the need for client-side storage (localStorage/SharedPreferences). This allows users to complete registration on any device, even if they click the email link on a different device than where they started registration.
+Art Finance Hub uses a server-side token-based registration system that eliminates the need for client-side storage (localStorage/SharedPreferences). This allows users to complete registration on any device, even if they click the email link on a different device than where they started registration.
 
 ## Architecture
 

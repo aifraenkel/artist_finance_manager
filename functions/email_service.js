@@ -11,7 +11,7 @@ import { sendEmail } from './email_service_sendgrid.js';
  * @param {string} name - User's name
  */
 export async function sendWelcomeEmail(to, name) {
-  const subject = 'Welcome to Artist Finance Manager!';
+  const subject = 'Welcome to Art Finance Hub!';
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -31,12 +31,12 @@ export async function sendWelcomeEmail(to, name) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>Welcome to Artist Finance Manager!</h1>
+          <h1>Welcome to Art Finance Hub!</h1>
         </div>
         <div class="content">
           <p>Hi ${name},</p>
 
-          <p>Thank you for joining Artist Finance Manager! We're excited to help you manage your artist finances with ease.</p>
+          <p>Thank you for joining Art Finance Hub! We're excited to help you manage your artist finances with ease.</p>
 
           <h3>What you can do:</h3>
           <ul>
@@ -50,10 +50,10 @@ export async function sendWelcomeEmail(to, name) {
 
           <p>If you have any questions or need assistance, feel free to reach out to our support team.</p>
 
-          <p>Best regards,<br>The Artist Finance Manager Team</p>
+          <p>Best regards,<br>The Art Finance Hub Team</p>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Artist Finance Manager. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Art Finance Hub. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -63,7 +63,7 @@ export async function sendWelcomeEmail(to, name) {
   const textBody = `
     Hi ${name},
 
-    Thank you for joining Artist Finance Manager! We're excited to help you manage your artist finances with ease.
+    Thank you for joining Art Finance Hub! We're excited to help you manage your artist finances with ease.
 
     What you can do:
     - Track your income and expenses
@@ -76,9 +76,9 @@ export async function sendWelcomeEmail(to, name) {
     If you have any questions or need assistance, feel free to reach out to our support team.
 
     Best regards,
-    The Artist Finance Manager Team
+    The Art Finance Hub Team
 
-    © ${new Date().getFullYear()} Artist Finance Manager. All rights reserved.
+    © ${new Date().getFullYear()} Art Finance Hub. All rights reserved.
   `;
 
   return await sendEmail(to, subject, htmlBody, textBody);
@@ -90,7 +90,7 @@ export async function sendWelcomeEmail(to, name) {
  * @param {string} name - User's name
  */
 export async function sendAccountDeletionEmail(to, name) {
-  const subject = 'Account Deletion Confirmation - Artist Finance Manager';
+  const subject = 'Account Deletion Confirmation - Art Finance Hub';
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -113,7 +113,7 @@ export async function sendAccountDeletionEmail(to, name) {
         <div class="content">
           <p>Hi ${name},</p>
 
-          <p>This email confirms that your Artist Finance Manager account has been scheduled for deletion.</p>
+          <p>This email confirms that your Art Finance Hub account has been scheduled for deletion.</p>
 
           <div class="warning">
             <strong>⚠️ Important:</strong> Your account and all associated data will be permanently deleted after 90 days.
@@ -129,12 +129,12 @@ export async function sendAccountDeletionEmail(to, name) {
 
           <p>If this deletion was made in error, please contact our support team immediately.</p>
 
-          <p>Thank you for using Artist Finance Manager. We're sorry to see you go!</p>
+          <p>Thank you for using Art Finance Hub. We're sorry to see you go!</p>
 
-          <p>Best regards,<br>The Artist Finance Manager Team</p>
+          <p>Best regards,<br>The Art Finance Hub Team</p>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Artist Finance Manager. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Art Finance Hub. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -144,7 +144,7 @@ export async function sendAccountDeletionEmail(to, name) {
   const textBody = `
     Hi ${name},
 
-    This email confirms that your Artist Finance Manager account has been scheduled for deletion.
+    This email confirms that your Art Finance Hub account has been scheduled for deletion.
 
     ⚠️ IMPORTANT: Your account and all associated data will be permanently deleted after 90 days.
     After this period, all your information will be completely removed from our systems and cannot be recovered.
@@ -156,12 +156,12 @@ export async function sendAccountDeletionEmail(to, name) {
 
     If this deletion was made in error, please contact our support team immediately.
 
-    Thank you for using Artist Finance Manager. We're sorry to see you go!
+    Thank you for using Art Finance Hub. We're sorry to see you go!
 
     Best regards,
-    The Artist Finance Manager Team
+    The Art Finance Hub Team
 
-    © ${new Date().getFullYear()} Artist Finance Manager. All rights reserved.
+    © ${new Date().getFullYear()} Art Finance Hub. All rights reserved.
   `;
 
   return await sendEmail(to, subject, htmlBody, textBody);
@@ -175,7 +175,7 @@ export async function sendAccountDeletionEmail(to, name) {
  * @param {string} ipAddress - IP address of login
  */
 export async function sendLoginNotificationEmail(to, name, deviceInfo = 'Unknown device', ipAddress = 'Unknown IP') {
-  const subject = 'New Login to Your Artist Finance Manager Account';
+  const subject = 'New Login to Your Art Finance Hub Account';
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -199,7 +199,7 @@ export async function sendLoginNotificationEmail(to, name, deviceInfo = 'Unknown
         <div class="content">
           <p>Hi ${name},</p>
 
-          <p>We detected a new login to your Artist Finance Manager account.</p>
+          <p>We detected a new login to your Art Finance Hub account.</p>
 
           <div class="info-box">
             <p><strong>Login Details:</strong></p>
@@ -223,10 +223,10 @@ export async function sendLoginNotificationEmail(to, name, deviceInfo = 'Unknown
 
           <p>We take your security seriously and monitor all account activity to keep your data safe.</p>
 
-          <p>Best regards,<br>The Artist Finance Manager Team</p>
+          <p>Best regards,<br>The Art Finance Hub Team</p>
         </div>
         <div class="footer">
-          <p>© ${new Date().getFullYear()} Artist Finance Manager. All rights reserved.</p>
+          <p>© ${new Date().getFullYear()} Art Finance Hub. All rights reserved.</p>
         </div>
       </div>
     </body>
@@ -236,7 +236,7 @@ export async function sendLoginNotificationEmail(to, name, deviceInfo = 'Unknown
   const textBody = `
     Hi ${name},
 
-    We detected a new login to your Artist Finance Manager account.
+    We detected a new login to your Art Finance Hub account.
 
     Login Details:
     - Device: ${deviceInfo}
@@ -255,9 +255,9 @@ export async function sendLoginNotificationEmail(to, name, deviceInfo = 'Unknown
     We take your security seriously and monitor all account activity to keep your data safe.
 
     Best regards,
-    The Artist Finance Manager Team
+    The Art Finance Hub Team
 
-    © ${new Date().getFullYear()} Artist Finance Manager. All rights reserved.
+    © ${new Date().getFullYear()} Art Finance Hub. All rights reserved.
   `;
 
   return await sendEmail(to, subject, htmlBody, textBody);
