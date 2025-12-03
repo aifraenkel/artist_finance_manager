@@ -314,8 +314,7 @@ class ProjectDrawer extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content:
-                Text('Project name must be at most 50 characters.'),
+            content: Text('Project name must be at most 50 characters.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -403,8 +402,7 @@ class ProjectDrawer extends StatelessWidget {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content:
-                Text('Project name must be at most 50 characters.'),
+            content: Text('Project name must be at most 50 characters.'),
             backgroundColor: Colors.red,
           ),
         );
