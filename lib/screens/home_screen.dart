@@ -4,9 +4,11 @@ import '../models/transaction.dart';
 import '../services/storage_service.dart';
 import '../services/firestore_sync_service.dart';
 import '../services/observability_service.dart';
+import '../services/user_preferences.dart';
 import '../widgets/summary_cards.dart';
 import '../widgets/transaction_form.dart';
 import '../widgets/transaction_list.dart';
+import '../widgets/consent_dialog.dart';
 import '../providers/auth_provider.dart';
 import 'profile/profile_screen.dart';
 
@@ -19,7 +21,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late StorageService _storageService;
-  final ObservabilityService _observability = ObservabilityService();
+  final UserPreferences _userPreferences = UserPreferences();
+  late ObservabilityService _observability;
   List<Transaction> _transactions = [];
   bool _isLoading = true;
   bool _isSyncing = false;
@@ -34,6 +37,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _initializeStorage() async {
+    // Initialize user preferences first
+    await _userPreferences.initialize();
+    
+    // Initialize observability with user preferences
+    _observability = ObservabilityService(userPreferences: _userPreferences);
+    
+    // Show consent dialog if user hasn't seen it yet
+    if (!_userPreferences.hasSeenConsentPrompt && mounted) {
+      // Wait a bit for the UI to settle
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        await ConsentDialog.show(context, _userPreferences);
+      }
+    }
+
     // Create storage service with optional sync service
     final syncService = FirestoreSyncService();
     _storageService = StorageService(syncService: syncService);
@@ -303,6 +321,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double get _balance => _totalIncome - _totalExpenses;
 
+  void _showPrivacyPolicy(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Privacy Policy'),
+        content: const SingleChildScrollView(
+          child: Text(
+            'Our Privacy Policy explains how we collect, use, and protect your data.\n\n'
+            'Key points:\n'
+            '• Analytics are disabled by default\n'
+            '• We never track transaction amounts or descriptions\n'
+            '• You control your privacy settings\n'
+            '• You can delete your data anytime\n\n'
+            'For the full privacy policy, please visit our GitHub repository:\n'
+            'github.com/aifraenkel/artist_finance_manager/blob/main/PRIVACY.md',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -419,6 +464,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                 transactions: _transactions,
                                 onDelete: _deleteTransaction,
                               ),
+                              const SizedBox(height: 32),
+                              // Footer with privacy policy link
+                              Center(
+                                child: TextButton.icon(
+                                  onPressed: () {
+                                    // Open privacy policy in browser or show dialog
+                                    _showPrivacyPolicy(context);
+                                  },
+                                  icon: const Icon(Icons.privacy_tip_outlined, size: 16),
+                                  label: const Text(
+                                    'Privacy Policy',
+                                    style: TextStyle(fontSize: 13),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
                             ],
                           ),
                         ),

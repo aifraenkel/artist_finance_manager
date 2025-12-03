@@ -1,5 +1,6 @@
 import 'dart:js_interop';
 import 'observability_service.dart';
+import 'user_preferences.dart';
 
 // External JS bindings for Faro
 @JS('window.faro')
@@ -7,6 +8,11 @@ external JSAny? get _windowFaro;
 
 /// Web implementation using Grafana Faro
 class ObservabilityServiceImpl implements ObservabilityService {
+  final UserPreferences? _userPreferences;
+
+  ObservabilityServiceImpl({UserPreferences? userPreferences})
+      : _userPreferences = userPreferences;
+
   bool get _isFaroAvailable {
     try {
       return _windowFaro != null;
@@ -15,9 +21,16 @@ class ObservabilityServiceImpl implements ObservabilityService {
     }
   }
 
+  /// Check if tracking is allowed based on user consent
+  bool get _canTrack {
+    // If no user preferences provided, default to not tracking (privacy-first)
+    if (_userPreferences == null) return false;
+    return _userPreferences!.analyticsConsent;
+  }
+
   @override
   void trackEvent(String name, {Map<String, dynamic>? attributes}) {
-    if (!_isFaroAvailable) return;
+    if (!_canTrack || !_isFaroAvailable) return;
 
     try {
       // Call Faro API using js_interop
@@ -36,7 +49,7 @@ class ObservabilityServiceImpl implements ObservabilityService {
   @override
   void trackMeasurement(String name, double value,
       {Map<String, String>? attributes}) {
-    if (!_isFaroAvailable) return;
+    if (!_canTrack || !_isFaroAvailable) return;
 
     try {
       final measurement = {
@@ -58,7 +71,7 @@ class ObservabilityServiceImpl implements ObservabilityService {
   @override
   void trackError(dynamic error,
       {StackTrace? stackTrace, Map<String, dynamic>? context}) {
-    if (!_isFaroAvailable) return;
+    if (!_canTrack || !_isFaroAvailable) return;
 
     try {
       final errorData = {
@@ -80,7 +93,7 @@ class ObservabilityServiceImpl implements ObservabilityService {
   @override
   void log(String message,
       {String level = 'info', Map<String, dynamic>? context}) {
-    if (!_isFaroAvailable) return;
+    if (!_canTrack || !_isFaroAvailable) return;
 
     try {
       final logData = {
@@ -100,7 +113,7 @@ class ObservabilityServiceImpl implements ObservabilityService {
 
   @override
   void setUser(String userId, {String? email, String? username}) {
-    if (!_isFaroAvailable) return;
+    if (!_canTrack || !_isFaroAvailable) return;
 
     try {
       final userData = {
@@ -160,4 +173,5 @@ class ObservabilityServiceImpl implements ObservabilityService {
 }
 
 /// Factory function to get the observability service
-ObservabilityService getObservabilityService() => ObservabilityServiceImpl();
+ObservabilityService getObservabilityService({UserPreferences? userPreferences}) => 
+    ObservabilityServiceImpl(userPreferences: userPreferences);

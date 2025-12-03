@@ -1,11 +1,13 @@
 import 'observability_service_stub.dart'
     if (dart.library.html) 'observability_service_web.dart';
+import 'user_preferences.dart';
 
 /// Observability service for tracking events, metrics, and errors
 /// Uses Grafana Faro on web, no-op on mobile platforms
 abstract class ObservabilityService {
   /// Factory constructor that returns the appropriate implementation
-  factory ObservabilityService() => getObservabilityService();
+  factory ObservabilityService({UserPreferences? userPreferences}) => 
+      getObservabilityService(userPreferences: userPreferences);
 
   /// Track a custom event
   void trackEvent(String name, {Map<String, dynamic>? attributes});

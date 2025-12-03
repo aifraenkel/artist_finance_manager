@@ -1,7 +1,15 @@
 import 'observability_service.dart';
+import 'user_preferences.dart';
 
 /// Stub implementation for non-web platforms (iOS, Android)
 class ObservabilityServiceImpl implements ObservabilityService {
+  // Note: _userPreferences is kept for interface consistency with web implementation
+  // even though this is a no-op stub. Mobile platforms could use this in the future
+  // for platform-specific analytics (e.g., Firebase Analytics, Crashlytics)
+  final UserPreferences? _userPreferences;
+
+  ObservabilityServiceImpl({UserPreferences? userPreferences})
+      : _userPreferences = userPreferences;
   @override
   void trackEvent(String name, {Map<String, dynamic>? attributes}) {
     // No-op on mobile platforms
@@ -34,4 +42,5 @@ class ObservabilityServiceImpl implements ObservabilityService {
 }
 
 /// Factory function to get the observability service
-ObservabilityService getObservabilityService() => ObservabilityServiceImpl();
+ObservabilityService getObservabilityService({UserPreferences? userPreferences}) => 
+    ObservabilityServiceImpl(userPreferences: userPreferences);
