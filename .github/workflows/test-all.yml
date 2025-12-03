@@ -83,7 +83,9 @@ jobs:
       - name: Check for integration tests
         id: check
         run: |
-          if [ -d "test/integration_test" ] && [ -n "$(find test/integration_test -name '*_test.dart' 2>/dev/null)" ]; then
+          if [ -d "test" ] && [ -n "$(find test -name '*_test.dart' -path '*/integration_test/*' 2>/dev/null)" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          elif [ -d "integration_test" ] && [ -n "$(find integration_test -name '*_test.dart' 2>/dev/null)" ]; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
@@ -166,24 +168,36 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Check for E2E tests
+      - name: Check for E2E tests and credentials
         id: check
         run: |
           if [ -d "__tests__" ] && find __tests__ -name "*.e2e.test.js" 2>/dev/null | grep -q .; then
             echo "exists=true" >> $GITHUB_OUTPUT
+            # E2E tests require GCP credentials - skip in CI for now
+            echo "skip_reason=E2E tests require GCP credentials" >> $GITHUB_OUTPUT
+            echo "should_skip=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
+            echo "skip_reason=No E2E tests found" >> $GITHUB_OUTPUT
+            echo "should_skip=true" >> $GITHUB_OUTPUT
           fi
 
       - name: Run E2E tests
-        if: steps.check.outputs.exists == 'true'
+        if: steps.check.outputs.exists == 'true' && steps.check.outputs.should_skip != 'true'
         run: npm run test:e2e
 
-      - name: Report no E2E tests
-        if: steps.check.outputs.exists == 'false'
+      - name: Report skipped E2E tests
+        if: steps.check.outputs.should_skip == 'true'
         run: |
           echo "## Cloud Functions E2E Tests" >> $GITHUB_STEP_SUMMARY
-          echo "No E2E tests found - skipping" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ Skipped: ${{ steps.check.outputs.skip_reason }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "E2E tests require:" >> $GITHUB_STEP_SUMMARY
+          echo "- GCP service account credentials" >> $GITHUB_STEP_SUMMARY
+          echo "- Firebase project configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- Deployed Cloud Functions" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "These tests should be run manually before deployment." >> $GITHUB_STEP_SUMMARY
 
   # Job 5: Aggregate Results and Comment on PR
   test-summary:
@@ -281,12 +295,13 @@ jobs:
             OVERALL_RESULT="failure"
           fi
           
-          # Check integration tests (failure counts, skipped is OK)
+          # Check integration tests (failure counts, skipped and success are OK)
           if [ "${{ needs.flutter-integration-tests.result }}" == "failure" ] || [ "${{ needs.flutter-integration-tests.result }}" == "cancelled" ]; then
             OVERALL_RESULT="failure"
           fi
-          
-          # Check E2E tests (failure counts, skipped is OK)
+
+          # Check E2E tests (failure counts, skipped and success are OK)
+          # Note: E2E tests are currently always skipped in CI (require credentials)
           if [ "${{ needs.functions-e2e-tests.result }}" == "failure" ] || [ "${{ needs.functions-e2e-tests.result }}" == "cancelled" ]; then
             OVERALL_RESULT="failure"
           fi
