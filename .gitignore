@@ -151,7 +151,6 @@ gcp-key.json
 
 # Firebase Functions node_modules
 functions/node_modules/
-functions/package-lock.json
 
 # Local SMTP server
 smtp-server/node_modules/
