@@ -1,12 +1,10 @@
-// Simplified widget tests replacing manual E2E integration tests.
-// These avoid Firebase/platform channel dependencies and provide
-// fast UI verification for core reusable widgets.
+// Widget tests for SummaryCards component.
+// These test UI rendering and layout behavior without Firebase/platform dependencies.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:artist_finance_manager/widgets/summary_cards.dart';
 
-@Tags(['integration'])
 void main() {
   group('SummaryCards Widget', () {
     testWidgets('renders income, expenses and balance (positive balance)', (tester) async {
