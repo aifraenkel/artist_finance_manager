@@ -306,24 +306,37 @@ class ProjectDrawer extends StatelessWidget {
       return;
     }
 
-    final projectProvider =
-        Provider.of<ProjectProvider>(context, listen: false);
-    final project = await projectProvider.createProject(trimmedName);
+    try {
+      final projectProvider =
+          Provider.of<ProjectProvider>(context, listen: false);
+      final project = await projectProvider.createProject(trimmedName);
 
-    if (context.mounted) {
-      Navigator.of(context).pop();
+      if (context.mounted) {
+        Navigator.of(context).pop();
 
-      if (project != null) {
+        if (project != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Project "$trimmedName" created'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else {
+          final error = projectProvider.error ?? 'Unknown error';
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to create project: $error'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Project "$name" created'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to create project'),
+            content: Text('Failed to create project: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -363,14 +376,29 @@ class ProjectDrawer extends StatelessWidget {
 
   void _renameProject(
       BuildContext context, Project project, String newName) async {
-    if (newName.trim().isEmpty || newName.trim() == project.name) {
+    final trimmedName = newName.trim();
+    if (trimmedName.isEmpty || trimmedName == project.name) {
+      return;
+    }
+    
+    const maxLength = 50;
+    if (trimmedName.length > maxLength) {
+      if (context.mounted) {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Project name must be at most $maxLength characters.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
     final projectProvider =
         Provider.of<ProjectProvider>(context, listen: false);
     final success =
-        await projectProvider.renameProject(project.id, newName.trim());
+        await projectProvider.renameProject(project.id, trimmedName);
 
     if (context.mounted) {
       Navigator.of(context).pop();
@@ -378,14 +406,15 @@ class ProjectDrawer extends StatelessWidget {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Project renamed to "$newName"'),
+            content: Text('Project renamed to "$trimmedName"'),
             backgroundColor: Colors.green,
           ),
         );
       } else {
+        final error = projectProvider.error ?? 'Unknown error';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to rename project'),
+          SnackBar(
+            content: Text('Failed to rename project: $error'),
             backgroundColor: Colors.red,
           ),
         );
@@ -437,9 +466,10 @@ class ProjectDrawer extends StatelessWidget {
           ),
         );
       } else {
+        final error = projectProvider.error ?? 'Unknown error';
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Failed to delete project'),
+          SnackBar(
+            content: Text('Failed to delete project: $error'),
             backgroundColor: Colors.red,
           ),
         );
