@@ -321,6 +321,33 @@ class _HomeScreenState extends State<HomeScreen> {
 
   double get _balance => _totalIncome - _totalExpenses;
 
+  void _showPrivacyPolicy(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Privacy Policy'),
+        content: const SingleChildScrollView(
+          child: Text(
+            'Our Privacy Policy explains how we collect, use, and protect your data.\n\n'
+            'Key points:\n'
+            '• Analytics are disabled by default\n'
+            '• We never track transaction amounts or descriptions\n'
+            '• You control your privacy settings\n'
+            '• You can delete your data anytime\n\n'
+            'For the full privacy policy, please visit our GitHub repository:\n'
+            'github.com/aifraenkel/artist_finance_manager/blob/main/PRIVACY.md',
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -437,6 +464,22 @@ class _HomeScreenState extends State<HomeScreen> {
                                 transactions: _transactions,
                                 onDelete: _deleteTransaction,
                               ),
+                              const SizedBox(height: 32),
+                              // Footer with privacy policy link
+                              Center(
+                                child: TextButton.icon(
+                                  onPressed: () {
+                                    // Open privacy policy in browser or show dialog
+                                    _showPrivacyPolicy(context);
+                                  },
+                                  icon: const Icon(Icons.privacy_tip_outlined, size: 16),
+                                  label: const Text(
+                                    'Privacy Policy',
+                                    style: TextStyle(fontSize: 13),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 16),
                             ],
                           ),
                         ),
