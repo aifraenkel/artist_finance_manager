@@ -27,6 +27,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = true;
   Map<String, List<Transaction>> _projectTransactions = {};
   Map<String, Project> _projects = {};
+  
+  // Month abbreviations for timeline chart
+  static const List<String> _monthAbbreviations = [
+    '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+  ];
 
   @override
   void initState() {
@@ -299,8 +305,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildProjectContributionsChart(Map<String, double> contributions) {
+    if (contributions.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    
     final total = contributions.values.fold(0.0, (sum, val) => sum + val);
-    if (total == 0) {
+    if (total < 0.01) {
       return const SizedBox.shrink();
     }
 
@@ -400,11 +410,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       balanceSpots.add(FlSpot(i.toDouble(), balanceData[i].value));
     }
 
-    // Find max value for y-axis
-    final maxIncome = incomeData.map((d) => d.value).reduce((a, b) => a > b ? a : b);
-    final maxExpenses = expensesData.map((d) => d.value).reduce((a, b) => a > b ? a : b);
-    final maxBalance = balanceData.map((d) => d.value).reduce((a, b) => a > b ? a : b);
-    final maxY = [maxIncome, maxExpenses, maxBalance].reduce((a, b) => a > b ? a : b);
+    // Find max and min values for y-axis
+    final maxIncome = _findMaxValue(incomeData);
+    final maxExpenses = _findMaxValue(expensesData);
+    final maxBalance = _findMaxValue(balanceData);
+    final minBalance = _findMinValue(balanceData);
+    
+    // Determine y-axis range, accounting for negative balances
+    final maxY = [maxIncome, maxExpenses, maxBalance].fold(0.0, (a, b) => a > b ? a : b);
+    final minY = minBalance < 0 ? minBalance : 0.0;
+    final yRange = maxY - minY;
+    
+    // Avoid division by zero
+    final interval = yRange > 0 ? yRange / 5 : 1.0;
 
     return Card(
       elevation: 2,
@@ -419,7 +437,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   gridData: FlGridData(
                     show: true,
                     drawVerticalLine: false,
-                    horizontalInterval: maxY / 5,
+                    horizontalInterval: interval,
                   ),
                   titlesData: FlTitlesData(
                     leftTitles: AxisTitles(
@@ -446,9 +464,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             final parts = date.split('-');
                             if (parts.length >= 2) {
                               final month = int.parse(parts[1]);
-                              const months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
                               return Text(
-                                months[month],
+                                _monthAbbreviations[month],
                                 style: const TextStyle(fontSize: 10),
                               );
                             }
@@ -493,7 +510,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       dotData: const FlDotData(show: false),
                     ),
                   ],
-                  minY: 0,
+                  minY: minY * 1.1,
                   maxY: maxY * 1.1,
                 ),
               ),
@@ -592,5 +609,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
       Colors.cyan,
       Colors.deepOrange,
     ];
+  }
+  
+  /// Helper method to find maximum value from timeline data points
+  double _findMaxValue(List<TimelineDataPoint> data) {
+    if (data.isEmpty) return 0.0;
+    final max = data.map((d) => d.value).fold(double.negativeInfinity, (max, val) => max > val ? max : val);
+    return max.isInfinite ? 0.0 : max;
+  }
+  
+  /// Helper method to find minimum value from timeline data points
+  double _findMinValue(List<TimelineDataPoint> data) {
+    if (data.isEmpty) return 0.0;
+    final min = data.map((d) => d.value).fold(double.infinity, (min, val) => min < val ? min : val);
+    return min.isInfinite ? 0.0 : min;
   }
 }
