@@ -1,0 +1,596 @@
+import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:fl_chart/fl_chart.dart';
+import '../models/transaction.dart';
+import '../models/project.dart';
+import '../providers/project_provider.dart';
+import '../services/analytics_service.dart';
+import '../services/storage_service.dart';
+import '../services/firestore_sync_service.dart';
+
+/// Dashboard screen showing financial analytics and insights.
+///
+/// Features:
+/// - Project contribution breakdown (pie chart)
+/// - Timeline charts for income, expenses, and balance
+/// - Top expensive projects
+/// - Summary statistics
+class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+
+  @override
+  State<DashboardScreen> createState() => _DashboardScreenState();
+}
+
+class _DashboardScreenState extends State<DashboardScreen> {
+  final AnalyticsService _analyticsService = AnalyticsService();
+  bool _isLoading = true;
+  Map<String, List<Transaction>> _projectTransactions = {};
+  Map<String, Project> _projects = {};
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+    });
+  }
+
+  Future<void> _loadData() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final projectProvider = Provider.of<ProjectProvider>(context, listen: false);
+    final projects = projectProvider.projects;
+
+    // Build projects map
+    final projectsMap = <String, Project>{};
+    for (final project in projects) {
+      projectsMap[project.id] = project;
+    }
+
+    // Load transactions for each project
+    final projectTransactions = <String, List<Transaction>>{};
+    for (final project in projects) {
+      final syncService = FirestoreSyncService(projectId: project.id);
+      final storageService = StorageService(
+        syncService: syncService,
+        projectId: project.id,
+      );
+      await storageService.initialize();
+
+      final transactions = await storageService.loadTransactions();
+      projectTransactions[project.id] = transactions;
+    }
+
+    setState(() {
+      _projectTransactions = projectTransactions;
+      _projects = projectsMap;
+      _isLoading = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Analytics Dashboard'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              Colors.blue.shade50,
+              Colors.indigo.shade100,
+            ],
+          ),
+        ),
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _buildDashboard(),
+      ),
+    );
+  }
+
+  Widget _buildDashboard() {
+    final allTransactions =
+        _projectTransactions.values.expand((txns) => txns).toList();
+
+    if (allTransactions.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.analytics_outlined,
+              size: 80,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'No data available',
+              style: TextStyle(
+                fontSize: 18,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Add some transactions to see analytics',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final summary = _analyticsService.calculateSummary(_projectTransactions);
+    final contributions =
+        _analyticsService.getProjectContributions(_projectTransactions, _projects);
+    final topExpensive = _analyticsService.getTopExpensiveProjects(
+      _projectTransactions,
+      _projects,
+      limit: 5,
+    );
+    final timelineData = _analyticsService.getTimelineData(
+      allTransactions,
+      granularity: TimelineGranularity.monthly,
+    );
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Summary statistics
+          _buildSummarySection(summary),
+          const SizedBox(height: 24),
+
+          // Project contributions (pie chart)
+          if (contributions.isNotEmpty) ...[
+            _buildSectionTitle('Project Contributions'),
+            const SizedBox(height: 16),
+            _buildProjectContributionsChart(contributions),
+            const SizedBox(height: 24),
+          ],
+
+          // Timeline charts
+          if (timelineData['income']!.isNotEmpty) ...[
+            _buildSectionTitle('Financial Timeline'),
+            const SizedBox(height: 16),
+            _buildTimelineChart(timelineData),
+            const SizedBox(height: 24),
+          ],
+
+          // Top expensive projects
+          if (topExpensive.isNotEmpty) ...[
+            _buildSectionTitle('Top Expensive Projects'),
+            const SizedBox(height: 16),
+            _buildTopExpensiveList(topExpensive),
+            const SizedBox(height: 24),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        color: Colors.black87,
+      ),
+    );
+  }
+
+  Widget _buildSummarySection(AnalyticsSummary summary) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Summary',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSummaryCard(
+                    'Income',
+                    '\$${summary.totalIncome.toStringAsFixed(2)}',
+                    Colors.green,
+                    Icons.trending_up,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildSummaryCard(
+                    'Expenses',
+                    '\$${summary.totalExpenses.toStringAsFixed(2)}',
+                    Colors.red,
+                    Icons.trending_down,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Expanded(
+                  child: _buildSummaryCard(
+                    'Balance',
+                    '\$${summary.balance.toStringAsFixed(2)}',
+                    summary.balance >= 0 ? Colors.blue : Colors.orange,
+                    Icons.account_balance_wallet,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildSummaryCard(
+                    'Transactions',
+                    summary.numberOfTransactions.toString(),
+                    Colors.purple,
+                    Icons.receipt_long,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSummaryCard(String label, String value, Color color, IconData icon) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: color.withOpacity(0.3)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade700,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 4),
+          Text(
+            value,
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProjectContributionsChart(Map<String, double> contributions) {
+    final total = contributions.values.fold(0.0, (sum, val) => sum + val);
+    if (total == 0) {
+      return const SizedBox.shrink();
+    }
+
+    // Generate colors for each project
+    final colors = _generateColors(contributions.length);
+    final sections = <PieChartSectionData>[];
+    int colorIndex = 0;
+
+    for (final entry in contributions.entries) {
+      final percentage = (entry.value / total) * 100;
+      sections.add(
+        PieChartSectionData(
+          value: entry.value,
+          title: '${percentage.toStringAsFixed(1)}%',
+          color: colors[colorIndex % colors.length],
+          radius: 100,
+          titleStyle: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      );
+      colorIndex++;
+    }
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 250,
+              child: PieChart(
+                PieChartData(
+                  sections: sections,
+                  sectionsSpace: 2,
+                  centerSpaceRadius: 40,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildLegend(contributions, colors),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLegend(Map<String, double> data, List<Color> colors) {
+    final entries = data.entries.toList();
+    return Wrap(
+      spacing: 16,
+      runSpacing: 8,
+      children: List.generate(entries.length, (index) {
+        final entry = entries[index];
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                color: colors[index % colors.length],
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 6),
+            Text(
+              entry.key,
+              style: const TextStyle(fontSize: 12),
+            ),
+          ],
+        );
+      }),
+    );
+  }
+
+  Widget _buildTimelineChart(Map<String, List<TimelineDataPoint>> timelineData) {
+    final incomeData = timelineData['income']!;
+    final expensesData = timelineData['expenses']!;
+    final balanceData = timelineData['balance']!;
+
+    if (incomeData.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Create spots for each line
+    final incomeSpots = <FlSpot>[];
+    final expensesSpots = <FlSpot>[];
+    final balanceSpots = <FlSpot>[];
+
+    for (int i = 0; i < incomeData.length; i++) {
+      incomeSpots.add(FlSpot(i.toDouble(), incomeData[i].value));
+      expensesSpots.add(FlSpot(i.toDouble(), expensesData[i].value));
+      balanceSpots.add(FlSpot(i.toDouble(), balanceData[i].value));
+    }
+
+    // Find max value for y-axis
+    final maxIncome = incomeData.map((d) => d.value).reduce((a, b) => a > b ? a : b);
+    final maxExpenses = expensesData.map((d) => d.value).reduce((a, b) => a > b ? a : b);
+    final maxBalance = balanceData.map((d) => d.value).reduce((a, b) => a > b ? a : b);
+    final maxY = [maxIncome, maxExpenses, maxBalance].reduce((a, b) => a > b ? a : b);
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            SizedBox(
+              height: 250,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: maxY / 5,
+                  ),
+                  titlesData: FlTitlesData(
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 50,
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            '\$${value.toInt()}',
+                            style: const TextStyle(fontSize: 10),
+                          );
+                        },
+                      ),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 30,
+                        getTitlesWidget: (value, meta) {
+                          final index = value.toInt();
+                          if (index >= 0 && index < incomeData.length) {
+                            // Show abbreviated date (e.g., "Jan", "Feb")
+                            final date = incomeData[index].date;
+                            final parts = date.split('-');
+                            if (parts.length >= 2) {
+                              final month = int.parse(parts[1]);
+                              const months = ['', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                              return Text(
+                                months[month],
+                                style: const TextStyle(fontSize: 10),
+                              );
+                            }
+                          }
+                          return const Text('');
+                        },
+                      ),
+                    ),
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                  ),
+                  borderData: FlBorderData(show: false),
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: incomeSpots,
+                      color: Colors.green,
+                      barWidth: 3,
+                      dotData: const FlDotData(show: false),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: Colors.green.withOpacity(0.1),
+                      ),
+                    ),
+                    LineChartBarData(
+                      spots: expensesSpots,
+                      color: Colors.red,
+                      barWidth: 3,
+                      dotData: const FlDotData(show: false),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: Colors.red.withOpacity(0.1),
+                      ),
+                    ),
+                    LineChartBarData(
+                      spots: balanceSpots,
+                      color: Colors.blue,
+                      barWidth: 3,
+                      dotData: const FlDotData(show: false),
+                    ),
+                  ],
+                  minY: 0,
+                  maxY: maxY * 1.1,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            _buildTimelineLegend(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTimelineLegend() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildLegendItem('Income', Colors.green),
+        const SizedBox(width: 16),
+        _buildLegendItem('Expenses', Colors.red),
+        const SizedBox(width: 16),
+        _buildLegendItem('Balance', Colors.blue),
+      ],
+    );
+  }
+
+  Widget _buildLegendItem(String label, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 12,
+          height: 12,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: const TextStyle(fontSize: 12),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTopExpensiveList(List<MapEntry<String, double>> topExpensive) {
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: topExpensive.map((entry) {
+            final project = entry.key;
+            final amount = entry.value;
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      project,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    '\$${amount.toStringAsFixed(2)}',
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
+  List<Color> _generateColors(int count) {
+    return [
+      Colors.blue,
+      Colors.green,
+      Colors.orange,
+      Colors.purple,
+      Colors.teal,
+      Colors.pink,
+      Colors.indigo,
+      Colors.amber,
+      Colors.cyan,
+      Colors.deepOrange,
+    ];
+  }
+}

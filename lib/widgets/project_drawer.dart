@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/project_provider.dart';
 import '../models/project.dart';
+import '../screens/dashboard_screen.dart';
 
 /// Drawer widget for displaying projects and global financial summary.
 ///
@@ -28,6 +29,8 @@ class ProjectDrawer extends StatelessWidget {
         children: [
           _buildHeader(context),
           _buildGlobalSummary(context),
+          const Divider(),
+          _buildAnalyticsButton(context),
           const Divider(),
           Expanded(
             child: _buildProjectList(context),
@@ -130,6 +133,32 @@ class ProjectDrawer extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildAnalyticsButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton.icon(
+          onPressed: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const DashboardScreen(),
+              ),
+            );
+          },
+          icon: const Icon(Icons.analytics),
+          label: const Text('View Analytics'),
+          style: ElevatedButton.styleFrom(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            backgroundColor: Theme.of(context).primaryColor,
+            foregroundColor: Colors.white,
+          ),
+        ),
+      ),
     );
   }
 

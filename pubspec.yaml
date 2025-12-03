@@ -26,6 +26,9 @@ dependencies:
   uuid: ^4.5.1
   crypto: ^3.0.3
 
+  # Charts and visualization
+  fl_chart: ^0.69.0
+
   # Icons (Material Design icons are built-in)
   cupertino_icons: ^1.0.6
 
