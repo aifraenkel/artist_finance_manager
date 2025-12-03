@@ -1,5 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart' hide UserMetadata;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import '../models/app_user.dart';
 import 'device_info_service.dart';
 import 'observability_service.dart';
@@ -44,6 +46,17 @@ class AuthService {
     }
   }
 
+  /// Hash email for secure logging (OWASP compliance)
+  ///
+  /// Creates a SHA-256 hash of the email for logging without exposing PII.
+  /// The hash is deterministic so same email always produces same hash,
+  /// allowing for tracking across logs while protecting user privacy.
+  String _hashEmail(String email) {
+    final bytes = utf8.encode(email.toLowerCase().trim());
+    final digest = sha256.convert(bytes);
+    return digest.toString().substring(0, 16); // First 16 chars of hash
+  }
+
   /// Stream of authentication state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
@@ -77,13 +90,13 @@ class AuthService {
         level: 'info',
         context: {
           'userId': user.uid,
-          'email': user.email,
+          'emailHash': _hashEmail(user.email ?? ''),
           'lastLoginAt': appUser.lastLoginAt.toIso8601String(),
           'loginCount': appUser.metadata.loginCount,
         },
       );
 
-      print('DEBUG: Session restored for user ${user.email}');
+      print('DEBUG: Session restored for user ${_hashEmail(user.email ?? '')}');
 
       return appUser;
     } catch (e) {
@@ -222,7 +235,7 @@ class AuthService {
       // Log registration event
       _observability.trackEvent('user_registered', attributes: {
         'userId': user.uid,
-        'email': email,
+        'emailHash': _hashEmail(email),
         'deviceId': deviceId,
         'deviceName': deviceName,
         'platform': deviceInfo['platform'],
@@ -234,13 +247,13 @@ class AuthService {
         level: 'info',
         context: {
           'userId': user.uid,
-          'email': email,
+          'emailHash': _hashEmail(email),
           'deviceId': deviceId,
           'deviceName': deviceName,
         },
       );
 
-      print('INFO: New user registered: $email from $deviceName (device: $deviceId)');
+      print('INFO: New user registered: ${_hashEmail(email)} from $deviceName (device: $deviceId)');
 
       return appUser;
     } catch (e) {
@@ -310,7 +323,7 @@ class AuthService {
       // Log sign-in event for security monitoring
       _observability.trackEvent('user_sign_in', attributes: {
         'userId': user.uid,
-        'email': user.email ?? 'unknown',
+        'emailHash': _hashEmail(user.email ?? ''),
         'deviceId': deviceId,
         'deviceName': deviceName,
         'platform': deviceInfo['platform'],
@@ -323,14 +336,14 @@ class AuthService {
         level: 'info',
         context: {
           'userId': user.uid,
-          'email': user.email,
+          'emailHash': _hashEmail(user.email ?? ''),
           'deviceId': deviceId,
           'deviceName': deviceName,
           'loginCount': updatedMetadata.loginCount,
         },
       );
 
-      print('INFO: User ${user.email} signed in from $deviceName (device: $deviceId, login #${updatedMetadata.loginCount})');
+      print('INFO: User ${_hashEmail(user.email ?? '')} signed in from $deviceName (device: $deviceId, login #${updatedMetadata.loginCount})');
     } catch (e) {
       print('Error updating last login: $e');
       _observability.trackError(e, context: {
@@ -441,7 +454,7 @@ class AuthService {
         // Log sign-out event before clearing session
         _observability.trackEvent('user_sign_out', attributes: {
           'userId': user.uid,
-          'email': user.email ?? 'unknown',
+          'emailHash': _hashEmail(user.email ?? ''),
           'timestamp': DateTime.now().toIso8601String(),
         });
 
@@ -450,11 +463,11 @@ class AuthService {
           level: 'info',
           context: {
             'userId': user.uid,
-            'email': user.email,
+            'emailHash': _hashEmail(user.email ?? ''),
           },
         );
 
-        print('INFO: User ${user.email} signed out');
+        print('INFO: User ${_hashEmail(user.email ?? '')} signed out');
       }
       
       await _auth.signOut();
