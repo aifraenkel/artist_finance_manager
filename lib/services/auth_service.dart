@@ -220,7 +220,7 @@ class AuthService {
         metadata: UserMetadata(
           loginCount: 1,
           devices: [initialDevice],
-          lastLoginUserAgent: deviceInfo['userAgent'] as String?,
+          lastLoginUserAgent: deviceInfo['userAgent'] is String ? deviceInfo['userAgent'] as String : null,
         ),
       );
 
