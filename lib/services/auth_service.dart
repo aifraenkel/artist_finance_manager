@@ -5,6 +5,7 @@ import 'package:crypto/crypto.dart';
 import '../models/app_user.dart';
 import 'device_info_service.dart';
 import 'observability_service.dart';
+import 'preferences_service.dart';
 
 /// Authentication service for managing user authentication and profile
 ///
@@ -21,6 +22,7 @@ class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final ObservabilityService _observability = ObservabilityService();
+  final PreferencesService _preferencesService = PreferencesService();
 
   AuthService() {
     // Configure Firebase Auth persistence
@@ -234,6 +236,15 @@ class AuthService {
       userDoc['lastLoginAt'] = FieldValue.serverTimestamp();
 
       await _firestore.collection('users').doc(user.uid).set(userDoc);
+
+      // Initialize default preferences for new user
+      try {
+        await _preferencesService.initializeDefaultPreferences(user.uid);
+        print('INFO: Default preferences initialized for user ${_hashEmail(email)}');
+      } catch (e) {
+        // Log error but don't fail registration
+        print('WARN: Failed to initialize preferences for user ${_hashEmail(email)}: $e');
+      }
 
       // Log registration event
       _observability.trackEvent('user_registered', attributes: {

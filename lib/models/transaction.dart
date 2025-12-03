@@ -5,6 +5,7 @@ class Transaction {
   final String type; // 'income' or 'expense'
   final String category;
   final DateTime date;
+  final String? currency; // Currency code (EUR, USD) - optional for backward compatibility
 
   Transaction({
     required this.id,
@@ -13,6 +14,7 @@ class Transaction {
     required this.type,
     required this.category,
     required this.date,
+    this.currency,
   });
 
   // Convert to JSON for storage
@@ -24,6 +26,7 @@ class Transaction {
       'type': type,
       'category': category,
       'date': date.toIso8601String(),
+      if (currency != null) 'currency': currency,
     };
   }
 
@@ -36,6 +39,7 @@ class Transaction {
       type: json['type'] as String,
       category: json['category'] as String,
       date: DateTime.parse(json['date'] as String),
+      currency: json['currency'] as String?,
     );
   }
 }

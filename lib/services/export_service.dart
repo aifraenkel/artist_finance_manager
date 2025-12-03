@@ -24,6 +24,7 @@ class ExportService {
   /// - Category
   /// - Description
   /// - Amount
+  /// - Currency
   /// - Datetime
   ///
   /// Throws an exception if there's an error loading data.
@@ -33,7 +34,15 @@ class ExportService {
 
     // Prepare CSV data with headers
     final List<List<dynamic>> csvData = [
-      ['Project name', 'Type', 'Category', 'Description', 'Amount', 'Datetime']
+      [
+        'Project name',
+        'Type',
+        'Category',
+        'Description',
+        'Amount',
+        'Currency',
+        'Datetime'
+      ]
     ];
 
     // Load transactions for each project
@@ -49,6 +58,7 @@ class ExportService {
           transaction.category,
           transaction.description,
           transaction.amount.toStringAsFixed(2),
+          transaction.currency ?? 'EUR', // Default to EUR for legacy data
           _formatDateTime(transaction.date),
         ]);
       }

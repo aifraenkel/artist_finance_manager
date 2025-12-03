@@ -4,11 +4,14 @@ import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/project_provider.dart';
 import '../../models/app_user.dart';
+import '../../models/user_preferences.dart';
 import '../../services/user_preferences.dart';
 import '../../services/export_service.dart';
 import '../../services/storage_service.dart';
 import '../../services/firestore_sync_service.dart';
 import '../../services/file_download.dart';
+import '../../services/preferences_service.dart';
+import '../../services/currency_conversion_service.dart';
 import '../../widgets/consent_dialog.dart';
 
 /// User profile and settings screen
@@ -32,12 +35,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _isLoading = false;
   bool _isExporting = false;
   final UserPreferences _userPreferences = UserPreferences();
+  final PreferencesService _preferencesService = PreferencesService();
+  final CurrencyConversionService _currencyService =
+      CurrencyConversionService();
   bool _analyticsConsent = false;
+  UserPreferencesModel? _userPrefs;
 
   @override
   void initState() {
     super.initState();
     _loadPreferences();
+    _loadUserPreferences();
   }
 
   Future<void> _loadPreferences() async {
@@ -46,6 +54,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() {
         _analyticsConsent = _userPreferences.analyticsConsent;
       });
+    }
+  }
+
+  Future<void> _loadUserPreferences() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+    if (user != null) {
+      final prefs = await _preferencesService.getPreferences(user.uid);
+      if (mounted) {
+        setState(() {
+          _userPrefs = prefs;
+        });
+      }
     }
   }
 
@@ -243,6 +264,151 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _updateLanguage(AppLanguage language) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+    if (user == null) return;
+
+    try {
+      await _preferencesService.updateLanguage(user.uid, language);
+      await _loadUserPreferences();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Language updated to ${language.displayName}'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update language: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _updateCurrency(AppCurrency currency) async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+    if (user == null || _userPrefs == null) return;
+
+    // If currency is same as current, no need to update
+    if (_userPrefs!.currency == currency) return;
+
+    // Show conversion warning dialog
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Currency Conversion'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Changing from ${_userPrefs!.currency.code} to ${currency.code} will apply a conversion rate to all saved transactions in all projects.',
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'The conversion rate is based on the European Central Bank rate from Frankfurter API.',
+              style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+            ),
+            const SizedBox(height: 16),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange[200]!),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.warning_amber, color: Colors.orange[700], size: 20),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'This will modify all transaction amounts',
+                      style: TextStyle(fontSize: 12),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Theme.of(context).primaryColor,
+            ),
+            child: const Text('Convert'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) return;
+
+    try {
+      setState(() => _isLoading = true);
+
+      // Fetch conversion rate
+      double? conversionRate;
+      if (_userPrefs!.currency == AppCurrency.eur &&
+          currency == AppCurrency.usd) {
+        conversionRate = await _currencyService.getEurToUsdRate();
+      } else if (_userPrefs!.currency == AppCurrency.usd &&
+          currency == AppCurrency.eur) {
+        conversionRate = await _currencyService.getUsdToEurRate();
+      }
+
+      if (conversionRate == null) {
+        throw Exception('Failed to fetch conversion rate');
+      }
+
+      // Update currency preference with conversion rate
+      await _preferencesService.updateCurrency(
+        user.uid,
+        currency,
+        conversionRate: conversionRate,
+      );
+      await _loadUserPreferences();
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                'Currency updated to ${currency.code} (rate: ${conversionRate.toStringAsFixed(4)})'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to update currency: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -355,6 +521,87 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             icon: const Icon(Icons.edit),
                             label: const Text('Edit Profile'),
                           ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // User Preferences (Language & Currency)
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Preferences',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        // Language selector
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Language',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            ),
+                            DropdownButton<AppLanguage>(
+                              value: _userPrefs?.language ?? AppLanguage.english,
+                              items: AppLanguage.values.map((lang) {
+                                return DropdownMenuItem(
+                                  value: lang,
+                                  child: Text(lang.displayName),
+                                );
+                              }).toList(),
+                              onChanged: _isLoading
+                                  ? null
+                                  : (AppLanguage? newValue) {
+                                      if (newValue != null) {
+                                        _updateLanguage(newValue);
+                                      }
+                                    },
+                            ),
+                          ],
+                        ),
+                        const Divider(height: 24),
+                        // Currency selector
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              'Currency',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            ),
+                            DropdownButton<AppCurrency>(
+                              value: _userPrefs?.currency ?? AppCurrency.eur,
+                              items: AppCurrency.values.map((curr) {
+                                return DropdownMenuItem(
+                                  value: curr,
+                                  child: Text(
+                                      '${curr.symbol} ${curr.displayName}'),
+                                );
+                              }).toList(),
+                              onChanged: _isLoading
+                                  ? null
+                                  : (AppCurrency? newValue) {
+                                      if (newValue != null) {
+                                        _updateCurrency(newValue);
+                                      }
+                                    },
+                            ),
+                          ],
+                        ),
                       ],
                     ),
                   ),
