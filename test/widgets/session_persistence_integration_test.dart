@@ -6,21 +6,19 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:artist_finance_manager/main.dart';
 import 'package:artist_finance_manager/services/device_info_service.dart';
 
-/**
- * Integration Test: Session Persistence Across App Restarts
- * 
- * This test validates that user sessions persist correctly when the app
- * is closed and reopened, simulating real-world usage patterns.
- * 
- * Test Flow:
- * 1. Sign in user
- * 2. Verify authenticated state
- * 3. Simulate app restart (reinitialize Firebase)
- * 4. Verify session is automatically restored
- * 5. Verify device tracking works correctly
- * 
- * Note: This test requires Firebase Test Lab or local emulator setup.
- */
+/// Integration Test: Session Persistence Across App Restarts
+/// 
+/// This test validates that user sessions persist correctly when the app
+/// is closed and reopened, simulating real-world usage patterns.
+/// 
+/// Test Flow:
+/// 1. Sign in user
+/// 2. Verify authenticated state
+/// 3. Simulate app restart (reinitialize Firebase)
+/// 4. Verify session is automatically restored
+/// 5. Verify device tracking works correctly
+/// 
+/// Note: This test requires Firebase Test Lab or local emulator setup.
 
 void main() {
   IntegrationTestWidgetsFlutterBinding.ensureInitialized();

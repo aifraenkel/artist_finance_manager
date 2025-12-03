@@ -3,15 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/**
- * Session Persistence Tests
- * 
- * These tests verify that authentication sessions persist correctly
- * across app restarts and device changes, following OWASP best practices.
- * 
- * Note: These are unit tests with mocked Firebase dependencies.
- * Integration tests with real Firebase are in integration_test/.
- */
+/// Session Persistence Tests
+/// 
+/// These tests verify that authentication sessions persist correctly
+/// across app restarts and device changes, following OWASP best practices.
+/// 
+/// Note: These are unit tests with mocked Firebase dependencies.
+/// Integration tests with real Firebase are in integration_test/.
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();

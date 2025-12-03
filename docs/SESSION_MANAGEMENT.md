@@ -67,12 +67,14 @@ All authentication events are logged for security monitoring:
 - **Session Restoration**: User info, last login time
 - **User Sign-Out**: User info, timestamp
 
-Example log output:
+Example log output (with email hashing for privacy):
 ```
-INFO: User john@example.com signed in from Chrome on macOS (device: abc-123, login #5)
-INFO: Session restored for user john@example.com
-INFO: User john@example.com signed out
+INFO: User a1b2c3d4e5f6g7h8 signed in from Chrome on macOS (device: abc-123, login #5)
+INFO: Session restored for user a1b2c3d4e5f6g7h8
+INFO: User a1b2c3d4e5f6g7h8 signed out
 ```
+
+**Note**: Email addresses are hashed using SHA-256 for OWASP compliance and PII protection. The hash is deterministic, so the same email always produces the same hash for tracking purposes.
 
 ### Device Information Tracking
 

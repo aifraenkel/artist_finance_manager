@@ -7,12 +7,10 @@ import 'package:artist_finance_manager/widgets/auth_wrapper.dart';
 import 'package:artist_finance_manager/screens/auth/login_screen.dart';
 import 'package:artist_finance_manager/screens/home_screen.dart';
 
-/**
- * Auth Wrapper Session Persistence Widget Tests
- * 
- * Tests the AuthWrapper widget's behavior when handling
- * persisted authentication sessions.
- */
+/// Auth Wrapper Session Persistence Widget Tests
+/// 
+/// Tests the AuthWrapper widget's behavior when handling
+/// persisted authentication sessions.
 
 class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   bool _isAuthenticated = false;
