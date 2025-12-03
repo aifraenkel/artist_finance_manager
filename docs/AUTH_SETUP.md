@@ -13,7 +13,9 @@ The application uses Firebase Authentication with email link (passwordless) auth
 - **User Profiles**: Manage account settings and preferences
 - **Soft Delete**: Account deletion with 90-day recovery period
 - **Email Notifications**: Welcome emails, deletion confirmations, and security alerts
-- **Session Management**: Automatic authentication state management
+- **Session Persistence**: Keep users logged in across app restarts (see [SESSION_MANAGEMENT.md](./SESSION_MANAGEMENT.md))
+- **Device Tracking**: Monitor sign-ins from different devices for security
+- **Enhanced Logging**: Track authentication events for audit and security
 
 ## Architecture
 
@@ -309,7 +311,7 @@ gcloud firestore export gs://backup-bucket --collection-ids=users
 2. **Add Social Auth**: Extend to support Google, Apple, etc.
 3. **Implement Rate Limiting**: Add Firestore-based rate limiting
 4. **Add 2FA**: Optional two-factor authentication
-5. **Session Management**: Implement "remember me" functionality
+5. **Device Management UI**: Build UI for viewing and managing trusted devices
 6. **Account Recovery**: Build UI for recovering soft-deleted accounts
 
 ## References
@@ -317,4 +319,6 @@ gcloud firestore export gs://backup-bucket --collection-ids=users
 - [Firebase Authentication Docs](https://firebase.google.com/docs/auth)
 - [Firestore Security Rules](https://firebase.google.com/docs/firestore/security/get-started)
 - [Cloud Functions for Firebase](https://firebase.google.com/docs/functions)
+- [Session Management Guide](./SESSION_MANAGEMENT.md) - Detailed session persistence documentation
+- [OWASP Session Management](https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html)
 - [Flutter Firebase Integration](https://firebase.flutter.dev/)
