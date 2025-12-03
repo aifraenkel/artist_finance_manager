@@ -117,15 +117,19 @@ jobs:
 
       - name: Run unit tests with coverage
         run: npm run test:coverage
+        continue-on-error: false
 
       - name: Generate coverage summary
         id: coverage
+        continue-on-error: true
         run: |
           echo "## Cloud Functions Unit Tests Coverage" >> $GITHUB_STEP_SUMMARY
           if [ -f coverage/coverage-summary.json ]; then
             echo '```json' >> $GITHUB_STEP_SUMMARY
             cat coverage/coverage-summary.json >> $GITHUB_STEP_SUMMARY
             echo '```' >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Coverage report not generated" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: Upload coverage artifact
@@ -157,7 +161,7 @@ jobs:
       - name: Check for E2E tests
         id: check
         run: |
-          if find __tests__ -name "*.e2e.test.js" 2>/dev/null | grep -q .; then
+          if [ -d "__tests__" ] && find __tests__ -name "*.e2e.test.js" 2>/dev/null | grep -q .; then
             echo "exists=true" >> $GITHUB_OUTPUT
           else
             echo "exists=false" >> $GITHUB_OUTPUT
@@ -194,11 +198,35 @@ jobs:
       - name: Generate comprehensive test summary
         id: summary
         run: |
+          # Function to determine status with all possible states
+          get_status() {
+            local result="$1"
+            local passed_emoji="$2"
+            
+            case "$result" in
+              success)
+                echo "${passed_emoji} Passed"
+                ;;
+              failure)
+                echo "❌ Failed"
+                ;;
+              skipped)
+                echo "⏭️ Skipped"
+                ;;
+              cancelled)
+                echo "🚫 Cancelled"
+                ;;
+              *)
+                echo "❓ Unknown"
+                ;;
+            esac
+          }
+
           # Determine status for each test suite
-          FLUTTER_UNIT_STATUS="${{ needs.flutter-unit-widget-tests.result == 'success' && '✅ Passed' || '❌ Failed' }}"
-          FLUTTER_INTEGRATION_STATUS="${{ needs.flutter-integration-tests.result == 'success' && '✅ Passed' || needs.flutter-integration-tests.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }}"
-          FUNCTIONS_UNIT_STATUS="${{ needs.functions-unit-tests.result == 'success' && '✅ Passed' || '❌ Failed' }}"
-          FUNCTIONS_E2E_STATUS="${{ needs.functions-e2e-tests.result == 'success' && '✅ Passed' || needs.functions-e2e-tests.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }}"
+          FLUTTER_UNIT_STATUS=$(get_status "${{ needs.flutter-unit-widget-tests.result }}" "✅")
+          FLUTTER_INTEGRATION_STATUS=$(get_status "${{ needs.flutter-integration-tests.result }}" "✅")
+          FUNCTIONS_UNIT_STATUS=$(get_status "${{ needs.functions-unit-tests.result }}" "✅")
+          FUNCTIONS_E2E_STATUS=$(get_status "${{ needs.functions-e2e-tests.result }}" "✅")
 
           cat > test-summary.md << EOF
           ## 🧪 Test Results Summary
@@ -233,8 +261,28 @@ jobs:
             echo "" >> test-summary.md
           fi
 
-          # Add overall result
-          OVERALL_RESULT="${{ (needs.flutter-unit-widget-tests.result == 'success' && needs.flutter-integration-tests.result != 'failure' && needs.functions-unit-tests.result == 'success' && needs.functions-e2e-tests.result != 'failure') && 'success' || 'failure' }}"
+          # Add overall result - fail if any required test failed or was cancelled
+          OVERALL_RESULT="success"
+          
+          # Check Flutter unit tests (required)
+          if [ "${{ needs.flutter-unit-widget-tests.result }}" != "success" ]; then
+            OVERALL_RESULT="failure"
+          fi
+          
+          # Check Functions unit tests (required)
+          if [ "${{ needs.functions-unit-tests.result }}" != "success" ]; then
+            OVERALL_RESULT="failure"
+          fi
+          
+          # Check integration tests (failure counts, skipped is OK)
+          if [ "${{ needs.flutter-integration-tests.result }}" == "failure" ] || [ "${{ needs.flutter-integration-tests.result }}" == "cancelled" ]; then
+            OVERALL_RESULT="failure"
+          fi
+          
+          # Check E2E tests (failure counts, skipped is OK)
+          if [ "${{ needs.functions-e2e-tests.result }}" == "failure" ] || [ "${{ needs.functions-e2e-tests.result }}" == "cancelled" ]; then
+            OVERALL_RESULT="failure"
+          fi
           
           if [ "$OVERALL_RESULT" = "success" ]; then
             echo "### ✅ All Tests Passed!" >> test-summary.md

@@ -68,6 +68,21 @@ The `test-summary` job runs after all test jobs complete (even if some fail) and
 3. GitHub branch protection rules should require the `Test Summary & PR Comment` check to pass
 4. Failed tests will prevent PR merges automatically
 
+### Setting Up Branch Protection
+
+To enforce test passing before merging PRs, repository administrators should configure branch protection rules:
+
+1. Go to **Settings** → **Branches** in your GitHub repository
+2. Add a branch protection rule for `main` and/or `master`
+3. Enable **Require status checks to pass before merging**
+4. Search for and select these required checks:
+   - `Test Summary & PR Comment` (from test-all.yml)
+   - `Analyze & Format Check` (from flutter-ci.yml - optional but recommended)
+5. Enable **Require branches to be up to date before merging** (recommended)
+6. Save the branch protection rule
+
+Once configured, PRs cannot be merged until all required status checks pass.
+
 ## Relationship with Other Workflows
 
 ### `flutter-ci.yml`
