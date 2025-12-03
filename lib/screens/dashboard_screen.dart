@@ -510,7 +510,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       dotData: const FlDotData(show: false),
                     ),
                   ],
-                  minY: minY * 1.1,
+                  minY: minY < 0 ? minY * 1.1 : minY,
                   maxY: maxY * 1.1,
                 ),
               ),
