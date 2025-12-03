@@ -104,7 +104,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const Text('This will:'),
             const SizedBox(height: 8),
             const Text('• Remove access to your account'),
-            const Text('• Keep your data for 90 days in case you change your mind'),
+            const Text(
+                '• Keep your data for 90 days in case you change your mind'),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -237,9 +238,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 8),
                         Text(
                           user.email,
-                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                color: Colors.grey[600],
-                              ),
+                          style:
+                              Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
                         ),
                         const SizedBox(height: 16),
                         if (_isEditing)

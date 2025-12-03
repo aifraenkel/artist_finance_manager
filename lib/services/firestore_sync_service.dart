@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../models/transaction.dart';
+import '../models/transaction.dart' as models;
 import 'sync_service.dart';
 
 /// Firestore-based implementation of [SyncService].
@@ -71,12 +71,11 @@ class FirestoreSyncService implements SyncService {
   }
 
   @override
-  Future<List<Transaction>> loadTransactions() async {
+  Future<List<models.Transaction>> loadTransactions() async {
     try {
       // Get all transactions, excluding metadata document
-      final querySnapshot = await _transactionsRef()
-          .orderBy('date', descending: true)
-          .get();
+      final querySnapshot =
+          await _transactionsRef().orderBy('date', descending: true).get();
 
       // Filter out metadata document and map to Transaction objects
       return querySnapshot.docs
@@ -89,14 +88,15 @@ class FirestoreSyncService implements SyncService {
   }
 
   @override
-  Future<void> saveTransactions(List<Transaction> transactions) async {
+  Future<void> saveTransactions(List<models.Transaction> transactions) async {
     try {
       // Firestore batch limit is 500 operations per batch.
       const batchLimit = 450; // Leave room for metadata operations
 
       // First, delete all existing transactions (except metadata) in batches
       final existingDocs = await _transactionsRef().get();
-      final docsToDelete = existingDocs.docs.where((doc) => doc.id != _metadataDoc).toList();
+      final docsToDelete =
+          existingDocs.docs.where((doc) => doc.id != _metadataDoc).toList();
       for (var i = 0; i < docsToDelete.length; i += batchLimit) {
         final chunk = docsToDelete.skip(i).take(batchLimit);
         final deleteBatch = _firestore.batch();
@@ -145,7 +145,7 @@ class FirestoreSyncService implements SyncService {
   }
 
   @override
-  Future<void> addTransaction(Transaction transaction) async {
+  Future<void> addTransaction(models.Transaction transaction) async {
     try {
       final batch = _firestore.batch();
 
@@ -248,7 +248,7 @@ class FirestoreSyncService implements SyncService {
   }
 
   /// Converts a Firestore document to a Transaction.
-  Transaction _transactionFromFirestore(
+  models.Transaction _transactionFromFirestore(
       QueryDocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data();
     final id = int.tryParse(doc.id);
@@ -258,7 +258,7 @@ class FirestoreSyncService implements SyncService {
         message: 'Invalid transaction ID format: ${doc.id}',
       );
     }
-    return Transaction(
+    return models.Transaction(
       id: id,
       description: data['description'] as String,
       amount: (data['amount'] as num).toDouble(),
@@ -269,7 +269,7 @@ class FirestoreSyncService implements SyncService {
   }
 
   /// Converts a Transaction to a Firestore document map.
-  Map<String, dynamic> _transactionToFirestore(Transaction transaction) {
+  Map<String, dynamic> _transactionToFirestore(models.Transaction transaction) {
     return {
       'description': transaction.description,
       'amount': transaction.amount,
@@ -296,12 +296,12 @@ class FirestoreSyncService implements SyncService {
       case 'unavailable':
       case 'network-request-failed':
         code = SyncException.networkError;
-        message =
-            'Network error. Please check your connection and try again.';
+        message = 'Network error. Please check your connection and try again.';
         break;
       default:
         code = SyncException.unknown;
-        message = 'An unexpected error occurred during $operation: ${e.message}';
+        message =
+            'An unexpected error occurred during $operation: ${e.message}';
     }
 
     return SyncException(

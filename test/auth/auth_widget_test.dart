@@ -6,16 +6,14 @@ import 'package:artist_finance_manager/screens/auth/login_screen.dart';
 import 'package:artist_finance_manager/screens/auth/registration_screen.dart';
 import 'package:artist_finance_manager/models/app_user.dart';
 
-/**
- * Authentication Widget Tests
- * Tests the authentication UI and validation without Firebase dependencies
- */
+/// Authentication Widget Tests
+/// Tests the authentication UI and validation without Firebase dependencies
 
 class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   bool _isAuthenticated = false;
   AppUser? _user;
   String? _error;
-  bool _isLoading = false;
+  final bool _isLoading = false;
 
   @override
   bool get isAuthenticated => _isAuthenticated;
@@ -39,13 +37,15 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   void clearError() => _error = null;
 
   @override
-  Future<bool> sendSignInLink(String email, String continueUrl, {String? name}) async {
+  Future<bool> sendSignInLink(String email, String continueUrl,
+      {String? name}) async {
     await Future.delayed(const Duration(milliseconds: 50));
     return true;
   }
 
   @override
-  Future<bool> sendRegistrationLink(String email, String name, String continueUrl) async {
+  Future<bool> sendRegistrationLink(
+      String email, String name, String continueUrl) async {
     await Future.delayed(const Duration(milliseconds: 50));
     return true;
   }
@@ -72,7 +72,8 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   }
 
   @override
-  Future<bool> signInWithEmailLink(String email, String emailLink) async => true;
+  Future<bool> signInWithEmailLink(String email, String emailLink) async =>
+      true;
 
   @override
   Future<void> signOut() async => _isAuthenticated = false;
@@ -105,14 +106,17 @@ void main() {
 
       expect(find.text('Artist Finance Manager'), findsOneWidget);
       expect(find.byType(TextFormField), findsOneWidget);
-      expect(find.widgetWithText(ElevatedButton, 'Send Sign-In Link'), findsOneWidget);
+      expect(find.widgetWithText(ElevatedButton, 'Send Sign-In Link'),
+          findsOneWidget);
     });
 
-    testWidgets('Registration form validates required fields', (WidgetTester tester) async {
+    testWidgets('Registration form validates required fields',
+        (WidgetTester tester) async {
       await tester.pumpWidget(createTestApp(const RegistrationScreen()));
       await tester.pumpAndSettle();
 
-      final registerButton = find.widgetWithText(ElevatedButton, 'Create Account');
+      final registerButton =
+          find.widgetWithText(ElevatedButton, 'Create Account');
       await tester.tap(registerButton);
       await tester.pumpAndSettle();
 
@@ -120,7 +124,8 @@ void main() {
       expect(find.text('Please enter your email'), findsOneWidget);
     });
 
-    testWidgets('Registration form validates email format', (WidgetTester tester) async {
+    testWidgets('Registration form validates email format',
+        (WidgetTester tester) async {
       await tester.pumpWidget(createTestApp(const RegistrationScreen()));
       await tester.pumpAndSettle();
 
@@ -128,7 +133,8 @@ void main() {
       await tester.enterText(find.byType(TextFormField).at(1), 'invalid-email');
       await tester.pumpAndSettle();
 
-      final registerButton = find.widgetWithText(ElevatedButton, 'Create Account');
+      final registerButton =
+          find.widgetWithText(ElevatedButton, 'Create Account');
       await tester.tap(registerButton);
       await tester.pumpAndSettle();
 
@@ -149,15 +155,18 @@ void main() {
       expect(find.text('Please enter a valid email'), findsOneWidget);
     });
 
-    testWidgets('Complete registration with valid data', (WidgetTester tester) async {
+    testWidgets('Complete registration with valid data',
+        (WidgetTester tester) async {
       await tester.pumpWidget(createTestApp(const RegistrationScreen()));
       await tester.pumpAndSettle();
 
       await tester.enterText(find.byType(TextFormField).at(0), 'John Doe');
-      await tester.enterText(find.byType(TextFormField).at(1), 'john@example.com');
+      await tester.enterText(
+          find.byType(TextFormField).at(1), 'john@example.com');
       await tester.pumpAndSettle();
 
-      final registerButton = find.widgetWithText(ElevatedButton, 'Create Account');
+      final registerButton =
+          find.widgetWithText(ElevatedButton, 'Create Account');
       await tester.tap(registerButton);
       await tester.pumpAndSettle();
 

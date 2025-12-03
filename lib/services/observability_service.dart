@@ -11,13 +11,16 @@ abstract class ObservabilityService {
   void trackEvent(String name, {Map<String, dynamic>? attributes});
 
   /// Track a measurement (metric)
-  void trackMeasurement(String name, double value, {Map<String, String>? attributes});
+  void trackMeasurement(String name, double value,
+      {Map<String, String>? attributes});
 
   /// Track an error
-  void trackError(dynamic error, {StackTrace? stackTrace, Map<String, dynamic>? context});
+  void trackError(dynamic error,
+      {StackTrace? stackTrace, Map<String, dynamic>? context});
 
   /// Log a message
-  void log(String message, {String level = 'info', Map<String, dynamic>? context});
+  void log(String message,
+      {String level = 'info', Map<String, dynamic>? context});
 
   /// Set user information
   void setUser(String userId, {String? email, String? username});

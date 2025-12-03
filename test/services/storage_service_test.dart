@@ -145,17 +145,20 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    test('isSyncAvailable returns true when syncService is available', () async {
+    test('isSyncAvailable returns true when syncService is available',
+        () async {
       mockSyncService.setAvailable(true);
       expect(await storageService.isSyncAvailable(), isTrue);
     });
 
-    test('isSyncAvailable returns false when syncService is unavailable', () async {
+    test('isSyncAvailable returns false when syncService is unavailable',
+        () async {
       mockSyncService.setAvailable(false);
       expect(await storageService.isSyncAvailable(), isFalse);
     });
 
-    test('In cloudSync mode, loads from cloud and updates local cache', () async {
+    test('In cloudSync mode, loads from cloud and updates local cache',
+        () async {
       // Setup cloud data
       await mockSyncService.saveTransactions([
         Transaction(
@@ -403,7 +406,7 @@ void main() {
       ];
 
       await storageService.saveTransactions(transactions);
-      
+
       // Delete one
       await storageService.deleteTransaction(2, [transactions[0]]);
 

@@ -7,8 +7,7 @@ import '../screens/home_screen.dart';
 
 // Web-only import for URL manipulation
 // ignore: avoid_web_libraries_in_flutter
-import 'auth_wrapper_stub.dart'
-    if (dart.library.html) 'dart:html' as html;
+import 'auth_wrapper_stub.dart' if (dart.library.html) 'dart:html' as html;
 
 /// Authentication wrapper widget
 ///
@@ -65,8 +64,11 @@ class _AuthWrapperState extends State<AuthWrapper> {
     // Old Firebase email link flow is no longer supported
     // Users must use the token-based flow via registration/sign-in emails
     final link = uri.toString();
-    if (link.contains('apiKey') && link.contains('oobCode') && link.contains('mode=signIn')) {
-      print('DEBUG: Ignoring legacy Firebase email link - use token-based flow instead');
+    if (link.contains('apiKey') &&
+        link.contains('oobCode') &&
+        link.contains('mode=signIn')) {
+      print(
+          'DEBUG: Ignoring legacy Firebase email link - use token-based flow instead');
       // Clean URL and show login screen - user will need to request new sign-in link
       _cleanUrl();
     }

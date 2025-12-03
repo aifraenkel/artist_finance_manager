@@ -8,7 +8,7 @@ import '../models/app_user.dart';
 /// - Email token (passwordless from user perspective) authentication
 /// - User registration and profile creation via backend-verified tokens
 /// - User profile updates
-/// - Account soft deletion  
+/// - Account soft deletion
 /// - Session management
 ///
 /// Note: Firebase passwords are used internally for compatibility but are
@@ -57,13 +57,14 @@ class AuthService {
   }) async {
     try {
       print('DEBUG: Attempting to send sign-in link to $email');
-      print('DEBUG: ActionCodeSettings - URL: ${actionCodeSettings.url}, handleCodeInApp: ${actionCodeSettings.handleCodeInApp}');
-      
+      print(
+          'DEBUG: ActionCodeSettings - URL: ${actionCodeSettings.url}, handleCodeInApp: ${actionCodeSettings.handleCodeInApp}');
+
       await _auth.sendSignInLinkToEmail(
         email: email,
         actionCodeSettings: actionCodeSettings,
       );
-      
+
       print('DEBUG: Sign-in link sent successfully to $email');
       print('DEBUG: Check your email inbox and spam folder');
     } catch (e) {
@@ -148,10 +149,7 @@ class AuthService {
       userDoc['createdAt'] = FieldValue.serverTimestamp();
       userDoc['lastLoginAt'] = FieldValue.serverTimestamp();
 
-      await _firestore
-          .collection('users')
-          .doc(user.uid)
-          .set(userDoc);
+      await _firestore.collection('users').doc(user.uid).set(userDoc);
 
       return appUser;
     } catch (e) {
@@ -310,5 +308,4 @@ class AuthService {
       iOSBundleId: 'com.artist.financemanager',
     );
   }
-
 }

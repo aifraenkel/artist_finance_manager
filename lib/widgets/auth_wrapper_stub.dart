@@ -1,5 +1,5 @@
-/// Stub for non-web platforms
-/// This provides a no-op window.history for platforms that don't support dart:html
+// Stub for non-web platforms
+// This provides a no-op window.history for platforms that don't support dart:html
 
 class _Window {
   final _History history = _History();
