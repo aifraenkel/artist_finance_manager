@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
+import '../models/user_preferences.dart';
 import '../services/storage_service.dart';
 import '../services/firestore_sync_service.dart';
 import '../services/observability_service.dart';
 import '../services/user_preferences.dart';
 import '../services/migration_service.dart';
+import '../services/preferences_service.dart';
 import '../widgets/summary_cards.dart';
 import '../widgets/transaction_form.dart';
 import '../widgets/transaction_list.dart';
@@ -31,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Transaction> _transactions = [];
   bool _isLoading = true;
   bool _isSyncing = false;
+  String _currencySymbol = '€'; // Default to Euro
   Map<String, double> _globalSummary = {
     'income': 0,
     'expenses': 0,
@@ -109,6 +112,20 @@ class _HomeScreenState extends State<HomeScreen> {
       final isSyncAvailable = await _storageService.isSyncAvailable();
       if (isSyncAvailable) {
         await _storageService.setStorageMode(StorageMode.cloudSync);
+      }
+
+      // Load user currency preference
+      try {
+        final preferencesService = PreferencesService();
+        final userPrefs = await preferencesService.getPreferences(authProvider.currentUser!.uid);
+        if (mounted) {
+          setState(() {
+            _currencySymbol = userPrefs.currency.symbol;
+          });
+        }
+      } catch (e) {
+        print('Error loading user preferences: $e');
+        // Keep default currency symbol
       }
     }
 
@@ -594,6 +611,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     totalIncome: _totalIncome,
                                     totalExpenses: _totalExpenses,
                                     balance: _balance,
+                                    currencySymbol: _currencySymbol,
                                   ),
                                   const SizedBox(height: 24),
                                   TransactionForm(
@@ -605,6 +623,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     key: const ValueKey('transaction-list'),
                                     transactions: _transactions,
                                     onDelete: _deleteTransaction,
+                                    currencySymbol: _currencySymbol,
                                   ),
                                   const SizedBox(height: 32),
                                   // Footer with privacy policy link

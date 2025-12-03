@@ -104,6 +104,19 @@ class PreferencesService {
     }
   }
 
+  /// Migrate existing users to have default preferences
+  /// 
+  /// This should be called once per user when they log in
+  /// to ensure all users have preferences set
+  Future<void> migrateUserPreferences(String userId) async {
+    try {
+      await initializeDefaultPreferences(userId);
+    } catch (e) {
+      print('Error migrating user preferences: $e');
+      // Don't rethrow - we don't want to block user login
+    }
+  }
+
   /// Stream of user preferences changes
   Stream<UserPreferencesModel> watchPreferences(String userId) {
     return _firestore

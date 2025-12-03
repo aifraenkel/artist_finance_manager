@@ -101,6 +101,14 @@ class AuthService {
 
       print('DEBUG: Session restored for user ${_hashEmail(user.email ?? '')}');
 
+      // Ensure user has preferences (for existing users migration)
+      try {
+        await _preferencesService.migrateUserPreferences(user.uid);
+      } catch (e) {
+        print('WARN: Failed to migrate preferences for user ${_hashEmail(user.email ?? '')}: $e');
+        // Don't fail the login
+      }
+
       return appUser;
     } catch (e) {
       print('Error getting current app user: $e');
@@ -361,6 +369,14 @@ class AuthService {
 
       print(
           'INFO: User ${_hashEmail(user.email ?? '')} signed in from $deviceName (device: $deviceId, login #${updatedMetadata.loginCount})');
+
+      // Ensure user has preferences (for existing users migration)
+      try {
+        await _preferencesService.migrateUserPreferences(user.uid);
+      } catch (e) {
+        print('WARN: Failed to migrate preferences for user ${_hashEmail(user.email ?? '')}: $e');
+        // Don't fail the login
+      }
     } catch (e) {
       print('Error updating last login: $e');
       _observability.trackError(e, context: {
