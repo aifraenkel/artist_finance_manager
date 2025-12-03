@@ -250,8 +250,9 @@ _observability.trackEvent('user_sign_in', attributes: {
 | Data Protection | ✅ Full | Encrypted in transit and at rest |
 | Monitoring | ✅ Full | Email hashing implemented |
 
-**Overall Compliance: 100%**
+**Overall Compliance: 95%**
 
+> _Note: Some controls remain outstanding (see checklist and recommendations). Compliance percentage will be updated as these are addressed._
 ## Recommendations for Production
 
 1. **Immediate (High Priority):**
