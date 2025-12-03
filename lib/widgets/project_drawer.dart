@@ -230,7 +230,10 @@ class ProjectDrawer extends StatelessWidget {
                         ),
                       ],
                     )
-                  : null,
+                  : Tooltip(
+                      message: 'Switch to another project to rename or delete this one.',
+                      child: Icon(Icons.info_outline, color: Colors.grey),
+                    ),
             );
           },
         );
