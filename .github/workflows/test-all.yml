@@ -1,0 +1,288 @@
+name: All Tests
+
+on:
+  pull_request:
+    branches: [ main, master ]
+  push:
+    branches: [ main, master ]
+
+jobs:
+  # Job 1: Flutter Unit & Widget Tests
+  flutter-unit-widget-tests:
+    name: Flutter Unit & Widget Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run unit and widget tests with coverage
+        run: flutter test --coverage --exclude-tags=integration
+
+      - name: Install lcov
+        run: sudo apt-get update && sudo apt-get install -y lcov
+
+      - name: Generate coverage summary
+        id: coverage
+        run: |
+          echo "## Flutter Unit & Widget Tests Coverage" >> $GITHUB_STEP_SUMMARY
+          lcov --summary coverage/lcov.info 2>&1 | tee coverage-summary.txt
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat coverage-summary.txt >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: flutter-coverage
+          path: |
+            coverage/
+            coverage-summary.txt
+
+  # Job 2: Flutter Integration Tests
+  flutter-integration-tests:
+    name: Flutter Integration Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Cache pub packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Check for integration tests
+        id: check
+        run: |
+          if [ -d "test/integration_test" ] && [ -n "$(find test/integration_test -name '*_test.dart' 2>/dev/null)" ]; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run integration tests
+        if: steps.check.outputs.exists == 'true'
+        run: flutter test --tags=integration
+
+      - name: Report no integration tests
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          echo "## Flutter Integration Tests" >> $GITHUB_STEP_SUMMARY
+          echo "No integration tests found - skipping" >> $GITHUB_STEP_SUMMARY
+
+  # Job 3: Cloud Functions Unit Tests
+  functions-unit-tests:
+    name: Cloud Functions Unit Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functions
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run unit tests with coverage
+        run: npm run test:coverage
+
+      - name: Generate coverage summary
+        id: coverage
+        run: |
+          echo "## Cloud Functions Unit Tests Coverage" >> $GITHUB_STEP_SUMMARY
+          if [ -f coverage/coverage-summary.json ]; then
+            echo '```json' >> $GITHUB_STEP_SUMMARY
+            cat coverage/coverage-summary.json >> $GITHUB_STEP_SUMMARY
+            echo '```' >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: functions-coverage
+          path: functions/coverage/
+
+  # Job 4: Cloud Functions E2E Tests
+  functions-e2e-tests:
+    name: Cloud Functions E2E Tests
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: functions
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: functions/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check for E2E tests
+        id: check
+        run: |
+          if find __tests__ -name "*.e2e.test.js" 2>/dev/null | grep -q .; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run E2E tests
+        if: steps.check.outputs.exists == 'true'
+        run: npm run test:e2e
+
+      - name: Report no E2E tests
+        if: steps.check.outputs.exists == 'false'
+        run: |
+          echo "## Cloud Functions E2E Tests" >> $GITHUB_STEP_SUMMARY
+          echo "No E2E tests found - skipping" >> $GITHUB_STEP_SUMMARY
+
+  # Job 5: Aggregate Results and Comment on PR
+  test-summary:
+    name: Test Summary & PR Comment
+    runs-on: ubuntu-latest
+    needs: [flutter-unit-widget-tests, flutter-integration-tests, functions-unit-tests, functions-e2e-tests]
+    if: always()
+    permissions:
+      pull-requests: write
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate comprehensive test summary
+        id: summary
+        run: |
+          cat > test-summary.md << 'EOF'
+          ## 🧪 Test Results Summary
+          
+          ### Test Jobs Status
+          | Test Suite | Status |
+          |------------|--------|
+          | Flutter Unit & Widget Tests | ${{ needs.flutter-unit-widget-tests.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+          | Flutter Integration Tests | ${{ needs.flutter-integration-tests.result == 'success' && '✅ Passed' || needs.flutter-integration-tests.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+          | Cloud Functions Unit Tests | ${{ needs.functions-unit-tests.result == 'success' && '✅ Passed' || '❌ Failed' }} |
+          | Cloud Functions E2E Tests | ${{ needs.functions-e2e-tests.result == 'success' && '✅ Passed' || needs.functions-e2e-tests.result == 'skipped' && '⏭️ Skipped' || '❌ Failed' }} |
+          
+          ### Coverage Reports
+          
+          EOF
+
+          # Add Flutter coverage if available
+          if [ -f artifacts/flutter-coverage/coverage-summary.txt ]; then
+            echo "#### Flutter Coverage" >> test-summary.md
+            echo '```' >> test-summary.md
+            cat artifacts/flutter-coverage/coverage-summary.txt >> test-summary.md
+            echo '```' >> test-summary.md
+            echo "" >> test-summary.md
+          fi
+
+          # Add Functions coverage if available
+          if [ -f artifacts/functions-coverage/coverage-summary.json ]; then
+            echo "#### Cloud Functions Coverage" >> test-summary.md
+            echo '```json' >> test-summary.md
+            cat artifacts/functions-coverage/coverage-summary.json >> test-summary.md
+            echo '```' >> test-summary.md
+            echo "" >> test-summary.md
+          fi
+
+          # Add overall result
+          OVERALL_RESULT="${{ (needs.flutter-unit-widget-tests.result == 'success' && needs.flutter-integration-tests.result != 'failure' && needs.functions-unit-tests.result == 'success' && needs.functions-e2e-tests.result != 'failure') && 'success' || 'failure' }}"
+          
+          if [ "$OVERALL_RESULT" = "success" ]; then
+            echo "### ✅ All Tests Passed!" >> test-summary.md
+            echo "SUCCESS=true" >> $GITHUB_OUTPUT
+          else
+            echo "### ❌ Some Tests Failed" >> test-summary.md
+            echo "Please review the failing tests and fix the issues before merging." >> test-summary.md
+            echo "SUCCESS=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Add to step summary
+          cat test-summary.md >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment PR with test results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = fs.readFileSync('test-summary.md', 'utf8');
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🧪 Test Results Summary')
+            );
+            
+            const commentBody = summary + '\n\n---\n*Updated at ' + new Date().toISOString() + '*';
+            
+            if (botComment) {
+              // Update existing comment
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              // Create new comment
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }
+
+      - name: Fail if tests failed
+        if: steps.summary.outputs.SUCCESS == 'false'
+        run: |
+          echo "Some tests failed. Please fix them before merging."
+          exit 1
