@@ -259,7 +259,7 @@ class AuthService {
       print('Error registering user: $e');
       _observability.trackError(e, context: {
         'operation': 'registerUser',
-        'email': email,
+        'emailHash': _hashEmail(email),
       });
       rethrow;
     }
