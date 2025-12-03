@@ -236,20 +236,20 @@ jobs:
           FUNCTIONS_UNIT_STATUS=$(get_status "${{ needs.functions-unit-tests.result }}" "✅")
           FUNCTIONS_E2E_STATUS=$(get_status "${{ needs.functions-e2e-tests.result }}" "✅")
 
-          cat > test-summary.md <<EOF
-## 🧪 Test Results Summary
-
-### Test Jobs Status
-| Test Suite | Status |
-|------------|--------|
-| Flutter Unit & Widget Tests | ${FLUTTER_UNIT_STATUS} |
-| Flutter Integration Tests | ${FLUTTER_INTEGRATION_STATUS} |
-| Cloud Functions Unit Tests | ${FUNCTIONS_UNIT_STATUS} |
-| Cloud Functions E2E Tests | ${FUNCTIONS_E2E_STATUS} |
-
-### Coverage Reports
-
-EOF
+          cat > test-summary.md << EOF
+          ## 🧪 Test Results Summary
+          
+          ### Test Jobs Status
+          | Test Suite | Status |
+          |------------|--------|
+          | Flutter Unit & Widget Tests | ${FLUTTER_UNIT_STATUS} |
+          | Flutter Integration Tests | ${FLUTTER_INTEGRATION_STATUS} |
+          | Cloud Functions Unit Tests | ${FUNCTIONS_UNIT_STATUS} |
+          | Cloud Functions E2E Tests | ${FUNCTIONS_E2E_STATUS} |
+          
+          ### Coverage Reports
+          
+          EOF
           # Add Flutter coverage if available
           if [ -f artifacts/flutter-coverage/coverage-summary.txt ]; then
             echo "#### Flutter Coverage" >> test-summary.md
