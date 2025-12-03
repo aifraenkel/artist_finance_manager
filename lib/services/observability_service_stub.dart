@@ -42,5 +42,6 @@ class ObservabilityServiceImpl implements ObservabilityService {
 }
 
 /// Factory function to get the observability service
-ObservabilityService getObservabilityService({UserPreferences? userPreferences}) => 
+ObservabilityService getObservabilityService(
+        {UserPreferences? userPreferences}) =>
     ObservabilityServiceImpl(userPreferences: userPreferences);

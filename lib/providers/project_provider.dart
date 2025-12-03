@@ -10,7 +10,7 @@ import '../services/project_service.dart';
 /// - Project CRUD operations
 class ProjectProvider extends ChangeNotifier {
   final ProjectService projectService;
-  
+
   List<Project> _projects = [];
   Project? _currentProject;
   bool _isLoading = false;
@@ -92,16 +92,16 @@ class ProjectProvider extends ChangeNotifier {
     try {
       _error = null;
       await projectService.updateProject(project);
-      
+
       final index = _projects.indexWhere((p) => p.id == project.id);
       if (index != -1) {
         _projects[index] = project;
       }
-      
+
       if (_currentProject?.id == project.id) {
         _currentProject = project;
       }
-      
+
       notifyListeners();
       return true;
     } catch (e) {
@@ -132,9 +132,9 @@ class ProjectProvider extends ChangeNotifier {
     try {
       _error = null;
       await projectService.deleteProject(projectId);
-      
+
       _projects.removeWhere((p) => p.id == projectId);
-      
+
       // If we deleted the current project, switch to another one
       if (_currentProject?.id == projectId) {
         if (_projects.isNotEmpty) {
@@ -147,7 +147,7 @@ class ProjectProvider extends ChangeNotifier {
           await projectService.setCurrentProjectId(defaultProject.id);
         }
       }
-      
+
       notifyListeners();
       return true;
     } catch (e) {

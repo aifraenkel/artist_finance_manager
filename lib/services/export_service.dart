@@ -65,7 +65,7 @@ class ExportService {
     if (type.isEmpty) {
       return 'Unknown';
     }
-    
+
     switch (type.toLowerCase()) {
       case 'income':
         return 'Income';
@@ -73,7 +73,7 @@ class ExportService {
         return 'Expense';
       default:
         // Return the original type capitalized for unknown types
-        return type[0].toUpperCase() + 
+        return type[0].toUpperCase() +
             (type.length > 1 ? type.substring(1).toLowerCase() : '');
     }
   }

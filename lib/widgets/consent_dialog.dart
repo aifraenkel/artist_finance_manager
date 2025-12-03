@@ -64,8 +64,10 @@ class ConsentDialog extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            _buildBulletPoint('Transaction events (add/delete/load)', Icons.check),
-            _buildBulletPoint('Performance metrics (load times, Web Vitals)', Icons.check),
+            _buildBulletPoint(
+                'Transaction events (add/delete/load)', Icons.check),
+            _buildBulletPoint(
+                'Performance metrics (load times, Web Vitals)', Icons.check),
             _buildBulletPoint('Error tracking', Icons.check),
             _buildBulletPoint('Session analytics', Icons.check),
             const SizedBox(height: 16),
@@ -74,9 +76,12 @@ class ConsentDialog extends StatelessWidget {
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            _buildBulletPoint('Transaction amounts', Icons.close, isNegative: true),
-            _buildBulletPoint('Transaction descriptions', Icons.close, isNegative: true),
-            _buildBulletPoint('Personal financial data', Icons.close, isNegative: true),
+            _buildBulletPoint('Transaction amounts', Icons.close,
+                isNegative: true),
+            _buildBulletPoint('Transaction descriptions', Icons.close,
+                isNegative: true),
+            _buildBulletPoint('Personal financial data', Icons.close,
+                isNegative: true),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -114,7 +119,8 @@ class ConsentDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildBulletPoint(String text, IconData icon, {bool isNegative = false}) {
+  Widget _buildBulletPoint(String text, IconData icon,
+      {bool isNegative = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4),
       child: Row(

@@ -194,8 +194,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _isExporting = true);
 
     try {
-      final projectProvider = Provider.of<ProjectProvider>(context, listen: false);
-      
+      final projectProvider =
+          Provider.of<ProjectProvider>(context, listen: false);
+
       // Create export service with a factory function for storage services
       final exportService = ExportService(
         projectService: projectProvider.projectService,
@@ -481,7 +482,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 16),
                         OutlinedButton.icon(
-                          onPressed: (_isLoading || _isExporting) ? null : _exportToCSV,
+                          onPressed: (_isLoading || _isExporting)
+                              ? null
+                              : _exportToCSV,
                           icon: _isExporting
                               ? const SizedBox(
                                   width: 20,

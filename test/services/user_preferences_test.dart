@@ -64,7 +64,7 @@ void main() {
 
       // Wait a bit to ensure timestamp is different
       await Future.delayed(const Duration(milliseconds: 10));
-      
+
       await userPreferences.setAnalyticsConsent(false);
       final secondTimestamp = userPreferences.consentTimestamp;
 
@@ -104,13 +104,15 @@ void main() {
       final afterTime = DateTime.now();
 
       final timestamp = userPreferences.consentTimestamp!;
-      expect(timestamp.isAfter(beforeTime.subtract(const Duration(seconds: 1))), isTrue);
-      expect(timestamp.isBefore(afterTime.add(const Duration(seconds: 1))), isTrue);
+      expect(timestamp.isAfter(beforeTime.subtract(const Duration(seconds: 1))),
+          isTrue);
+      expect(timestamp.isBefore(afterTime.add(const Duration(seconds: 1))),
+          isTrue);
 
       // Verify it persists
       final newPreferences = UserPreferences();
       await newPreferences.initialize();
-      
+
       expect(newPreferences.consentTimestamp, isNotNull);
       expect(newPreferences.consentTimestamp!.millisecondsSinceEpoch,
           equals(timestamp.millisecondsSinceEpoch));

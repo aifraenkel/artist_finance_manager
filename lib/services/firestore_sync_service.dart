@@ -20,13 +20,13 @@ import 'sync_service.dart';
 class FirestoreSyncService implements SyncService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
-  
+
   /// Current project ID for scoping transactions
   String? _currentProjectId;
 
   /// Collection name for user transactions (subcollection under projects)
   static const String _transactionsCollection = 'transactions';
-  
+
   /// Collection name for projects (subcollection under users)
   static const String _projectsCollection = 'projects';
 
@@ -47,7 +47,7 @@ class FirestoreSyncService implements SyncService {
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
         _auth = auth ?? FirebaseAuth.instance,
         _currentProjectId = projectId;
-  
+
   /// Set the current project ID for scoping transactions.
   void setProjectId(String projectId) {
     _currentProjectId = projectId;

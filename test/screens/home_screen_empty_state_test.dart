@@ -46,10 +46,14 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   void clearError() {}
 
   @override
-  Future<bool> sendSignInLink(String email, String continueUrl, {String? name}) async => true;
+  Future<bool> sendSignInLink(String email, String continueUrl,
+          {String? name}) async =>
+      true;
 
   @override
-  Future<bool> sendRegistrationLink(String email, String name, String continueUrl) async => true;
+  Future<bool> sendRegistrationLink(
+          String email, String name, String continueUrl) async =>
+      true;
 
   @override
   Future<bool> verifyRegistrationToken(String token) async => true;
@@ -58,7 +62,8 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   Future<bool> registerUser(String email, String name) async => true;
 
   @override
-  Future<bool> signInWithEmailLink(String email, String emailLink) async => true;
+  Future<bool> signInWithEmailLink(String email, String emailLink) async =>
+      true;
 
   @override
   Future<void> signOut() async {}
@@ -144,7 +149,8 @@ class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
   @override
   Future<Map<String, double>> getGlobalSummary(
     Future<Map<String, double>> Function(String projectId) getSummary,
-  ) async => {'income': 0, 'expenses': 0, 'balance': 0};
+  ) async =>
+      {'income': 0, 'expenses': 0, 'balance': 0};
 }
 
 void main() {
@@ -160,14 +166,16 @@ void main() {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthProvider>.value(value: mockAuthProvider),
-        ChangeNotifierProvider<ProjectProvider>.value(value: mockProjectProvider),
+        ChangeNotifierProvider<ProjectProvider>.value(
+            value: mockProjectProvider),
       ],
       child: const MaterialApp(home: HomeScreen()),
     );
   }
 
   group('HomeScreen Empty State Integration Tests', () {
-    testWidgets('AppBar title shows Loading when no project', (WidgetTester tester) async {
+    testWidgets('AppBar title shows Loading when no project',
+        (WidgetTester tester) async {
       // Setup: No projects
       mockProjectProvider.clearProjects();
 
@@ -178,7 +186,8 @@ void main() {
       expect(find.text('Loading...'), findsOneWidget);
     });
 
-    testWidgets('Drawer is still accessible in empty state', (WidgetTester tester) async {
+    testWidgets('Drawer is still accessible in empty state',
+        (WidgetTester tester) async {
       // Setup: No projects
       mockProjectProvider.clearProjects();
 
@@ -189,7 +198,8 @@ void main() {
       expect(find.byType(DrawerButton), findsOneWidget);
     });
 
-    testWidgets('Project provider reactivity updates UI', (WidgetTester tester) async {
+    testWidgets('Project provider reactivity updates UI',
+        (WidgetTester tester) async {
       // Start with a project
       mockProjectProvider.setProjects([
         Project(

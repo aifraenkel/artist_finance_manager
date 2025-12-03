@@ -79,7 +79,8 @@ class AuthService {
 
       // Check if user is soft-deleted
       if (appUser.isDeleted) {
-        print('WARN: User ${_hashEmail(user.email ?? '')} is soft-deleted, signing out');
+        print(
+            'WARN: User ${_hashEmail(user.email ?? '')} is soft-deleted, signing out');
         await signOut();
         return null;
       }
@@ -119,13 +120,14 @@ class AuthService {
   }) async {
     try {
       print('DEBUG: Attempting to send sign-in link to ${_hashEmail(email)}');
-      print('DEBUG: ActionCodeSettings - URL: ${actionCodeSettings.url}, handleCodeInApp: ${actionCodeSettings.handleCodeInApp}');
-      
+      print(
+          'DEBUG: ActionCodeSettings - URL: ${actionCodeSettings.url}, handleCodeInApp: ${actionCodeSettings.handleCodeInApp}');
+
       await _auth.sendSignInLinkToEmail(
         email: email,
         actionCodeSettings: actionCodeSettings,
       );
-      
+
       print('DEBUG: Sign-in link sent successfully to ${_hashEmail(email)}');
       print('DEBUG: Check your email inbox and spam folder');
     } catch (e) {
@@ -197,12 +199,12 @@ class AuthService {
 
     try {
       final now = DateTime.now();
-      
+
       // Get device information for initial registration
       final deviceId = await DeviceInfoService.getDeviceId();
       final deviceName = await DeviceInfoService.getDeviceName();
       final deviceInfo = await DeviceInfoService.getDeviceInfo();
-      
+
       // Create device info for first device
       final initialDevice = DeviceInfo(
         deviceId: deviceId,
@@ -210,7 +212,7 @@ class AuthService {
         firstSeen: now,
         lastSeen: now,
       );
-      
+
       final appUser = AppUser(
         uid: user.uid,
         email: email,
@@ -220,7 +222,9 @@ class AuthService {
         metadata: UserMetadata(
           loginCount: 1,
           devices: [initialDevice],
-          lastLoginUserAgent: deviceInfo['userAgent'] is String ? deviceInfo['userAgent'] as String : null,
+          lastLoginUserAgent: deviceInfo['userAgent'] is String
+              ? deviceInfo['userAgent'] as String
+              : null,
         ),
       );
 
@@ -252,7 +256,8 @@ class AuthService {
         },
       );
 
-      print('INFO: New user registered: ${_hashEmail(email)} from $deviceName (device: $deviceId)');
+      print(
+          'INFO: New user registered: ${_hashEmail(email)} from $deviceName (device: $deviceId)');
 
       return appUser;
     } catch (e) {
@@ -278,17 +283,18 @@ class AuthService {
       if (!doc.exists) return;
 
       final appUser = AppUser.fromFirestore(doc);
-      
+
       // Get device information
       final deviceId = await DeviceInfoService.getDeviceId();
       final deviceName = await DeviceInfoService.getDeviceName();
       final deviceInfo = await DeviceInfoService.getDeviceInfo();
-      
+
       // Update or add device to the list
       final now = DateTime.now();
       final devices = List<DeviceInfo>.from(appUser.metadata.devices);
-      final existingDeviceIndex = devices.indexWhere((d) => d.deviceId == deviceId);
-      
+      final existingDeviceIndex =
+          devices.indexWhere((d) => d.deviceId == deviceId);
+
       if (existingDeviceIndex >= 0) {
         // Update existing device
         devices[existingDeviceIndex] = DeviceInfo(
@@ -342,7 +348,8 @@ class AuthService {
         },
       );
 
-      print('INFO: User ${_hashEmail(user.email ?? '')} signed in from $deviceName (device: $deviceId, login #${updatedMetadata.loginCount})');
+      print(
+          'INFO: User ${_hashEmail(user.email ?? '')} signed in from $deviceName (device: $deviceId, login #${updatedMetadata.loginCount})');
     } catch (e) {
       print('Error updating last login: $e');
       _observability.trackError(e, context: {
@@ -447,7 +454,7 @@ class AuthService {
   /// Logs the sign-out event for security monitoring before clearing the session.
   Future<void> signOut() async {
     final user = currentUser;
-    
+
     try {
       if (user != null) {
         // Log sign-out event before clearing session
@@ -468,7 +475,7 @@ class AuthService {
 
         print('INFO: User ${_hashEmail(user.email ?? '')} signed out');
       }
-      
+
       await _auth.signOut();
     } catch (e) {
       print('Error signing out: $e');

@@ -6,7 +6,7 @@ import 'user_preferences.dart';
 /// Uses Grafana Faro on web, no-op on mobile platforms
 abstract class ObservabilityService {
   /// Factory constructor that returns the appropriate implementation
-  factory ObservabilityService({UserPreferences? userPreferences}) => 
+  factory ObservabilityService({UserPreferences? userPreferences}) =>
       getObservabilityService(userPreferences: userPreferences);
 
   /// Track a custom event

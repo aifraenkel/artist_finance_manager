@@ -24,7 +24,7 @@ class UserPreferences {
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     _analyticsConsent = prefs.getBool(_analyticsConsentKey) ?? false;
-    
+
     final timestampMillis = prefs.getInt(_consentTimestampKey);
     if (timestampMillis != null) {
       _consentTimestamp = DateTime.fromMillisecondsSinceEpoch(timestampMillis);
@@ -37,17 +37,18 @@ class UserPreferences {
   Future<void> setAnalyticsConsent(bool consent) async {
     _analyticsConsent = consent;
     _consentTimestamp = DateTime.now();
-    
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_analyticsConsentKey, consent);
-    await prefs.setInt(_consentTimestampKey, _consentTimestamp!.millisecondsSinceEpoch);
+    await prefs.setInt(
+        _consentTimestampKey, _consentTimestamp!.millisecondsSinceEpoch);
   }
 
   /// Reset all preferences (useful for testing)
   Future<void> reset() async {
     _analyticsConsent = false;
     _consentTimestamp = null;
-    
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_analyticsConsentKey);
     await prefs.remove(_consentTimestampKey);

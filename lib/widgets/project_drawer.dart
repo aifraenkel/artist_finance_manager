@@ -189,15 +189,13 @@ class ProjectDrawer extends StatelessWidget {
           itemCount: projectProvider.projects.length,
           itemBuilder: (context, index) {
             final project = projectProvider.projects[index];
-            final isSelected =
-                project.id == projectProvider.currentProject?.id;
+            final isSelected = project.id == projectProvider.currentProject?.id;
 
             return ListTile(
               leading: Icon(
                 Icons.folder,
-                color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey,
+                color:
+                    isSelected ? Theme.of(context).primaryColor : Colors.grey,
               ),
               title: Text(
                 project.name,
@@ -316,7 +314,8 @@ class ProjectDrawer extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Project name must be at most $maxLength characters.'),
+            content:
+                Text('Project name must be at most $maxLength characters.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -383,8 +382,7 @@ class ProjectDrawer extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () =>
-                _renameProject(context, project, controller.text),
+            onPressed: () => _renameProject(context, project, controller.text),
             child: const Text('Rename'),
           ),
         ],
@@ -398,14 +396,15 @@ class ProjectDrawer extends StatelessWidget {
     if (trimmedName.isEmpty || trimmedName == project.name) {
       return;
     }
-    
+
     const maxLength = 50;
     if (trimmedName.length > maxLength) {
       if (context.mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Project name must be at most $maxLength characters.'),
+            content:
+                Text('Project name must be at most $maxLength characters.'),
             backgroundColor: Colors.red,
           ),
         );

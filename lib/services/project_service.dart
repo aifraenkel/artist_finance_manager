@@ -108,7 +108,7 @@ class ProjectService {
   Future<void> updateProject(Project project) async {
     final allProjects = await _loadFromLocalStorage();
     final index = allProjects.indexWhere((p) => p.id == project.id);
-    
+
     if (index == -1) {
       throw Exception('Project not found: ${project.id}');
     }
@@ -142,7 +142,7 @@ class ProjectService {
   Future<void> deleteProject(String projectId) async {
     final allProjects = await _loadFromLocalStorage();
     final index = allProjects.indexWhere((p) => p.id == projectId);
-    
+
     if (index == -1) {
       throw Exception('Project not found: $projectId');
     }
@@ -190,7 +190,7 @@ class ProjectService {
   /// Returns the default project or the first active project.
   Future<Project> ensureDefaultProject() async {
     final projects = await loadProjects();
-    
+
     // If projects exist, return the first one or find "Default"
     if (projects.isNotEmpty) {
       final defaultProject = projects.firstWhere(

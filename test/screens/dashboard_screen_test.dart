@@ -76,7 +76,8 @@ class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
 
 void main() {
   group('DashboardScreen', () {
-    testWidgets('shows loading indicator initially', (WidgetTester tester) async {
+    testWidgets('shows loading indicator initially',
+        (WidgetTester tester) async {
       final mockProjectProvider = MockProjectProvider(
         projects: [],
       );
@@ -94,7 +95,8 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('shows empty state when no data available', (WidgetTester tester) async {
+    testWidgets('shows empty state when no data available',
+        (WidgetTester tester) async {
       final mockProjectProvider = MockProjectProvider(
         projects: [],
       );
@@ -113,7 +115,8 @@ void main() {
 
       // Should show empty state
       expect(find.text('No data available'), findsOneWidget);
-      expect(find.text('Add some transactions to see analytics'), findsOneWidget);
+      expect(
+          find.text('Add some transactions to see analytics'), findsOneWidget);
       expect(find.byIcon(Icons.analytics_outlined), findsOneWidget);
     });
 
@@ -138,7 +141,8 @@ void main() {
       expect(find.byType(AppBar), findsOneWidget);
     });
 
-    testWidgets('renders with gradient background', (WidgetTester tester) async {
+    testWidgets('renders with gradient background',
+        (WidgetTester tester) async {
       final mockProjectProvider = MockProjectProvider(
         projects: [],
       );
@@ -156,10 +160,12 @@ void main() {
 
       // Should have Container with gradient decoration
       final container = tester.widget<Container>(
-        find.descendant(
-          of: find.byType(Scaffold),
-          matching: find.byType(Container),
-        ).first,
+        find
+            .descendant(
+              of: find.byType(Scaffold),
+              matching: find.byType(Container),
+            )
+            .first,
       );
 
       expect(container.decoration, isA<BoxDecoration>());
@@ -180,7 +186,8 @@ void main() {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => ChangeNotifierProvider<ProjectProvider>.value(
+                      builder: (_) =>
+                          ChangeNotifierProvider<ProjectProvider>.value(
                         value: mockProjectProvider,
                         child: const DashboardScreen(),
                       ),

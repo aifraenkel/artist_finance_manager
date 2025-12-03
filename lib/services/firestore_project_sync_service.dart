@@ -66,9 +66,8 @@ class FirestoreProjectSyncService implements ProjectSyncService {
   @override
   Future<List<Project>> loadProjects() async {
     try {
-      final querySnapshot = await _projectsRef()
-          .orderBy('createdAt', descending: false)
-          .get();
+      final querySnapshot =
+          await _projectsRef().orderBy('createdAt', descending: false).get();
 
       // Filter out metadata document and map to Project objects
       return querySnapshot.docs
