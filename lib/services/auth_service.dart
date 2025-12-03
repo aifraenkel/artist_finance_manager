@@ -311,7 +311,7 @@ class AuthService {
       final updatedMetadata = appUser.metadata.copyWith(
         loginCount: appUser.metadata.loginCount + 1,
         devices: devices,
-        lastLoginUserAgent: deviceInfo['userAgent'] as String?,
+        lastLoginUserAgent: (deviceInfo['userAgent'] as String?) ?? 'Unknown',
       );
 
       await _firestore.collection('users').doc(user.uid).update({
