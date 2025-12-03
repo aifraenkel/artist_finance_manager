@@ -122,7 +122,7 @@ jobs:
         run: npm ci
 
       - name: Run unit tests with coverage
-        run: npm run test:coverage
+        run: npm run test:unit:coverage
         continue-on-error: false
 
       - name: Generate coverage summary
