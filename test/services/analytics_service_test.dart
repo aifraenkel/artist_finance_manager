@@ -100,8 +100,8 @@ void main() {
           projects,
         );
 
-        expect(contributions['Project A'], 100.0);
-        expect(contributions['Project B'], 200.0);
+        expect(contributions['Project A (p1)'], 100.0);
+        expect(contributions['Project B (p2)'], 200.0);
       });
 
       test('excludes deleted projects', () {
@@ -150,8 +150,8 @@ void main() {
           projects,
         );
 
-        expect(contributions.containsKey('Project A'), true);
-        expect(contributions.containsKey('Project B'), false);
+        expect(contributions.containsKey('Project A (p1)'), true);
+        expect(contributions.containsKey('Project B (p2)'), false);
       });
     });
 
@@ -219,9 +219,9 @@ void main() {
         );
 
         expect(topExpensive.length, 2);
-        expect(topExpensive[0].key, 'Project B');
+        expect(topExpensive[0].key, 'Project B (p2)');
         expect(topExpensive[0].value, 150.0);
-        expect(topExpensive[1].key, 'Project C');
+        expect(topExpensive[1].key, 'Project C (p3)');
         expect(topExpensive[1].value, 100.0);
       });
     });
