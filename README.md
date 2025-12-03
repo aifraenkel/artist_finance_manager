@@ -277,19 +277,41 @@ flutter run -d chrome
 
 ## 🧪 Testing
 
-This project has comprehensive test coverage including unit tests, widget tests, integration tests, and E2E browser tests. For detailed testing documentation, see [TEST_GUIDE.md](docs/TEST_GUIDE.md).
+This project has comprehensive test coverage including:
+- **Flutter Tests**: Unit tests, widget tests, and integration tests
+- **Cloud Functions Tests**: Jest-based unit and E2E tests for backend functions
+- **Automated CI/CD**: All tests run automatically on every PR with parallel execution
+
+For detailed testing documentation and workflow information, see:
+- [TESTING_WORKFLOW.md](docs/TESTING_WORKFLOW.md) - CI/CD test workflow documentation
+- [TEST_GUIDE.md](docs/TEST_GUIDE.md) - Detailed testing guide (if exists)
 
 **Quick start:**
 ```bash
-# Run all unit and widget tests
-flutter test
+# Run all Flutter unit and widget tests
+flutter test --exclude-tags=integration
 
-# Run E2E widget tests (fast, all platforms)
-flutter test test/e2e_widget/
+# Run Flutter integration tests
+flutter test --tags=integration
 
-# Run E2E web tests (browser)
-cd test/e2e_web && ./run-e2e-tests.sh
+# Run Cloud Functions tests
+cd functions
+npm test                # All tests
+npm run test:unit      # Unit tests only
+npm run test:e2e       # E2E tests only
+npm run test:coverage  # With coverage report
 ```
+
+### CI/CD Test Workflow
+
+Every pull request automatically runs:
+1. ✅ Flutter Unit & Widget Tests (with coverage)
+2. ✅ Flutter Integration Tests
+3. ✅ Cloud Functions Unit Tests (with coverage)
+4. ✅ Cloud Functions E2E Tests
+5. 📊 Test Summary & PR Comment (aggregates results)
+
+All test suites run in parallel for fast feedback. Failed tests automatically block PR merges.
 ---
 
 📄 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
