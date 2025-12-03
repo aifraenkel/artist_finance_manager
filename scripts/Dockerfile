@@ -54,13 +54,11 @@ RUN rm -rf /usr/share/nginx/html/* && \
 # Copy built Flutter web app from build stage
 COPY --from=build /app/build/web /usr/share/nginx/html
 
-# Copy custom nginx configuration
-COPY scripts/nginx.conf /etc/nginx/conf.d/default.conf
+# Copy custom nginx configuration (already includes port 8080 and /health endpoint)
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Create nginx.conf that sets PID location for non-root user
-RUN echo 'pid /tmp/nginx.pid;' > /etc/nginx/nginx.conf && \
-    echo 'events { worker_connections 1024; }' >> /etc/nginx/nginx.conf && \
-    echo 'http { include /etc/nginx/mime.types; include /etc/nginx/conf.d/*.conf; }' >> /etc/nginx/nginx.conf
+# Add PID location for non-root user (Cloud Run requirement)
+RUN sed -i '1i pid /tmp/nginx.pid;' /etc/nginx/nginx.conf
 
 # Add a simple health check endpoint
 
