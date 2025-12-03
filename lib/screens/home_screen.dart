@@ -11,6 +11,7 @@ import '../widgets/transaction_form.dart';
 import '../widgets/transaction_list.dart';
 import '../widgets/consent_dialog.dart';
 import '../widgets/project_drawer.dart';
+import '../widgets/empty_project_state.dart';
 import '../providers/auth_provider.dart';
 import '../providers/project_provider.dart';
 import 'profile/profile_screen.dart';
@@ -557,56 +558,71 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SafeArea(
           child: _isLoading
               ? const Center(child: CircularProgressIndicator())
-              : LayoutBuilder(
-                  builder: (context, constraints) {
-                    final isWideScreen = constraints.maxWidth > 800;
-                    final maxWidth = isWideScreen ? 1200.0 : double.infinity;
+              : Consumer<ProjectProvider>(
+                  builder: (context, projectProvider, child) {
+                    // Show empty state if no projects exist
+                    if (projectProvider.currentProject == null) {
+                      return EmptyProjectState(
+                        onCreateProject: () {
+                          // Open drawer to show create project button
+                          Scaffold.of(context).openDrawer();
+                        },
+                      );
+                    }
 
-                    return Center(
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: maxWidth),
-                        child: SingleChildScrollView(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SummaryCards(
-                                key: const ValueKey('summary-cards'),
-                                totalIncome: _totalIncome,
-                                totalExpenses: _totalExpenses,
-                                balance: _balance,
-                              ),
-                              const SizedBox(height: 24),
-                              TransactionForm(
-                                key: const ValueKey('transaction-form'),
-                                onSubmit: _addTransaction,
-                              ),
-                              const SizedBox(height: 24),
-                              TransactionList(
-                                key: const ValueKey('transaction-list'),
-                                transactions: _transactions,
-                                onDelete: _deleteTransaction,
-                              ),
-                              const SizedBox(height: 32),
-                              // Footer with privacy policy link
-                              Center(
-                                child: TextButton.icon(
-                                  onPressed: () {
-                                    // Open privacy policy in browser or show dialog
-                                    _showPrivacyPolicy(context);
-                                  },
-                                  icon: const Icon(Icons.privacy_tip_outlined, size: 16),
-                                  label: const Text(
-                                    'Privacy Policy',
-                                    style: TextStyle(fontSize: 13),
+                    // Show normal content when project exists
+                    return LayoutBuilder(
+                      builder: (context, constraints) {
+                        final isWideScreen = constraints.maxWidth > 800;
+                        final maxWidth = isWideScreen ? 1200.0 : double.infinity;
+
+                        return Center(
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: maxWidth),
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  SummaryCards(
+                                    key: const ValueKey('summary-cards'),
+                                    totalIncome: _totalIncome,
+                                    totalExpenses: _totalExpenses,
+                                    balance: _balance,
                                   ),
-                                ),
+                                  const SizedBox(height: 24),
+                                  TransactionForm(
+                                    key: const ValueKey('transaction-form'),
+                                    onSubmit: _addTransaction,
+                                  ),
+                                  const SizedBox(height: 24),
+                                  TransactionList(
+                                    key: const ValueKey('transaction-list'),
+                                    transactions: _transactions,
+                                    onDelete: _deleteTransaction,
+                                  ),
+                                  const SizedBox(height: 32),
+                                  // Footer with privacy policy link
+                                  Center(
+                                    child: TextButton.icon(
+                                      onPressed: () {
+                                        // Open privacy policy in browser or show dialog
+                                        _showPrivacyPolicy(context);
+                                      },
+                                      icon: const Icon(Icons.privacy_tip_outlined, size: 16),
+                                      label: const Text(
+                                        'Privacy Policy',
+                                        style: TextStyle(fontSize: 13),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                ],
                               ),
-                              const SizedBox(height: 16),
-                            ],
+                            ),
                           ),
-                        ),
-                      ),
+                        );
+                      },
                     );
                   },
                 ),

@@ -40,7 +40,8 @@ class ProjectDrawer extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
-    return DrawerHeader(
+    return Container(
+      padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -51,25 +52,15 @@ class ProjectDrawer extends StatelessWidget {
           ],
         ),
       ),
-      child: const Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.end,
-        children: [
-          Icon(
-            Icons.palette,
-            size: 48,
+      child: const SafeArea(
+        child: Text(
+          'Art Finance Hub',
+          style: TextStyle(
             color: Colors.white,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
           ),
-          SizedBox(height: 8),
-          Text(
-            'Art Projects',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -85,7 +76,7 @@ class ProjectDrawer extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'All Projects',
+            'Balance',
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -97,12 +88,12 @@ class ProjectDrawer extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildSummaryItem(
-                'Income',
+                'Total Income',
                 income,
                 Colors.green,
               ),
               _buildSummaryItem(
-                'Expenses',
+                'Total Expenses',
                 expenses,
                 Colors.red,
               ),
@@ -154,9 +145,12 @@ class ProjectDrawer extends StatelessWidget {
             child: Padding(
               padding: EdgeInsets.all(16.0),
               child: Text(
-                'No projects yet.\nCreate your first project!',
+                'Create a project to start\nmanaging your finances',
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey),
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontSize: 16,
+                ),
               ),
             ),
           );
@@ -197,43 +191,38 @@ class ProjectDrawer extends StatelessWidget {
                   }
                 }
               },
-              trailing: !isSelected
-                  ? PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert),
-                      onSelected: (value) {
-                        if (value == 'rename') {
-                          _showRenameDialog(context, project);
-                        } else if (value == 'delete') {
-                          _showDeleteDialog(context, project);
-                        }
-                      },
-                      itemBuilder: (context) => [
-                        const PopupMenuItem(
-                          value: 'rename',
-                          child: Row(
-                            children: [
-                              Icon(Icons.edit, size: 20),
-                              SizedBox(width: 8),
-                              Text('Rename'),
-                            ],
-                          ),
-                        ),
-                        const PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(Icons.delete, size: 20, color: Colors.red),
-                              SizedBox(width: 8),
-                              Text('Delete', style: TextStyle(color: Colors.red)),
-                            ],
-                          ),
-                        ),
+              trailing: PopupMenuButton<String>(
+                icon: const Icon(Icons.more_vert),
+                onSelected: (value) {
+                  if (value == 'rename') {
+                    _showRenameDialog(context, project);
+                  } else if (value == 'delete') {
+                    _showDeleteDialog(context, project);
+                  }
+                },
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    value: 'rename',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit, size: 20),
+                        SizedBox(width: 8),
+                        Text('Rename'),
                       ],
-                    )
-                  : Tooltip(
-                      message: 'Switch to another project to rename or delete this one.',
-                      child: Icon(Icons.info_outline, color: Colors.grey),
                     ),
+                  ),
+                  const PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete, size: 20, color: Colors.red),
+                        SizedBox(width: 8),
+                        Text('Delete', style: TextStyle(color: Colors.red)),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             );
           },
         );
