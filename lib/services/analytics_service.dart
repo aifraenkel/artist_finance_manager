@@ -63,7 +63,7 @@ class AnalyticsService {
         final totalExpenses = transactions
             .where((t) => t.type == 'expense')
             .fold(0.0, (sum, t) => sum + t.amount);
-        expenses[project.name] = totalExpenses;
+        expenses['${project.name} (${project.id})'] = totalExpenses;
       }
     }
 
