@@ -11,6 +11,8 @@ jobs:
   flutter-unit-widget-tests:
     name: Flutter Unit & Widget Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -57,6 +59,8 @@ jobs:
   flutter-integration-tests:
     name: Flutter Integration Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v4
 
@@ -99,6 +103,8 @@ jobs:
   functions-unit-tests:
     name: Cloud Functions Unit Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: functions
@@ -142,6 +148,8 @@ jobs:
   functions-e2e-tests:
     name: Cloud Functions E2E Tests
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     defaults:
       run:
         working-directory: functions
