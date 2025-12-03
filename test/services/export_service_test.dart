@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:artist_finance_manager/services/export_service.dart';
 import 'package:artist_finance_manager/services/project_service.dart';
 import 'package:artist_finance_manager/services/storage_service.dart';
@@ -12,6 +13,7 @@ void main() {
     late Map<String, StorageService> storageServices;
 
     setUp(() {
+      SharedPreferences.setMockInitialValues({});
       projectService = ProjectService();
       storageServices = {};
     });
