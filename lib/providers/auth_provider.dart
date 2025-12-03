@@ -63,7 +63,8 @@ class AuthProvider with ChangeNotifier {
   /// [email] - User's email address
   /// [name] - User's display name
   /// [continueUrl] - URL to continue to after email verification
-  Future<bool> sendRegistrationLink(String email, String name, String continueUrl) async {
+  Future<bool> sendRegistrationLink(
+      String email, String name, String continueUrl) async {
     try {
       _isLoading = true;
       _error = null;
@@ -104,7 +105,8 @@ class AuthProvider with ChangeNotifier {
   /// [email] - User's email address
   /// [continueUrl] - URL to continue to after email verification
   /// [name] - User's display name (optional, not used for sign-in)
-  Future<bool> sendSignInLink(String email, String continueUrl, {String? name}) async {
+  Future<bool> sendSignInLink(String email, String continueUrl,
+      {String? name}) async {
     try {
       _isLoading = true;
       _error = null;
@@ -159,24 +161,24 @@ class AuthProvider with ChangeNotifier {
 
       // Check if user profile exists in Firestore, if not create it
       final existingUser = await _authService.getCurrentAppUser();
-      
+
       if (existingUser == null) {
         // New user - create profile in Firestore
         print('DEBUG: New user detected, creating profile in Firestore');
-        
+
         // Try to get saved name from SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         final savedName = prefs.getString('nameForSignIn');
         final userName = savedName ?? email.split('@').first;
-        
+
         print('DEBUG: Creating user with name: $userName');
-        
+
         final newUser = await _authService.registerUser(
           email: email,
           name: userName,
         );
         _currentUser = newUser;
-        
+
         // Clear saved name after use
         await prefs.remove('nameForSignIn');
       } else {
@@ -334,7 +336,8 @@ class AuthProvider with ChangeNotifier {
       print('DEBUG: Verifying registration token with backend');
 
       // Call backend to verify token and get sign-in link
-      final response = await _registrationApi.verifyRegistrationToken(token: token);
+      final response =
+          await _registrationApi.verifyRegistrationToken(token: token);
 
       final email = response['email'] as String;
       final name = response['name'] as String;

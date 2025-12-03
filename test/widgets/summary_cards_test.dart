@@ -1,6 +1,5 @@
-// Simplified widget tests replacing manual E2E integration tests.
-// These avoid Firebase/platform channel dependencies and provide
-// fast UI verification for core reusable widgets.
+// Widget tests for SummaryCards component.
+// These test UI rendering and layout behavior without Firebase/platform dependencies.
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -8,7 +7,8 @@ import 'package:artist_finance_manager/widgets/summary_cards.dart';
 
 void main() {
   group('SummaryCards Widget', () {
-    testWidgets('renders income, expenses and balance (positive balance)', (tester) async {
+    testWidgets('renders income, expenses and balance (positive balance)',
+        (tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: SummaryCards(
@@ -28,7 +28,8 @@ void main() {
       expect(find.textContaining('€999.50'), findsOneWidget);
     });
 
-    testWidgets('renders negative balance with minus sign and red styling', (tester) async {
+    testWidgets('renders negative balance with minus sign and red styling',
+        (tester) async {
       await tester.pumpWidget(const MaterialApp(
         home: Scaffold(
           body: SummaryCards(
@@ -43,7 +44,8 @@ void main() {
       expect(find.textContaining('-€150.00'), findsOneWidget);
     });
 
-    testWidgets('switches layout based on width (narrow vs wide)', (tester) async {
+    testWidgets('switches layout based on width (narrow vs wide)',
+        (tester) async {
       // Narrow layout
       await tester.binding.setSurfaceSize(const Size(400, 800));
       await tester.pumpWidget(const MaterialApp(

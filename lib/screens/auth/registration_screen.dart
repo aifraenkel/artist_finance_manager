@@ -44,7 +44,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
         : uri.toString().split('?').first;
 
     // Send registration link for new user
-    final success = await authProvider.sendRegistrationLink(email, name, continueUrl);
+    final success =
+        await authProvider.sendRegistrationLink(email, name, continueUrl);
 
     setState(() => _isLoading = false);
 

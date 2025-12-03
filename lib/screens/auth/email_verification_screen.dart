@@ -98,7 +98,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final continueUrl = Uri.base.toString();
 
-    final success = await authProvider.sendSignInLink(widget.email, continueUrl);
+    final success =
+        await authProvider.sendSignInLink(widget.email, continueUrl);
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -139,9 +140,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
 
                 // Title
                 Text(
-                  _isProcessing
-                      ? 'Verifying...'
-                      : 'Check Your Email',
+                  _isProcessing ? 'Verifying...' : 'Check Your Email',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),

@@ -105,7 +105,10 @@ class StorageService {
           _observability.trackError(
             e,
             stackTrace: stackTrace,
-            context: {'operation': 'load_transactions_cloud', 'storage_key': _key},
+            context: {
+              'operation': 'load_transactions_cloud',
+              'storage_key': _key
+            },
           );
           // Fall through to local storage
         }

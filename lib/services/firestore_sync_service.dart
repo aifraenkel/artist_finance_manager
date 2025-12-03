@@ -74,9 +74,8 @@ class FirestoreSyncService implements SyncService {
   Future<List<models.Transaction>> loadTransactions() async {
     try {
       // Get all transactions, excluding metadata document
-      final querySnapshot = await _transactionsRef()
-          .orderBy('date', descending: true)
-          .get();
+      final querySnapshot =
+          await _transactionsRef().orderBy('date', descending: true).get();
 
       // Filter out metadata document and map to Transaction objects
       return querySnapshot.docs
@@ -96,7 +95,8 @@ class FirestoreSyncService implements SyncService {
 
       // First, delete all existing transactions (except metadata) in batches
       final existingDocs = await _transactionsRef().get();
-      final docsToDelete = existingDocs.docs.where((doc) => doc.id != _metadataDoc).toList();
+      final docsToDelete =
+          existingDocs.docs.where((doc) => doc.id != _metadataDoc).toList();
       for (var i = 0; i < docsToDelete.length; i += batchLimit) {
         final chunk = docsToDelete.skip(i).take(batchLimit);
         final deleteBatch = _firestore.batch();
@@ -296,12 +296,12 @@ class FirestoreSyncService implements SyncService {
       case 'unavailable':
       case 'network-request-failed':
         code = SyncException.networkError;
-        message =
-            'Network error. Please check your connection and try again.';
+        message = 'Network error. Please check your connection and try again.';
         break;
       default:
         code = SyncException.unknown;
-        message = 'An unexpected error occurred during $operation: ${e.message}';
+        message =
+            'An unexpected error occurred during $operation: ${e.message}';
     }
 
     return SyncException(

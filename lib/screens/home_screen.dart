@@ -39,6 +39,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _storageService = StorageService(syncService: syncService);
     await _storageService.initialize();
 
+    if (!mounted) return;
+
     // Check if user is authenticated and enable cloud sync
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     if (authProvider.isAuthenticated) {
@@ -107,12 +109,14 @@ class _HomeScreenState extends State<HomeScreen> {
     // finished loading
   }
 
+  // ignore: unused_element
   Future<void> _saveTransactions() async {
     await _storageService.saveTransactions(_transactions);
   }
 
   /// Syncs local data to the cloud.
   /// Called when user logs in to upload existing local data.
+  // ignore: unused_element
   Future<void> _syncToCloud() async {
     setState(() {
       _isSyncing = true;
@@ -228,6 +232,8 @@ class _HomeScreenState extends State<HomeScreen> {
       },
     );
 
+    if (!mounted) return;
+
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Transaction added: $description'),
@@ -271,6 +277,8 @@ class _HomeScreenState extends State<HomeScreen> {
         'storage_mode': _storageService.storageMode.name,
       },
     );
+
+    if (!mounted) return;
 
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
