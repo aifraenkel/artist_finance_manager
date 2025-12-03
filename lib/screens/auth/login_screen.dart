@@ -43,6 +43,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final success = await authProvider.sendSignInLink(email, continueUrl);
 
+    if (!mounted) return;
+
     setState(() => _isLoading = false);
 
     if (success && mounted) {
