@@ -75,5 +75,36 @@ void main() {
       // For wide layout a Row should be used
       expect(find.byType(Row), findsWidgets);
     });
+
+    testWidgets('supports custom currency symbol', (tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
+          body: SummaryCards(
+            totalIncome: 1000.0,
+            totalExpenses: 500.0,
+            balance: 500.0,
+            currencySymbol: '\$',
+          ),
+        ),
+      ));
+
+      expect(find.textContaining('\$1000.00'), findsOneWidget);
+      expect(find.textContaining('\$500.00'), findsOneWidget);
+    });
+
+    testWidgets('defaults to Euro symbol when not specified', (tester) async {
+      await tester.pumpWidget(const MaterialApp(
+        home: Scaffold(
+          body: SummaryCards(
+            totalIncome: 100.0,
+            totalExpenses: 50.0,
+            balance: 50.0,
+          ),
+        ),
+      ));
+
+      expect(find.textContaining('€100.00'), findsOneWidget);
+      expect(find.textContaining('€50.00'), findsOneWidget);
+    });
   });
 }
