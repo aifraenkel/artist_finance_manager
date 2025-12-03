@@ -49,10 +49,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _initializeStorage() async {
     // Initialize user preferences first
     await _userPreferences.initialize();
-    
+
     // Initialize observability with user preferences
     _observability = ObservabilityService(userPreferences: _userPreferences);
-    
+
     // Show consent dialog if user hasn't seen it yet
     if (!_userPreferences.hasSeenConsentPrompt && mounted) {
       // Wait a bit for the UI to settle
@@ -65,12 +65,13 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
 
     // Initialize project provider
-    final projectProvider = Provider.of<ProjectProvider>(context, listen: false);
-    
+    final projectProvider =
+        Provider.of<ProjectProvider>(context, listen: false);
+
     // Run data migration before initializing projects
     final migrationService = MigrationService(projectProvider.projectService);
     final migrated = await migrationService.migrate();
-    
+
     if (migrated && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -80,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       );
     }
-    
+
     await projectProvider.initialize();
 
     // Get current project
@@ -263,8 +264,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Load global summary across all projects
   Future<void> _loadGlobalSummary() async {
-    final projectProvider = Provider.of<ProjectProvider>(context, listen: false);
-    
+    final projectProvider =
+        Provider.of<ProjectProvider>(context, listen: false);
+
     try {
       final summary = await projectProvider.getGlobalSummary((projectId) async {
         // Create a temporary storage service for this project
@@ -274,10 +276,10 @@ class _HomeScreenState extends State<HomeScreen> {
           projectId: projectId,
         );
         await tempStorage.initialize();
-        
+
         // Load transactions for this project
         final transactions = await tempStorage.loadTransactions();
-        
+
         // Calculate summary
         final income = transactions
             .where((t) => t.type == 'income')
@@ -285,14 +287,14 @@ class _HomeScreenState extends State<HomeScreen> {
         final expenses = transactions
             .where((t) => t.type == 'expense')
             .fold(0.0, (sum, t) => sum + t.amount);
-        
+
         return {
           'income': income,
           'expenses': expenses,
           'balance': income - expenses,
         };
       });
-      
+
       setState(() {
         _globalSummary = summary;
       });
@@ -313,9 +315,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Refresh all data (called when switching projects)
   Future<void> _refreshAll() async {
-    final projectProvider = Provider.of<ProjectProvider>(context, listen: false);
+    final projectProvider =
+        Provider.of<ProjectProvider>(context, listen: false);
     final currentProject = projectProvider.currentProject;
-    
+
     if (currentProject == null) {
       setState(() {
         _transactions = [];
@@ -469,7 +472,8 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Consumer<ProjectProvider>(
           builder: (context, projectProvider, child) {
-            final projectName = projectProvider.currentProject?.name ?? 'Loading...';
+            final projectName =
+                projectProvider.currentProject?.name ?? 'Loading...';
             return Text(projectName);
           },
         ),
@@ -574,7 +578,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     return LayoutBuilder(
                       builder: (context, constraints) {
                         final isWideScreen = constraints.maxWidth > 800;
-                        final maxWidth = isWideScreen ? 1200.0 : double.infinity;
+                        final maxWidth =
+                            isWideScreen ? 1200.0 : double.infinity;
 
                         return Center(
                           child: ConstrainedBox(
@@ -609,7 +614,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         // Open privacy policy in browser or show dialog
                                         _showPrivacyPolicy(context);
                                       },
-                                      icon: const Icon(Icons.privacy_tip_outlined, size: 16),
+                                      icon: const Icon(
+                                          Icons.privacy_tip_outlined,
+                                          size: 16),
                                       label: const Text(
                                         'Privacy Policy',
                                         style: TextStyle(fontSize: 13),

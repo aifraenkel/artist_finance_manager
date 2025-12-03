@@ -7,7 +7,8 @@ import 'package:artist_finance_manager/widgets/empty_project_state.dart';
 /// Tests the empty state view shown when user has no projects.
 void main() {
   group('EmptyProjectState Widget', () {
-    testWidgets('Displays icon when no projects exist', (WidgetTester tester) async {
+    testWidgets('Displays icon when no projects exist',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
@@ -44,7 +45,8 @@ void main() {
 
       // Verify call-to-action message
       expect(
-        find.text('Create a project to start registering your incomes and expenses'),
+        find.text(
+            'Create a project to start registering your incomes and expenses'),
         findsOneWidget,
       );
     });
@@ -65,10 +67,12 @@ void main() {
       );
 
       // Verify button is displayed
-      expect(find.widgetWithText(ElevatedButton, 'Create Your First Project'), findsOneWidget);
+      expect(find.widgetWithText(ElevatedButton, 'Create Your First Project'),
+          findsOneWidget);
 
       // Tap the button
-      await tester.tap(find.widgetWithText(ElevatedButton, 'Create Your First Project'));
+      await tester.tap(
+          find.widgetWithText(ElevatedButton, 'Create Your First Project'));
       await tester.pumpAndSettle();
 
       // Verify callback was called
@@ -152,7 +156,8 @@ void main() {
         ),
       );
 
-      final buttonFinder = find.widgetWithText(ElevatedButton, 'Create Your First Project');
+      final buttonFinder =
+          find.widgetWithText(ElevatedButton, 'Create Your First Project');
       expect(buttonFinder, findsOneWidget);
 
       final ElevatedButton buttonWidget = tester.widget(buttonFinder);
@@ -172,7 +177,8 @@ void main() {
       expect(find.byType(EmptyProjectState), findsOneWidget);
     });
 
-    testWidgets('Has proper spacing between elements', (WidgetTester tester) async {
+    testWidgets('Has proper spacing between elements',
+        (WidgetTester tester) async {
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(

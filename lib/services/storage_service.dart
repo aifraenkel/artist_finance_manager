@@ -30,7 +30,7 @@ class StorageService {
   static const String _keyPrefix = 'project-finances-';
   static const String _syncModeKey = 'storage_sync_mode';
   final ObservabilityService _observability = ObservabilityService();
-  
+
   /// Current project ID for scoping transactions
   String? _currentProjectId;
 
@@ -51,18 +51,17 @@ class StorageService {
   /// [projectId] - Optional project ID to scope transactions.
   StorageService({this.syncService, String? projectId})
       : _currentProjectId = projectId;
-  
+
   /// Set the current project ID for scoping transactions.
   void setProjectId(String projectId) {
     _currentProjectId = projectId;
   }
-  
+
   /// Get the storage key for the current project.
   String get _key {
     if (_currentProjectId == null) {
       throw StateError(
-        'Project ID is not set. Accessing storage without a project ID can lead to data corruption. This should only happen during migration.'
-      );
+          'Project ID is not set. Accessing storage without a project ID can lead to data corruption. This should only happen during migration.');
     }
     return '$_keyPrefix$_currentProjectId';
   }

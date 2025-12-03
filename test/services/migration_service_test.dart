@@ -23,7 +23,7 @@ void main() {
 
     test('Migration with no legacy data', () async {
       final migrated = await migrationService.migrate();
-      
+
       expect(migrated, isFalse);
       expect(await migrationService.isMigrationCompleted(), isTrue);
     });
@@ -56,7 +56,7 @@ void main() {
 
       // Run migration
       final migrated = await migrationService.migrate();
-      
+
       expect(migrated, isTrue);
       expect(await migrationService.isMigrationCompleted(), isTrue);
 
@@ -73,7 +73,7 @@ void main() {
       final migratedKey = 'project-finances-${projects.first.id}';
       final migratedData = prefs.getString(migratedKey);
       expect(migratedData, isNotNull);
-      
+
       final migratedTransactions = (json.decode(migratedData!) as List)
           .map((j) => Transaction.fromJson(j))
           .toList();
@@ -126,9 +126,9 @@ void main() {
           date: DateTime(2024, 1, 1),
         ),
       ];
-      
+
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('project-finances', 
+      await prefs.setString('project-finances',
           json.encode(legacyTransactions.map((t) => t.toJson()).toList()));
 
       // Should need migration
@@ -158,7 +158,8 @@ void main() {
       ];
 
       final prefs = await SharedPreferences.getInstance();
-      final jsonString = json.encode(legacyTransactions.map((t) => t.toJson()).toList());
+      final jsonString =
+          json.encode(legacyTransactions.map((t) => t.toJson()).toList());
       await prefs.setString('project-finances', jsonString);
 
       await migrationService.migrate();

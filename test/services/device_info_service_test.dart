@@ -23,9 +23,9 @@ void main() {
 
     test('getDeviceId returns different IDs after clearing', () async {
       final deviceId1 = await DeviceInfoService.getDeviceId();
-      
+
       await DeviceInfoService.clearDeviceId();
-      
+
       final deviceId2 = await DeviceInfoService.getDeviceId();
       expect(deviceId2, isNot(equals(deviceId1)));
     });
@@ -37,35 +37,43 @@ void main() {
 
     test('getDeviceInfo returns comprehensive device information', () async {
       final deviceInfo = await DeviceInfoService.getDeviceInfo();
-      
+
       expect(deviceInfo, isNotNull);
       expect(deviceInfo['deviceId'], isNotEmpty);
       expect(deviceInfo['deviceName'], isNotEmpty);
       expect(deviceInfo['platform'], isNotEmpty);
       expect(deviceInfo['timestamp'], isNotEmpty);
-      
+
       // Verify platform is one of the expected values
-      final validPlatforms = ['web', 'android', 'ios', 'macos', 'windows', 'linux'];
+      final validPlatforms = [
+        'web',
+        'android',
+        'ios',
+        'macos',
+        'windows',
+        'linux'
+      ];
       expect(validPlatforms, contains(deviceInfo['platform']));
     });
 
     test('clearDeviceId removes stored device ID', () async {
       // Generate a device ID
       await DeviceInfoService.getDeviceId();
-      
+
       // Clear it
       await DeviceInfoService.clearDeviceId();
-      
+
       // Verify it was removed from SharedPreferences
       final prefs = await SharedPreferences.getInstance();
       final storedId = prefs.getString('device_id');
       expect(storedId, isNull);
     });
 
-    test('multiple calls to getDeviceInfo return consistent deviceId', () async {
+    test('multiple calls to getDeviceInfo return consistent deviceId',
+        () async {
       final info1 = await DeviceInfoService.getDeviceInfo();
       final info2 = await DeviceInfoService.getDeviceInfo();
-      
+
       expect(info1['deviceId'], equals(info2['deviceId']));
     });
   });

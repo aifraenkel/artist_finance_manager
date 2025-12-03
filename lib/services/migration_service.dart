@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/project.dart';
 import '../models/transaction.dart';
 import 'project_service.dart';
 
@@ -9,9 +8,10 @@ import 'project_service.dart';
 /// This service handles the one-time migration of existing transaction data
 /// to the new project-based structure.
 class MigrationService {
-  static const String _migrationCompletedKey = 'migration_to_projects_completed';
+  static const String _migrationCompletedKey =
+      'migration_to_projects_completed';
   static const String _legacyTransactionsKey = 'project-finances';
-  
+
   final ProjectService _projectService;
 
   MigrationService(this._projectService);
@@ -45,7 +45,7 @@ class MigrationService {
 
     // Check if there are legacy transactions
     final legacyTransactions = await _loadLegacyTransactions();
-    
+
     if (legacyTransactions.isEmpty) {
       // No legacy data, just mark as completed
       await _markMigrationCompleted();
@@ -63,7 +63,7 @@ class MigrationService {
     await prefs.setString(newKey, jsonString);
 
     // Clear legacy storage (but keep a backup just in case)
-    await prefs.setString('${_legacyTransactionsKey}_backup', 
+    await prefs.setString('${_legacyTransactionsKey}_backup',
         prefs.getString(_legacyTransactionsKey) ?? '');
     await prefs.remove(_legacyTransactionsKey);
 
@@ -97,7 +97,7 @@ class MigrationService {
   Future<void> restoreFromBackup() async {
     final prefs = await SharedPreferences.getInstance();
     final backup = prefs.getString('${_legacyTransactionsKey}_backup');
-    
+
     if (backup != null && backup.isNotEmpty) {
       await prefs.setString(_legacyTransactionsKey, backup);
       await prefs.remove(_migrationCompletedKey);
@@ -108,7 +108,7 @@ class MigrationService {
   Future<Map<String, dynamic>> getMigrationStatus() async {
     final completed = await isMigrationCompleted();
     final legacyCount = (await _loadLegacyTransactions()).length;
-    
+
     return {
       'completed': completed,
       'legacyTransactionCount': legacyCount,

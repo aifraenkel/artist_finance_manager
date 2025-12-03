@@ -11,7 +11,7 @@ import 'package:artist_finance_manager/screens/auth/login_screen.dart';
 import 'package:artist_finance_manager/screens/home_screen.dart';
 
 /// Auth Wrapper Session Persistence Widget Tests
-/// 
+///
 /// Tests the AuthWrapper widget's behavior when handling
 /// persisted authentication sessions.
 
@@ -54,10 +54,14 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   void clearError() {}
 
   @override
-  Future<bool> sendSignInLink(String email, String continueUrl, {String? name}) async => true;
+  Future<bool> sendSignInLink(String email, String continueUrl,
+          {String? name}) async =>
+      true;
 
   @override
-  Future<bool> sendRegistrationLink(String email, String name, String continueUrl) async => true;
+  Future<bool> sendRegistrationLink(
+          String email, String name, String continueUrl) async =>
+      true;
 
   @override
   Future<bool> verifyRegistrationToken(String token) async => true;
@@ -66,7 +70,8 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   Future<bool> registerUser(String email, String name) async => true;
 
   @override
-  Future<bool> signInWithEmailLink(String email, String emailLink) async => true;
+  Future<bool> signInWithEmailLink(String email, String emailLink) async =>
+      true;
 
   @override
   Future<void> signOut() async {
@@ -135,7 +140,8 @@ class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
   @override
   Future<Map<String, double>> getGlobalSummary(
     Future<Map<String, double>> Function(String projectId) getSummary,
-  ) async => {'income': 0, 'expenses': 0, 'balance': 0};
+  ) async =>
+      {'income': 0, 'expenses': 0, 'balance': 0};
 }
 
 void main() {
@@ -151,25 +157,28 @@ void main() {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider<AuthProvider>.value(value: mockAuthProvider),
-        ChangeNotifierProvider<ProjectProvider>.value(value: mockProjectProvider),
+        ChangeNotifierProvider<ProjectProvider>.value(
+            value: mockProjectProvider),
       ],
       child: const MaterialApp(home: AuthWrapper()),
     );
   }
 
   group('AuthWrapper Session Persistence', () {
-    testWidgets('Shows loading indicator while checking session', (WidgetTester tester) async {
+    testWidgets('Shows loading indicator while checking session',
+        (WidgetTester tester) async {
       mockAuthProvider.setLoading(true);
-      
+
       await tester.pumpWidget(createTestApp());
       await tester.pump();
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('Shows LoginScreen when no persisted session', (WidgetTester tester) async {
+    testWidgets('Shows LoginScreen when no persisted session',
+        (WidgetTester tester) async {
       mockAuthProvider.setAuthenticated(false);
-      
+
       await tester.pumpWidget(createTestApp());
       // Use pump() instead of pumpAndSettle() since LoginScreen doesn't have blocking animations
       await tester.pump();
@@ -179,7 +188,8 @@ void main() {
       expect(find.byType(HomeScreen), findsNothing);
     });
 
-    testWidgets('Shows HomeScreen when session is restored', (WidgetTester tester) async {
+    testWidgets('Shows HomeScreen when session is restored',
+        (WidgetTester tester) async {
       final testUser = AppUser(
         uid: 'test-uid',
         email: 'test@example.com',
@@ -188,9 +198,9 @@ void main() {
         lastLoginAt: DateTime.now(),
         metadata: UserMetadata(loginCount: 5),
       );
-      
+
       mockAuthProvider.setAuthenticated(true, user: testUser);
-      
+
       await tester.pumpWidget(createTestApp());
       // Use pump() instead of pumpAndSettle() since HomeScreen has async operations that block settlement
       await tester.pump();
@@ -200,9 +210,10 @@ void main() {
       expect(find.byType(LoginScreen), findsNothing);
     });
 
-    testWidgets('Transitions from loading to authenticated state', (WidgetTester tester) async {
+    testWidgets('Transitions from loading to authenticated state',
+        (WidgetTester tester) async {
       mockAuthProvider.setLoading(true);
-      
+
       await tester.pumpWidget(createTestApp());
       await tester.pump();
 
@@ -217,7 +228,7 @@ void main() {
         lastLoginAt: DateTime.now(),
         metadata: UserMetadata(loginCount: 3),
       );
-      
+
       mockAuthProvider.setAuthenticated(true, user: testUser);
       // Pump to process the state change notification
       await tester.pump();
@@ -232,9 +243,10 @@ void main() {
       expect(find.byType(LoginScreen), findsNothing);
     });
 
-    testWidgets('Transitions from loading to unauthenticated state', (WidgetTester tester) async {
+    testWidgets('Transitions from loading to unauthenticated state',
+        (WidgetTester tester) async {
       mockAuthProvider.setLoading(true);
-      
+
       await tester.pumpWidget(createTestApp());
       await tester.pump();
 
@@ -250,7 +262,8 @@ void main() {
       expect(find.byType(LoginScreen), findsOneWidget);
     });
 
-    testWidgets('Handles sign out and returns to LoginScreen', (WidgetTester tester) async {
+    testWidgets('Handles sign out and returns to LoginScreen',
+        (WidgetTester tester) async {
       final testUser = AppUser(
         uid: 'test-uid',
         email: 'test@example.com',
@@ -259,9 +272,9 @@ void main() {
         lastLoginAt: DateTime.now(),
         metadata: UserMetadata(loginCount: 1),
       );
-      
+
       mockAuthProvider.setAuthenticated(true, user: testUser);
-      
+
       await tester.pumpWidget(createTestApp());
       // Use pump() instead of pumpAndSettle() since HomeScreen has async operations that block settlement
       await tester.pump();
@@ -281,24 +294,26 @@ void main() {
   });
 
   group('Session State Transitions', () {
-    testWidgets('Handles rapid state changes correctly', (WidgetTester tester) async {
+    testWidgets('Handles rapid state changes correctly',
+        (WidgetTester tester) async {
       mockAuthProvider.setLoading(true);
-      
+
       await tester.pumpWidget(createTestApp());
       await tester.pump();
 
       // Rapid transitions
       mockAuthProvider.setLoading(false);
       await tester.pump();
-      
-      mockAuthProvider.setAuthenticated(true, user: AppUser(
-        uid: 'test',
-        email: 'test@test.com',
-        name: 'Test',
-        createdAt: DateTime.now(),
-        lastLoginAt: DateTime.now(),
-        metadata: UserMetadata(),
-      ));
+
+      mockAuthProvider.setAuthenticated(true,
+          user: AppUser(
+            uid: 'test',
+            email: 'test@test.com',
+            name: 'Test',
+            createdAt: DateTime.now(),
+            lastLoginAt: DateTime.now(),
+            metadata: UserMetadata(),
+          ));
       // Use pump() instead of pumpAndSettle() since HomeScreen has async operations that block settlement
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 100));

@@ -51,7 +51,7 @@ class ProjectDrawer extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
+            Theme.of(context).primaryColor.withValues(alpha: 0.8),
           ],
         ),
       ),
@@ -189,15 +189,13 @@ class ProjectDrawer extends StatelessWidget {
           itemCount: projectProvider.projects.length,
           itemBuilder: (context, index) {
             final project = projectProvider.projects[index];
-            final isSelected =
-                project.id == projectProvider.currentProject?.id;
+            final isSelected = project.id == projectProvider.currentProject?.id;
 
             return ListTile(
               leading: Icon(
                 Icons.folder,
-                color: isSelected
-                    ? Theme.of(context).primaryColor
-                    : Colors.grey,
+                color:
+                    isSelected ? Theme.of(context).primaryColor : Colors.grey,
               ),
               title: Text(
                 project.name,
@@ -210,7 +208,7 @@ class ProjectDrawer extends StatelessWidget {
               ),
               selected: isSelected,
               selectedTileColor:
-                  Theme.of(context).primaryColor.withOpacity(0.1),
+                  Theme.of(context).primaryColor.withValues(alpha: 0.1),
               onTap: () async {
                 if (!isSelected) {
                   await projectProvider.selectProject(project.id);
@@ -315,8 +313,8 @@ class ProjectDrawer extends StatelessWidget {
     if (trimmedName.length > maxLength) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Project name must be at most $maxLength characters.'),
+          const SnackBar(
+            content: Text('Project name must be at most 50 characters.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -383,8 +381,7 @@ class ProjectDrawer extends StatelessWidget {
             child: const Text('Cancel'),
           ),
           ElevatedButton(
-            onPressed: () =>
-                _renameProject(context, project, controller.text),
+            onPressed: () => _renameProject(context, project, controller.text),
             child: const Text('Rename'),
           ),
         ],
@@ -398,14 +395,14 @@ class ProjectDrawer extends StatelessWidget {
     if (trimmedName.isEmpty || trimmedName == project.name) {
       return;
     }
-    
+
     const maxLength = 50;
     if (trimmedName.length > maxLength) {
       if (context.mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Project name must be at most $maxLength characters.'),
+          const SnackBar(
+            content: Text('Project name must be at most 50 characters.'),
             backgroundColor: Colors.red,
           ),
         );

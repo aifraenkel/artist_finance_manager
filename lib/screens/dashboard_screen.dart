@@ -27,11 +27,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _isLoading = true;
   Map<String, List<Transaction>> _projectTransactions = {};
   Map<String, Project> _projects = {};
-  
+
   // Month abbreviations for timeline chart
   static const List<String> _monthAbbreviations = [
-    '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
+    '',
+    'Jan',
+    'Feb',
+    'Mar',
+    'Apr',
+    'May',
+    'Jun',
+    'Jul',
+    'Aug',
+    'Sep',
+    'Oct',
+    'Nov',
+    'Dec'
   ];
 
   @override
@@ -47,7 +58,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       _isLoading = true;
     });
 
-    final projectProvider = Provider.of<ProjectProvider>(context, listen: false);
+    final projectProvider =
+        Provider.of<ProjectProvider>(context, listen: false);
     final projects = projectProvider.projects;
 
     // Build projects map
@@ -140,8 +152,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
 
     final summary = _analyticsService.calculateSummary(_projectTransactions);
-    final contributions =
-        _analyticsService.getProjectContributions(_projectTransactions, _projects);
+    final contributions = _analyticsService.getProjectContributions(
+        _projectTransactions, _projects);
     final topExpensive = _analyticsService.getTopExpensiveProjects(
       _projectTransactions,
       _projects,
@@ -265,13 +277,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildSummaryCard(String label, String value, Color color, IconData icon) {
+  Widget _buildSummaryCard(
+      String label, String value, Color color, IconData icon) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -308,7 +321,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (contributions.isEmpty) {
       return const SizedBox.shrink();
     }
-    
+
     final total = contributions.values.fold(0.0, (sum, val) => sum + val);
     if (total < 0.01) {
       return const SizedBox.shrink();
@@ -390,7 +403,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildTimelineChart(Map<String, List<TimelineDataPoint>> timelineData) {
+  Widget _buildTimelineChart(
+      Map<String, List<TimelineDataPoint>> timelineData) {
     final incomeData = timelineData['income']!;
     final expensesData = timelineData['expenses']!;
     final balanceData = timelineData['balance']!;
@@ -415,12 +429,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final maxExpenses = _findMaxValue(expensesData);
     final maxBalance = _findMaxValue(balanceData);
     final minBalance = _findMinValue(balanceData);
-    
+
     // Determine y-axis range, accounting for negative balances
-    final maxY = [maxIncome, maxExpenses, maxBalance].fold(0.0, (a, b) => a > b ? a : b);
+    final maxY =
+        [maxIncome, maxExpenses, maxBalance].fold(0.0, (a, b) => a > b ? a : b);
     final minY = minBalance < 0 ? minBalance : 0.0;
     final yRange = maxY - minY;
-    
+
     // Avoid division by zero
     final interval = yRange > 0 ? yRange / 5 : 1.0;
 
@@ -496,7 +511,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Colors.green.withOpacity(0.1),
+                        color: Colors.green.withValues(alpha: 0.1),
                       ),
                     ),
                     LineChartBarData(
@@ -506,7 +521,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Colors.red.withOpacity(0.1),
+                        color: Colors.red.withValues(alpha: 0.1),
                       ),
                     ),
                     LineChartBarData(
@@ -616,18 +631,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
       Colors.deepOrange,
     ];
   }
-  
+
   /// Helper method to find maximum value from timeline data points
   double _findMaxValue(List<TimelineDataPoint> data) {
     if (data.isEmpty) return 0.0;
-    final max = data.map((d) => d.value).fold(double.negativeInfinity, (max, val) => max > val ? max : val);
+    final max = data
+        .map((d) => d.value)
+        .fold(double.negativeInfinity, (max, val) => max > val ? max : val);
     return max.isInfinite ? 0.0 : max;
   }
-  
+
   /// Helper method to find minimum value from timeline data points
   double _findMinValue(List<TimelineDataPoint> data) {
     if (data.isEmpty) return 0.0;
-    final min = data.map((d) => d.value).fold(double.infinity, (min, val) => min < val ? min : val);
+    final min = data
+        .map((d) => d.value)
+        .fold(double.infinity, (min, val) => min < val ? min : val);
     return min.isInfinite ? 0.0 : min;
   }
 }

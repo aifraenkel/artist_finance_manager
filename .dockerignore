@@ -1,9 +1,8 @@
 # .dockerignore for Artist Finance Manager
 # Excludes unnecessary files from Docker build context
 
-# Deployment scripts (keep only nginx.conf)
+# Deployment scripts
 scripts/
-!scripts/nginx.conf
 
 # Git
 .git/

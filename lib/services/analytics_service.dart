@@ -106,10 +106,12 @@ class AnalyticsService {
 
     for (final key in sortedKeys) {
       final txns = groupedTransactions[key]!;
-      final income =
-          txns.where((t) => t.type == 'income').fold(0.0, (sum, t) => sum + t.amount);
-      final expenses =
-          txns.where((t) => t.type == 'expense').fold(0.0, (sum, t) => sum + t.amount);
+      final income = txns
+          .where((t) => t.type == 'income')
+          .fold(0.0, (sum, t) => sum + t.amount);
+      final expenses = txns
+          .where((t) => t.type == 'expense')
+          .fold(0.0, (sum, t) => sum + t.amount);
 
       cumulativeBalance += income - expenses;
 
@@ -178,8 +180,8 @@ class AnalyticsService {
     final totalExpenses = allTransactions
         .where((t) => t.type == 'expense')
         .fold(0.0, (sum, t) => sum + t.amount);
-    final avgAmount =
-        allTransactions.fold(0.0, (sum, t) => sum + t.amount) / allTransactions.length;
+    final avgAmount = allTransactions.fold(0.0, (sum, t) => sum + t.amount) /
+        allTransactions.length;
 
     return AnalyticsSummary(
       totalIncome: totalIncome,

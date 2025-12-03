@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:artist_finance_manager/services/export_service.dart';
 import 'package:artist_finance_manager/services/project_service.dart';
 import 'package:artist_finance_manager/services/storage_service.dart';
-import 'package:artist_finance_manager/models/project.dart';
 import 'package:artist_finance_manager/models/transaction.dart';
 import '../helpers/mock_sync_service.dart';
 
@@ -44,7 +43,8 @@ void main() {
 
       final csv = await exportService.exportToCSV();
 
-      expect(csv, contains('Project name,Type,Category,Description,Amount,Datetime'));
+      expect(csv,
+          contains('Project name,Type,Category,Description,Amount,Datetime'));
       // CSV with only headers should have just one line
       final lines = csv.trim().split('\n');
       expect(lines.length, 1);
@@ -84,11 +84,18 @@ void main() {
       final csv = await exportService.exportToCSV();
 
       // Check header
-      expect(csv, contains('Project name,Type,Category,Description,Amount,Datetime'));
-      
+      expect(csv,
+          contains('Project name,Type,Category,Description,Amount,Datetime'));
+
       // Check data rows
-      expect(csv, contains('Art Show,Expense,Venue,Venue rental,500.00,2024-01-15 10:30:00'));
-      expect(csv, contains('Art Show,Income,Event tickets,Ticket sales,1200.00,2024-01-20 18:00:00'));
+      expect(
+          csv,
+          contains(
+              'Art Show,Expense,Venue,Venue rental,500.00,2024-01-15 10:30:00'));
+      expect(
+          csv,
+          contains(
+              'Art Show,Income,Event tickets,Ticket sales,1200.00,2024-01-20 18:00:00'));
     });
 
     test('should export multiple projects with transactions', () async {

@@ -6,6 +6,7 @@ class ObservabilityServiceImpl implements ObservabilityService {
   // Note: _userPreferences is kept for interface consistency with web implementation
   // even though this is a no-op stub. Mobile platforms could use this in the future
   // for platform-specific analytics (e.g., Firebase Analytics, Crashlytics)
+  // ignore: unused_field
   final UserPreferences? _userPreferences;
 
   ObservabilityServiceImpl({UserPreferences? userPreferences})
@@ -42,5 +43,6 @@ class ObservabilityServiceImpl implements ObservabilityService {
 }
 
 /// Factory function to get the observability service
-ObservabilityService getObservabilityService({UserPreferences? userPreferences}) => 
+ObservabilityService getObservabilityService(
+        {UserPreferences? userPreferences}) =>
     ObservabilityServiceImpl(userPreferences: userPreferences);
