@@ -41,7 +41,7 @@ echo ""
 info "After signing up:"
 echo "1. Go to Settings > API Keys: https://app.sendgrid.com/settings/api_keys"
 echo "2. Click 'Create API Key'"
-echo "3. Name: 'Artist Finance Manager'"
+echo "3. Name: 'Art Finance Hub'"
 echo "4. Permission: 'Full Access' or 'Restricted Access' with Mail Send"
 echo "5. Copy the API key (you'll only see it once!)"
 echo ""
@@ -91,7 +91,7 @@ cat > functions/.env <<EOF
 # SendGrid Configuration
 SENDGRID_API_KEY=$SENDGRID_API_KEY
 SENDGRID_SENDER_EMAIL=$SENDER_EMAIL
-SENDGRID_SENDER_NAME=Artist Finance Manager
+SENDGRID_SENDER_NAME=Art Finance Hub
 EOF
 
 success "Configuration saved to functions/.env"
@@ -113,7 +113,7 @@ import sgMail from '@sendgrid/mail';
 // Initialize SendGrid
 const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY;
 const SENDER_EMAIL = process.env.SENDGRID_SENDER_EMAIL || 'noreply@example.com';
-const SENDER_NAME = process.env.SENDGRID_SENDER_NAME || 'Artist Finance Manager';
+const SENDER_NAME = process.env.SENDGRID_SENDER_NAME || 'Art Finance Hub';
 
 if (SENDGRID_API_KEY) {
   sgMail.setApiKey(SENDGRID_API_KEY);
@@ -157,7 +157,7 @@ export async function sendEmail(to, subject, htmlBody, textBody) {
  * Send welcome email
  */
 export async function sendWelcomeEmail(to, name) {
-  const subject = 'Welcome to Artist Finance Manager!';
+  const subject = 'Welcome to Art Finance Hub!';
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -182,11 +182,11 @@ export async function sendWelcomeEmail(to, name) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>🎨 Welcome to Artist Finance Manager</h1>
+          <h1>🎨 Welcome to Art Finance Hub</h1>
         </div>
         <div class="content">
           <h2>Hello ${name}!</h2>
-          <p>Thank you for joining Artist Finance Manager. We're excited to help you take control of your project finances.</p>
+          <p>Thank you for joining Art Finance Hub. We're excited to help you take control of your project finances.</p>
 
           <div class="features">
             <strong>What you can do:</strong>
@@ -209,10 +209,10 @@ export async function sendWelcomeEmail(to, name) {
           </p>
         </div>
         <div class="footer">
-          <p><strong>Artist Finance Manager</strong></p>
+          <p><strong>Art Finance Hub</strong></p>
           <p>This email was sent to ${to}</p>
           <p style="margin-top: 15px; font-size: 12px;">
-            You received this email because you created an account with Artist Finance Manager
+            You received this email because you created an account with Art Finance Hub
           </p>
         </div>
       </div>
@@ -223,7 +223,7 @@ export async function sendWelcomeEmail(to, name) {
   const textBody = `
 Hello ${name}!
 
-Thank you for joining Artist Finance Manager. We're excited to help you take control of your project finances.
+Thank you for joining Art Finance Hub. We're excited to help you take control of your project finances.
 
 What you can do:
 • Track income and expenses for your creative projects
@@ -236,7 +236,7 @@ Get started: https://artist-finance-manager-456648586026.us-central1.run.app
 Need help? Check out our documentation or reach out to support.
 
 Best regards,
-The Artist Finance Manager Team
+The Art Finance Hub Team
   `.trim();
 
   return sendEmail(to, subject, htmlBody, textBody);
@@ -246,7 +246,7 @@ The Artist Finance Manager Team
  * Send account deletion email
  */
 export async function sendAccountDeletionEmail(to, name) {
-  const subject = 'Your Artist Finance Manager account has been deleted';
+  const subject = 'Your Art Finance Hub account has been deleted';
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -272,7 +272,7 @@ export async function sendAccountDeletionEmail(to, name) {
         </div>
         <div class="content">
           <h2>Hello ${name}</h2>
-          <p>Your Artist Finance Manager account has been deleted as requested.</p>
+          <p>Your Art Finance Hub account has been deleted as requested.</p>
 
           <div class="warning">
             <strong>⏰ Recovery Period:</strong><br>
@@ -287,7 +287,7 @@ export async function sendAccountDeletionEmail(to, name) {
           </p>
         </div>
         <div class="footer">
-          <p><strong>Artist Finance Manager</strong></p>
+          <p><strong>Art Finance Hub</strong></p>
           <p>This email was sent to ${to}</p>
         </div>
       </div>
@@ -298,7 +298,7 @@ export async function sendAccountDeletionEmail(to, name) {
   const textBody = `
 Hello ${name}
 
-Your Artist Finance Manager account has been deleted as requested.
+Your Art Finance Hub account has been deleted as requested.
 
 RECOVERY PERIOD: Your data will be kept for 90 days in case you change your mind. You can recover your account by signing in again within this period.
 
@@ -307,7 +307,7 @@ After 90 days, your account and all associated data will be permanently deleted.
 If you didn't request this deletion, please contact support immediately to secure your account.
 
 Best regards,
-The Artist Finance Manager Team
+The Art Finance Hub Team
   `.trim();
 
   return sendEmail(to, subject, htmlBody, textBody);
@@ -317,7 +317,7 @@ The Artist Finance Manager Team
  * Send login notification email
  */
 export async function sendLoginNotificationEmail(to, name, deviceInfo, ipAddress) {
-  const subject = 'New login to your Artist Finance Manager account';
+  const subject = 'New login to your Art Finance Hub account';
   const timestamp = new Date().toLocaleString('en-US', {
     dateStyle: 'full',
     timeStyle: 'long'
@@ -348,7 +348,7 @@ export async function sendLoginNotificationEmail(to, name, deviceInfo, ipAddress
         </div>
         <div class="content">
           <h2>Hello ${name}</h2>
-          <p>We detected a new login to your Artist Finance Manager account.</p>
+          <p>We detected a new login to your Art Finance Hub account.</p>
 
           <div class="info-box">
             <strong>Login Details:</strong>
@@ -365,7 +365,7 @@ export async function sendLoginNotificationEmail(to, name, deviceInfo, ipAddress
           </p>
         </div>
         <div class="footer">
-          <p><strong>Artist Finance Manager</strong></p>
+          <p><strong>Art Finance Hub</strong></p>
           <p>This is a security notification sent to ${to}</p>
         </div>
       </div>
@@ -376,7 +376,7 @@ export async function sendLoginNotificationEmail(to, name, deviceInfo, ipAddress
   const textBody = `
 Hello ${name}
 
-We detected a new login to your Artist Finance Manager account.
+We detected a new login to your Art Finance Hub account.
 
 Login Details:
 - Device: ${deviceInfo || 'Unknown'}
@@ -388,7 +388,7 @@ If this was you, you can safely ignore this email.
 IF THIS WASN'T YOU: Please secure your account immediately by changing your credentials and reviewing recent activity.
 
 Best regards,
-The Artist Finance Manager Team
+The Art Finance Hub Team
 
 This is a security notification sent to ${to}
   `.trim();
@@ -439,7 +439,7 @@ else
     cat > functions/package.json <<'EOF'
 {
   "name": "artist-finance-manager-functions",
-  "description": "Cloud Functions for Artist Finance Manager",
+  "description": "Cloud Functions for Art Finance Hub",
   "version": "1.0.0",
   "type": "module",
   "main": "index.js",
