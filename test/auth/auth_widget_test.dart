@@ -184,7 +184,7 @@ void main() {
 
       final button = find.widgetWithText(ElevatedButton, 'Send Sign-In Link');
       await tester.tap(button);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Should show success snackbar
       expect(find.text('Sign-in email sent! Please check your inbox.'), findsOneWidget);
