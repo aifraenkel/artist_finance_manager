@@ -50,16 +50,28 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     setState(() => _isLoading = false);
 
     if (success && mounted) {
-      // Navigate to email verification screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => EmailVerificationScreen(
-            email: email,
-            name: name,
-            isRegistration: true,
-          ),
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Verification email sent! Please check your inbox.'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
         ),
       );
+      
+      // Navigate to email verification screen after a brief delay
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => EmailVerificationScreen(
+              email: email,
+              name: name,
+              isRegistration: true,
+            ),
+          ),
+        );
+      }
     } else if (mounted) {
       // Show error
       ScaffoldMessenger.of(context).showSnackBar(

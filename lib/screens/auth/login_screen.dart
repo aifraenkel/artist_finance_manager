@@ -46,12 +46,24 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _isLoading = false);
 
     if (success && mounted) {
-      // Navigate to email verification screen
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(
-          builder: (context) => EmailVerificationScreen(email: email),
+      // Show success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Sign-in email sent! Please check your inbox.'),
+          backgroundColor: Colors.green,
+          duration: Duration(seconds: 3),
         ),
       );
+      
+      // Navigate to email verification screen after a brief delay
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (context) => EmailVerificationScreen(email: email),
+          ),
+        );
+      }
     } else if (mounted) {
       // Show error
       ScaffoldMessenger.of(context).showSnackBar(

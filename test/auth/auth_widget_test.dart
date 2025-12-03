@@ -174,5 +174,46 @@ void main() {
       expect(find.text('Check Your Email'), findsOneWidget);
       expect(find.textContaining('john@example.com'), findsOneWidget);
     });
+
+    testWidgets('Login shows success snackbar on email sent', (WidgetTester tester) async {
+      await tester.pumpWidget(createTestApp(const LoginScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextFormField), 'test@example.com');
+      await tester.pumpAndSettle();
+
+      final button = find.widgetWithText(ElevatedButton, 'Send Sign-In Link');
+      await tester.tap(button);
+      await tester.pump();
+
+      // Should show success snackbar
+      expect(find.text('Sign-in email sent! Please check your inbox.'), findsOneWidget);
+      expect(find.byType(SnackBar), findsOneWidget);
+
+      // Verify snackbar has green background
+      final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+      expect(snackBar.backgroundColor, Colors.green);
+    });
+
+    testWidgets('Registration shows success snackbar on email sent', (WidgetTester tester) async {
+      await tester.pumpWidget(createTestApp(const RegistrationScreen()));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextFormField).at(0), 'John Doe');
+      await tester.enterText(find.byType(TextFormField).at(1), 'test@example.com');
+      await tester.pumpAndSettle();
+
+      final button = find.widgetWithText(ElevatedButton, 'Create Account');
+      await tester.tap(button);
+      await tester.pump();
+
+      // Should show success snackbar
+      expect(find.text('Verification email sent! Please check your inbox.'), findsOneWidget);
+      expect(find.byType(SnackBar), findsOneWidget);
+
+      // Verify snackbar has green background
+      final snackBar = tester.widget<SnackBar>(find.byType(SnackBar));
+      expect(snackBar.backgroundColor, Colors.green);
+    });
   });
 }
