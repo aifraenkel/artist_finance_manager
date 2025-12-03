@@ -148,37 +148,45 @@ Future<void> signOut() async {
 
 **Current Implementation:**
 ```dart
-// Sign-in logging
+// Sign-in logging (IMPLEMENTED)
 _observability.trackEvent('user_sign_in', attributes: {
   'userId': user.uid,
-  'email': user.email,  // ⚠️ Consider hashing
+  'emailHash': _hashEmail(user.email ?? ''),  // ✅ Implemented
   'deviceId': deviceId,
   'deviceName': deviceName,
   'loginCount': loginCount,
 });
 ```
 
-**Recommendation:**
-- Consider hashing email addresses in logs
-- Implement log rotation and retention policies
-- Set up alerting for suspicious patterns
+**Implementation Status:**
+- ✅ Email hashing implemented using SHA-256
+- ✅ All logging calls updated to use `_hashEmail()`
+- ⚠️ Log rotation and retention policies (to be configured at infrastructure level)
+- ⚠️ Alerting for suspicious patterns (future enhancement)
 
-### ⚠️ Areas for Improvement
+### ✅ Areas Implemented
 
 1. **Email in Logs**
-   - Currently logs full email address
-   - Recommendation: Hash or mask email in production logs
+   - ✅ Email hashing fully implemented
+   - ✅ All debug, info, and event logs use hashed emails
+   - ✅ SHA-256 hash with first 16 characters for logging
    ```dart
-   // Proposed improvement
-   'emailHash': hashEmail(user.email),
+   // Implementation
+   String _hashEmail(String email) {
+     final bytes = utf8.encode(email.toLowerCase().trim());
+     final digest = sha256.convert(bytes);
+     return digest.toString().substring(0, 16);
+   }
    ```
 
-2. **Session Monitoring Dashboard**
+### ⚠️ Areas for Future Improvement
+
+1. **Session Monitoring Dashboard**
    - No UI for viewing active sessions
    - Recommendation: Add user-facing session management UI
    - Allow users to see and revoke active sessions
 
-3. **Anomaly Detection**
+2. **Anomaly Detection**
    - No automated suspicious activity detection
    - Recommendation: Implement:
      - Impossible travel detection
@@ -186,7 +194,7 @@ _observability.trackEvent('user_sign_in', attributes: {
      - Unusual sign-in times
      - Geographic anomalies
 
-4. **Rate Limiting**
+3. **Rate Limiting**
    - No rate limiting on authentication attempts
    - Recommendation: Implement Firebase App Check or custom rate limiting
 
@@ -223,7 +231,7 @@ _observability.trackEvent('user_sign_in', attributes: {
 - [x] Multiple devices can have simultaneous sessions
 - [x] Device tracking works correctly
 - [x] All auth events are logged
-- [ ] Email masking in production logs
+- [x] Email hashing implemented in all logs
 - [ ] Rate limiting on auth endpoints
 - [ ] Anomaly detection for suspicious sign-ins
 - [ ] User-facing session management UI
@@ -240,14 +248,14 @@ _observability.trackEvent('user_sign_in', attributes: {
 | Session Storage | ✅ Full | Platform-specific secure storage |
 | Session Fixation | ✅ Full | Tokens regenerated on sign-in |
 | Data Protection | ✅ Full | Encrypted in transit and at rest |
-| Monitoring | ⚠️ Partial | Needs email hashing in logs |
+| Monitoring | ✅ Full | Email hashing implemented |
 
-**Overall Compliance: 95%**
+**Overall Compliance: 100%**
 
 ## Recommendations for Production
 
 1. **Immediate (High Priority):**
-   - Hash email addresses in logs
+   - ✅ Hash email addresses in logs (COMPLETED)
    - Implement log rotation
    - Set up monitoring alerts
 

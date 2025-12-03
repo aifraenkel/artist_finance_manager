@@ -79,7 +79,7 @@ class AuthService {
 
       // Check if user is soft-deleted
       if (appUser.isDeleted) {
-        print('WARN: User ${user.email} is soft-deleted, signing out');
+        print('WARN: User ${_hashEmail(user.email ?? '')} is soft-deleted, signing out');
         await signOut();
         return null;
       }
@@ -118,16 +118,15 @@ class AuthService {
     required ActionCodeSettings actionCodeSettings,
   }) async {
     try {
-      print('DEBUG: Attempting to send sign-in link to $email');
-      print(
-          'DEBUG: ActionCodeSettings - URL: ${actionCodeSettings.url}, handleCodeInApp: ${actionCodeSettings.handleCodeInApp}');
-
+      print('DEBUG: Attempting to send sign-in link to ${_hashEmail(email)}');
+      print('DEBUG: ActionCodeSettings - URL: ${actionCodeSettings.url}, handleCodeInApp: ${actionCodeSettings.handleCodeInApp}');
+      
       await _auth.sendSignInLinkToEmail(
         email: email,
         actionCodeSettings: actionCodeSettings,
       );
-
-      print('DEBUG: Sign-in link sent successfully to $email');
+      
+      print('DEBUG: Sign-in link sent successfully to ${_hashEmail(email)}');
       print('DEBUG: Check your email inbox and spam folder');
     } catch (e) {
       print('ERROR: Failed to send sign-in link: $e');
