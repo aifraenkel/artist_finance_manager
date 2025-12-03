@@ -205,7 +205,7 @@ void main() {
 
       final button = find.widgetWithText(ElevatedButton, 'Create Account');
       await tester.tap(button);
-      await tester.pump();
+      await tester.pumpAndSettle();
 
       // Should show success snackbar
       expect(find.text('Verification email sent! Please check your inbox.'), findsOneWidget);
