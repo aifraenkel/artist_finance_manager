@@ -2,8 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/project_provider.dart';
 import '../../models/app_user.dart';
 import '../../services/user_preferences.dart';
+import '../../services/export_service.dart';
+import '../../services/storage_service.dart';
+import '../../services/firestore_sync_service.dart';
+import '../../services/file_download.dart';
 import '../../widgets/consent_dialog.dart';
 
 /// User profile and settings screen
@@ -25,6 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   bool _isEditing = false;
   bool _isLoading = false;
+  bool _isExporting = false;
   final UserPreferences _userPreferences = UserPreferences();
   bool _analyticsConsent = false;
 
@@ -180,6 +186,58 @@ class _ProfileScreenState extends State<ProfileScreen> {
             backgroundColor: Colors.red,
           ),
         );
+      }
+    }
+  }
+
+  Future<void> _exportToCSV() async {
+    setState(() => _isExporting = true);
+
+    try {
+      final projectProvider = Provider.of<ProjectProvider>(context, listen: false);
+      
+      // Create export service with a factory function for storage services
+      final exportService = ExportService(
+        projectService: projectProvider.projectService,
+        createStorageService: (projectId) {
+          final syncService = FirestoreSyncService(projectId: projectId);
+          return StorageService(
+            syncService: syncService,
+            projectId: projectId,
+          );
+        },
+      );
+
+      // Generate CSV
+      final csvContent = await exportService.exportToCSV();
+
+      // Generate filename with current date
+      final timestamp = DateFormat('yyyy-MM-dd_HHmmss').format(DateTime.now());
+      final filename = 'art_finance_hub_export_$timestamp.csv';
+
+      // Download the file
+      await downloadFile(csvContent, filename);
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Projects exported successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to export: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isExporting = false);
       }
     }
   }
@@ -422,6 +480,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
+                        OutlinedButton.icon(
+                          onPressed: (_isLoading || _isExporting) ? null : _exportToCSV,
+                          icon: _isExporting
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  ),
+                                )
+                              : const Icon(Icons.download),
+                          label: const Text('Export to CSV'),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
                         OutlinedButton.icon(
                           onPressed: _isLoading ? null : _logout,
                           icon: const Icon(Icons.logout),

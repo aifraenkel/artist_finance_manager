@@ -28,6 +28,7 @@ The goal of this app is to enable artists to easily manage costs and income from
 - **Real-time Summary**: View income, expenses, and balance at a glance (per project)
 - **Transaction History**: View all transactions in chronological order with category, description, date, and amount
 - **Project Management**: Create, rename, and delete projects (soft delete with data preservation)
+- **Data Export**: Export all projects and transactions to CSV for backup or analysis
 
 ### 📱 Cross-Platform Experience
 - **Works Everywhere**: iOS, Android, and Web from a single codebase
@@ -245,6 +246,24 @@ The drawer shows a global summary across all projects.
 - Each transaction shows category, description, date, time, and amount
 - Delete any transaction by clicking the **Delete** button
 - Transactions are scoped to the current project
+
+### Exporting Data
+
+Export all your projects and transactions to CSV format for backup or analysis:
+
+1. Navigate to **Profile & Settings** (tap your profile icon)
+2. Scroll to the **Account Actions** section
+3. Click **Export to CSV**
+4. Wait for the export to complete (you'll see a progress indicator)
+5. The CSV file will automatically download with a timestamp in the filename
+
+The exported CSV contains the following columns:
+- **Project name**: The name of the project
+- **Type**: Income or Expense
+- **Category**: Transaction category (e.g., Venue, Event tickets)
+- **Description**: Transaction description
+- **Amount**: Transaction amount (formatted with 2 decimal places)
+- **Datetime**: Transaction date and time (YYYY-MM-DD HH:MM:SS format)
 
 ### Data Migration
 
