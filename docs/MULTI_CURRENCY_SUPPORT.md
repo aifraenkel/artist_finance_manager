@@ -28,10 +28,10 @@ When a user changes their currency preference:
 1. A confirmation dialog is shown explaining the conversion process
 2. The latest exchange rate is fetched from the [Frankfurter API](https://frankfurter.dev/)
 3. The exchange rate is based on data from the European Central Bank
-4. All existing transaction amounts across all projects are converted
-5. The conversion rate is stored with the user's preferences
+4. The conversion rate is stored with the user's preferences for future reference
+5. The UI updates to display the new currency symbol
 
-**Important:** Currency conversion is a one-time operation that modifies the stored transaction amounts. This is not a display-only conversion.
+**Note:** In the current implementation, currency preference changes the display symbol (€ vs $) but does not automatically convert stored transaction amounts. This allows users to track which currency their transactions were originally recorded in. Future versions may include automatic conversion of historical data.
 
 ## Implementation Details
 
@@ -131,9 +131,12 @@ match /users/{userId}/preferences/{preferencesId} {
 3. If confirmed:
    - Latest exchange rate is fetched
    - User preference is updated with the new currency and rate
-   - A success message shows the applied rate
+   - Currency symbol in UI updates to reflect new preference
+   - A success message shows the fetched rate
 4. If cancelled:
    - No changes are made
+
+**Note:** The current implementation updates the display symbol but does not convert existing transaction amounts. Users should manually account for currency differences when switching preferences.
 
 ## CSV Export
 

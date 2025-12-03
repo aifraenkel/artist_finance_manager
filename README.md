@@ -300,8 +300,9 @@ Customize your experience by setting language and currency preferences:
 **Important Notes on Currency Changes:**
 - When changing currencies, you'll be shown a confirmation dialog
 - The app will fetch the latest conversion rate from the European Central Bank (via Frankfurter API)
-- All existing transaction amounts in all projects will be converted using this rate
-- The conversion is a one-time operation applied to your stored data
+- The conversion rate is stored for your reference
+- The currency symbol in the UI will update to reflect your preference (€ or $)
+- Note: Changing currency preference updates the display symbol but does not automatically convert existing transaction amounts
 - Default settings for new users: English language and Euro currency
 
 ### Data Migration

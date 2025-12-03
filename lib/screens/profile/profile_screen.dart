@@ -305,34 +305,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Currency Conversion'),
+        title: const Text('Change Currency'),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Changing from ${_userPrefs!.currency.code} to ${currency.code} will apply a conversion rate to all saved transactions in all projects.',
+              'Changing from ${_userPrefs!.currency.code} to ${currency.code} will update the currency symbol displayed in the app.',
             ),
             const SizedBox(height: 16),
             const Text(
-              'The conversion rate is based on the European Central Bank rate from Frankfurter API.',
+              'The conversion rate from the European Central Bank (via Frankfurter API) will be fetched and stored for your reference.',
               style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange[50],
+                color: Colors.blue[50],
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange[200]!),
+                border: Border.all(color: Colors.blue[200]!),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.warning_amber, color: Colors.orange[700], size: 20),
+                  Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
                   const SizedBox(width: 8),
                   const Expanded(
                     child: Text(
-                      'This will modify all transaction amounts',
+                      'Note: This does not convert existing transaction amounts',
                       style: TextStyle(fontSize: 12),
                     ),
                   ),
@@ -351,7 +351,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,
             ),
-            child: const Text('Convert'),
+            child: const Text('Update Currency'),
           ),
         ],
       ),
