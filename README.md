@@ -23,12 +23,14 @@ The goal of this app is to enable artists to easily manage costs and income from
 - **Multiple Projects**: Organize finances by different art projects (new!)
 - **Project Switching**: Easily switch between projects with a drawer menu
 - **Global Summary**: View combined financial summary across all projects
+- **Multi-Currency Support**: Choose between Euro (€) and US Dollar ($) with automatic conversion (new!)
+- **Language Options**: Select your preferred language: English, Spanish, or Catalan (new!)
 - **Track Expenses**: Record art-related costs (venue, musicians, materials, food & drinks, book printing, podcast, etc.)
 - **Track Income**: Log revenue from book sales, event tickets, and more
 - **Real-time Summary**: View income, expenses, and balance at a glance (per project)
 - **Transaction History**: View all transactions in chronological order with category, description, date, and amount
 - **Project Management**: Create, rename, and delete projects (soft delete with data preservation)
-- **Data Export**: Export all projects and transactions to CSV for backup or analysis
+- **Data Export**: Export all projects and transactions to CSV for backup or analysis (includes currency information)
 
 ### 📊 Analytics & Insights
 - **Financial Dashboard**: Comprehensive analytics dashboard showing financial trends over time
@@ -283,7 +285,24 @@ The exported CSV contains the following columns:
 - **Category**: Transaction category (e.g., Venue, Event tickets)
 - **Description**: Transaction description
 - **Amount**: Transaction amount (formatted with 2 decimal places)
+- **Currency**: Currency code (EUR or USD)
 - **Datetime**: Transaction date and time (YYYY-MM-DD HH:MM:SS format)
+
+### Managing Preferences
+
+Customize your experience by setting language and currency preferences:
+
+1. Navigate to **Profile & Settings** (tap your profile icon)
+2. Find the **Preferences** section
+3. **Language**: Select from English, Spanish, or Catalan
+4. **Currency**: Choose between Euro (€) and US Dollar ($)
+
+**Important Notes on Currency Changes:**
+- When changing currencies, you'll be shown a confirmation dialog
+- The app will fetch the latest conversion rate from the European Central Bank (via Frankfurter API)
+- All existing transaction amounts in all projects will be converted using this rate
+- The conversion is a one-time operation applied to your stored data
+- Default settings for new users: English language and Euro currency
 
 ### Data Migration
 
@@ -291,6 +310,7 @@ If you're upgrading from a previous version:
 - Your existing transactions will be automatically migrated to a "Default" project
 - You'll see a notification when this happens
 - All your data is preserved and backed up during migration
+- Default preferences (English, Euro) will be automatically set for existing users on first login
 
 ## 🏗️ Architecture & Tech Stack
 
