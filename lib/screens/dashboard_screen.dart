@@ -463,11 +463,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             final date = incomeData[index].date;
                             final parts = date.split('-');
                             if (parts.length >= 2) {
-                              final month = int.parse(parts[1]);
-                              return Text(
-                                _monthAbbreviations[month],
-                                style: const TextStyle(fontSize: 10),
-                              );
+                              try {
+                                final month = int.parse(parts[1]);
+                                if (month >= 1 && month <= 12) {
+                                  return Text(
+                                    _monthAbbreviations[month],
+                                    style: const TextStyle(fontSize: 10),
+                                  );
+                                }
+                              } catch (e) {
+                                // Ignore parse errors and fall through to return empty text
+                              }
                             }
                           }
                           return const Text('');
