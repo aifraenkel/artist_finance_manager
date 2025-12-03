@@ -296,7 +296,17 @@ class _HomeScreenState extends State<HomeScreen> {
         _globalSummary = summary;
       });
     } catch (e) {
-      // Ignore errors in global summary calculation
+      // Log error and notify user that global summary may be incomplete
+      _observability.trackError(e);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Global summary may be incomplete'),
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
     }
   }
 
