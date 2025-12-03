@@ -65,7 +65,7 @@ if [ "$CHOICE" = "2" ]; then
 # Resend Configuration
 RESEND_API_KEY=$RESEND_API_KEY
 RESEND_SENDER_EMAIL=$SENDER_EMAIL
-RESEND_SENDER_NAME=Artist Finance Manager
+RESEND_SENDER_NAME=Art Finance Hub
 EMAIL_PROVIDER=resend
 EOF
 
@@ -82,7 +82,7 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 const SENDER_EMAIL = process.env.RESEND_SENDER_EMAIL || 'onboarding@resend.dev';
-const SENDER_NAME = process.env.RESEND_SENDER_NAME || 'Artist Finance Manager';
+const SENDER_NAME = process.env.RESEND_SENDER_NAME || 'Art Finance Hub';
 
 export async function sendEmail(to, subject, htmlBody, textBody) {
   try {
@@ -195,7 +195,7 @@ SMTP_USER=
 SMTP_PASS=
 SMTP_SECURE=false
 SENDER_EMAIL=noreply@artist-finance-manager.local
-SENDER_NAME=Artist Finance Manager
+SENDER_NAME=Art Finance Hub
 EMAIL_PROVIDER=smtp
 MAILPIT_WEB_UI=$SERVICE_URL
 EOF
@@ -218,7 +218,7 @@ const SMTP_USER = process.env.SMTP_USER || '';
 const SMTP_PASS = process.env.SMTP_PASS || '';
 const SMTP_SECURE = process.env.SMTP_SECURE === 'true';
 const SENDER_EMAIL = process.env.SENDER_EMAIL || 'noreply@example.com';
-const SENDER_NAME = process.env.SENDER_NAME || 'Artist Finance Manager';
+const SENDER_NAME = process.env.SENDER_NAME || 'Art Finance Hub';
 
 // Create transporter
 const transporter = nodemailer.createTransporter({

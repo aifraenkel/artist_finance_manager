@@ -253,7 +253,7 @@ export async function sendEmail(to, subject, htmlBody, textBody) {
  * Send welcome email
  */
 export async function sendWelcomeEmail(to, name) {
-  const subject = 'Welcome to Artist Finance Manager!';
+  const subject = 'Welcome to Art Finance Hub!';
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -272,12 +272,12 @@ export async function sendWelcomeEmail(to, name) {
     <body>
       <div class="container">
         <div class="header">
-          <h1>Welcome to Artist Finance Manager</h1>
+          <h1>Welcome to Art Finance Hub</h1>
         </div>
         <div class="content">
           <h2>Hello ${name}!</h2>
-          <p>Thank you for joining Artist Finance Manager. We're excited to help you manage your project finances.</p>
-          <p>With Artist Finance Manager, you can:</p>
+          <p>Thank you for joining Art Finance Hub. We're excited to help you manage your project finances.</p>
+          <p>With Art Finance Hub, you can:</p>
           <ul>
             <li>Track income and expenses for your projects</li>
             <li>View real-time financial summaries</li>
@@ -288,7 +288,7 @@ export async function sendWelcomeEmail(to, name) {
           <a href="https://artist-finance-manager-456648586026.us-central1.run.app" class="button">Go to Dashboard</a>
         </div>
         <div class="footer">
-          <p>Artist Finance Manager</p>
+          <p>Art Finance Hub</p>
           <p>This email was sent to ${to}</p>
         </div>
       </div>
@@ -299,12 +299,12 @@ export async function sendWelcomeEmail(to, name) {
   const textBody = `
 Hello ${name}!
 
-Thank you for joining Artist Finance Manager. We're excited to help you manage your project finances.
+Thank you for joining Art Finance Hub. We're excited to help you manage your project finances.
 
 Get started by visiting your dashboard and adding your first transaction.
 
 Best regards,
-The Artist Finance Manager Team
+The Art Finance Hub Team
   `.trim();
 
   return sendEmail(to, subject, htmlBody, textBody);
@@ -314,7 +314,7 @@ The Artist Finance Manager Team
  * Send account deletion email
  */
 export async function sendAccountDeletionEmail(to, name) {
-  const subject = 'Your Artist Finance Manager account has been deleted';
+  const subject = 'Your Art Finance Hub account has been deleted';
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -337,7 +337,7 @@ export async function sendAccountDeletionEmail(to, name) {
         </div>
         <div class="content">
           <h2>Hello ${name}</h2>
-          <p>Your Artist Finance Manager account has been deleted as requested.</p>
+          <p>Your Art Finance Hub account has been deleted as requested.</p>
           <div class="warning">
             <strong>Recovery Period:</strong> Your data will be kept for 90 days. You can recover your account by signing in again within this period.
           </div>
@@ -345,7 +345,7 @@ export async function sendAccountDeletionEmail(to, name) {
           <p>If you didn't request this deletion, please contact support immediately.</p>
         </div>
         <div class="footer">
-          <p>Artist Finance Manager</p>
+          <p>Art Finance Hub</p>
           <p>This email was sent to ${to}</p>
         </div>
       </div>
@@ -356,7 +356,7 @@ export async function sendAccountDeletionEmail(to, name) {
   const textBody = `
 Hello ${name}
 
-Your Artist Finance Manager account has been deleted as requested.
+Your Art Finance Hub account has been deleted as requested.
 
 RECOVERY PERIOD: Your data will be kept for 90 days in case you change your mind. You can recover your account by signing in again within this period.
 
@@ -365,7 +365,7 @@ After 90 days, your account and all associated data will be permanently deleted.
 If you didn't request this deletion, please contact support immediately.
 
 Best regards,
-The Artist Finance Manager Team
+The Art Finance Hub Team
   `.trim();
 
   return sendEmail(to, subject, htmlBody, textBody);
@@ -375,7 +375,7 @@ The Artist Finance Manager Team
  * Send login notification email
  */
 export async function sendLoginNotificationEmail(to, name, deviceInfo, ipAddress) {
-  const subject = 'New login to your Artist Finance Manager account';
+  const subject = 'New login to your Art Finance Hub account';
 
   const htmlBody = `
     <!DOCTYPE html>
@@ -398,7 +398,7 @@ export async function sendLoginNotificationEmail(to, name, deviceInfo, ipAddress
         </div>
         <div class="content">
           <h2>Hello ${name}</h2>
-          <p>We detected a new login to your Artist Finance Manager account.</p>
+          <p>We detected a new login to your Art Finance Hub account.</p>
           <div class="info-box">
             <strong>Login Details:</strong><br>
             Device: ${deviceInfo || 'Unknown'}<br>
@@ -409,7 +409,7 @@ export async function sendLoginNotificationEmail(to, name, deviceInfo, ipAddress
           <p><strong>If this wasn't you:</strong> Please secure your account immediately by changing your email address and reviewing recent activity.</p>
         </div>
         <div class="footer">
-          <p>Artist Finance Manager</p>
+          <p>Art Finance Hub</p>
           <p>This is a security notification sent to ${to}</p>
         </div>
       </div>
@@ -420,7 +420,7 @@ export async function sendLoginNotificationEmail(to, name, deviceInfo, ipAddress
   const textBody = `
 Hello ${name}
 
-We detected a new login to your Artist Finance Manager account.
+We detected a new login to your Art Finance Hub account.
 
 Login Details:
 - Device: ${deviceInfo || 'Unknown'}
@@ -432,7 +432,7 @@ If this was you, you can safely ignore this email.
 If this wasn't you, please secure your account immediately.
 
 Best regards,
-The Artist Finance Manager Team
+The Art Finance Hub Team
   `.trim();
 
   return sendEmail(to, subject, htmlBody, textBody);
