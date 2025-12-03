@@ -4,9 +4,11 @@ import '../models/transaction.dart';
 import '../services/storage_service.dart';
 import '../services/firestore_sync_service.dart';
 import '../services/observability_service.dart';
+import '../services/user_preferences.dart';
 import '../widgets/summary_cards.dart';
 import '../widgets/transaction_form.dart';
 import '../widgets/transaction_list.dart';
+import '../widgets/consent_dialog.dart';
 import '../providers/auth_provider.dart';
 import 'profile/profile_screen.dart';
 
@@ -19,7 +21,8 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late StorageService _storageService;
-  final ObservabilityService _observability = ObservabilityService();
+  final UserPreferences _userPreferences = UserPreferences();
+  late ObservabilityService _observability;
   List<Transaction> _transactions = [];
   bool _isLoading = true;
   bool _isSyncing = false;
@@ -34,6 +37,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _initializeStorage() async {
+    // Initialize user preferences first
+    await _userPreferences.initialize();
+    
+    // Initialize observability with user preferences
+    _observability = ObservabilityService(userPreferences: _userPreferences);
+    
+    // Show consent dialog if user hasn't seen it yet
+    if (!_userPreferences.hasSeenConsentPrompt && mounted) {
+      // Wait a bit for the UI to settle
+      await Future.delayed(const Duration(milliseconds: 500));
+      if (mounted) {
+        await ConsentDialog.show(context, _userPreferences);
+      }
+    }
+
     // Create storage service with optional sync service
     final syncService = FirestoreSyncService();
     _storageService = StorageService(syncService: syncService);

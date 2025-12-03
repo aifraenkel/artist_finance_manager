@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../models/app_user.dart';
+import '../../services/user_preferences.dart';
+import '../../widgets/consent_dialog.dart';
 
 /// User profile and settings screen
 ///
@@ -23,6 +25,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final _nameController = TextEditingController();
   bool _isEditing = false;
   bool _isLoading = false;
+  final UserPreferences _userPreferences = UserPreferences();
+  bool _analyticsConsent = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPreferences();
+  }
+
+  Future<void> _loadPreferences() async {
+    await _userPreferences.initialize();
+    if (mounted) {
+      setState(() {
+        _analyticsConsent = _userPreferences.analyticsConsent;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -311,6 +330,76 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         _buildInfoRow(
                           'Login count',
                           user.metadata.loginCount.toString(),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Privacy & Data Settings
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Privacy & Data',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        SwitchListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: const Text('Analytics'),
+                          subtitle: const Text(
+                            'Help improve the app by sharing anonymous usage data',
+                            style: TextStyle(fontSize: 12),
+                          ),
+                          value: _analyticsConsent,
+                          onChanged: (value) async {
+                            await _userPreferences.setAnalyticsConsent(value);
+                            setState(() {
+                              _analyticsConsent = value;
+                            });
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    value
+                                        ? 'Analytics enabled - thank you!'
+                                        : 'Analytics disabled',
+                                  ),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            }
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        TextButton.icon(
+                          onPressed: () {
+                            // Show detailed info about what data is collected
+                            ConsentDialog.show(
+                              context,
+                              _userPreferences,
+                              onConsentChanged: () async {
+                                await _loadPreferences();
+                              },
+                            );
+                          },
+                          icon: const Icon(Icons.info_outline, size: 18),
+                          label: const Text(
+                            'What data do we collect?',
+                            style: TextStyle(fontSize: 13),
+                          ),
+                          style: TextButton.styleFrom(
+                            alignment: Alignment.centerLeft,
+                            padding: EdgeInsets.zero,
+                          ),
                         ),
                       ],
                     ),
