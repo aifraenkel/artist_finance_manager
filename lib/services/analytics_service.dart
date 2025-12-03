@@ -39,7 +39,7 @@ class AnalyticsService {
         final income = transactions
             .where((t) => t.type == 'income')
             .fold(0.0, (sum, t) => sum + t.amount);
-        contributions[project.name] = income;
+        contributions['${project.name} (${project.id})'] = income;
       }
     }
 
