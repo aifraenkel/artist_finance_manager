@@ -1,6 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart' hide UserMetadata;
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import '../models/app_user.dart';
+import 'device_info_service.dart';
+import 'observability_service.dart';
 
 /// Authentication service for managing user authentication and profile
 ///
@@ -16,6 +20,42 @@ import '../models/app_user.dart';
 class AuthService {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final ObservabilityService _observability = ObservabilityService();
+
+  AuthService() {
+    // Configure Firebase Auth persistence
+    // On web: LOCAL persistence (survives browser close)
+    // On mobile: persistence is always enabled by default
+    _configurePersistence();
+  }
+
+  /// Configure Firebase Auth persistence for session management
+  ///
+  /// Ensures authentication state persists across app restarts
+  /// following OWASP session management best practices.
+  Future<void> _configurePersistence() async {
+    try {
+      // On web, explicitly set persistence to LOCAL for session persistence
+      // This keeps the user logged in even after closing the browser
+      await _auth.setPersistence(Persistence.LOCAL);
+      print('DEBUG: Firebase Auth persistence configured to LOCAL');
+    } catch (e) {
+      // Mobile platforms don't support setPersistence (always enabled)
+      // This is expected and not an error
+      print('DEBUG: Persistence configuration not needed on this platform: $e');
+    }
+  }
+
+  /// Hash email for secure logging (OWASP compliance)
+  ///
+  /// Creates a SHA-256 hash of the email for logging without exposing PII.
+  /// The hash is deterministic so same email always produces same hash,
+  /// allowing for tracking across logs while protecting user privacy.
+  String _hashEmail(String email) {
+    final bytes = utf8.encode(email.toLowerCase().trim());
+    final digest = sha256.convert(bytes);
+    return digest.toString().substring(0, 16); // First 16 chars of hash
+  }
 
   /// Stream of authentication state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
@@ -24,6 +64,9 @@ class AuthService {
   User? get currentUser => _auth.currentUser;
 
   /// Get current app user from Firestore
+  ///
+  /// Validates session and returns user data if authenticated.
+  /// Handles soft-deleted users and logs session restoration events.
   Future<AppUser?> getCurrentAppUser() async {
     final user = currentUser;
     if (user == null) return null;
@@ -36,13 +79,32 @@ class AuthService {
 
       // Check if user is soft-deleted
       if (appUser.isDeleted) {
+        print('WARN: User ${_hashEmail(user.email ?? '')} is soft-deleted, signing out');
         await signOut();
         return null;
       }
 
+      // Log session restoration for security monitoring
+      _observability.log(
+        'Session restored from persistent storage',
+        level: 'info',
+        context: {
+          'userId': user.uid,
+          'emailHash': _hashEmail(user.email ?? ''),
+          'lastLoginAt': appUser.lastLoginAt.toIso8601String(),
+          'loginCount': appUser.metadata.loginCount,
+        },
+      );
+
+      print('DEBUG: Session restored for user ${_hashEmail(user.email ?? '')}');
+
       return appUser;
     } catch (e) {
       print('Error getting current app user: $e');
+      _observability.trackError(e, context: {
+        'operation': 'getCurrentAppUser',
+        'userId': user.uid,
+      });
       return null;
     }
   }
@@ -56,16 +118,15 @@ class AuthService {
     required ActionCodeSettings actionCodeSettings,
   }) async {
     try {
-      print('DEBUG: Attempting to send sign-in link to $email');
-      print(
-          'DEBUG: ActionCodeSettings - URL: ${actionCodeSettings.url}, handleCodeInApp: ${actionCodeSettings.handleCodeInApp}');
-
+      print('DEBUG: Attempting to send sign-in link to ${_hashEmail(email)}');
+      print('DEBUG: ActionCodeSettings - URL: ${actionCodeSettings.url}, handleCodeInApp: ${actionCodeSettings.handleCodeInApp}');
+      
       await _auth.sendSignInLinkToEmail(
         email: email,
         actionCodeSettings: actionCodeSettings,
       );
-
-      print('DEBUG: Sign-in link sent successfully to $email');
+      
+      print('DEBUG: Sign-in link sent successfully to ${_hashEmail(email)}');
       print('DEBUG: Check your email inbox and spam folder');
     } catch (e) {
       print('ERROR: Failed to send sign-in link: $e');
@@ -121,6 +182,7 @@ class AuthService {
   /// Register a new user
   ///
   /// Creates user profile in Firestore after successful authentication
+  /// with device tracking for security monitoring.
   ///
   /// [email] - User's email address
   /// [name] - User's display name
@@ -135,13 +197,31 @@ class AuthService {
 
     try {
       final now = DateTime.now();
+      
+      // Get device information for initial registration
+      final deviceId = await DeviceInfoService.getDeviceId();
+      final deviceName = await DeviceInfoService.getDeviceName();
+      final deviceInfo = await DeviceInfoService.getDeviceInfo();
+      
+      // Create device info for first device
+      final initialDevice = DeviceInfo(
+        deviceId: deviceId,
+        deviceName: deviceName,
+        firstSeen: now,
+        lastSeen: now,
+      );
+      
       final appUser = AppUser(
         uid: user.uid,
         email: email,
         name: name,
         createdAt: now,
         lastLoginAt: now,
-        metadata: UserMetadata(loginCount: 1),
+        metadata: UserMetadata(
+          loginCount: 1,
+          devices: [initialDevice],
+          lastLoginUserAgent: deviceInfo['userAgent'] is String ? deviceInfo['userAgent'] as String : null,
+        ),
       );
 
       // Use server timestamp for createdAt and lastLoginAt
@@ -151,14 +231,44 @@ class AuthService {
 
       await _firestore.collection('users').doc(user.uid).set(userDoc);
 
+      // Log registration event
+      _observability.trackEvent('user_registered', attributes: {
+        'userId': user.uid,
+        'emailHash': _hashEmail(email),
+        'deviceId': deviceId,
+        'deviceName': deviceName,
+        'platform': deviceInfo['platform'],
+        'timestamp': now.toIso8601String(),
+      });
+
+      _observability.log(
+        'New user registered successfully',
+        level: 'info',
+        context: {
+          'userId': user.uid,
+          'emailHash': _hashEmail(email),
+          'deviceId': deviceId,
+          'deviceName': deviceName,
+        },
+      );
+
+      print('INFO: New user registered: ${_hashEmail(email)} from $deviceName (device: $deviceId)');
+
       return appUser;
     } catch (e) {
       print('Error registering user: $e');
+      _observability.trackError(e, context: {
+        'operation': 'registerUser',
+        'emailHash': _hashEmail(email),
+      });
       rethrow;
     }
   }
 
-  /// Update user's last login timestamp and metadata
+  /// Update user's last login timestamp and metadata with device tracking
+  ///
+  /// Tracks device information and logs sign-in events for security monitoring.
+  /// Implements OWASP recommendations for authentication logging.
   Future<void> updateLastLogin() async {
     final user = currentUser;
     if (user == null) return;
@@ -168,16 +278,77 @@ class AuthService {
       if (!doc.exists) return;
 
       final appUser = AppUser.fromFirestore(doc);
+      
+      // Get device information
+      final deviceId = await DeviceInfoService.getDeviceId();
+      final deviceName = await DeviceInfoService.getDeviceName();
+      final deviceInfo = await DeviceInfoService.getDeviceInfo();
+      
+      // Update or add device to the list
+      final now = DateTime.now();
+      final devices = List<DeviceInfo>.from(appUser.metadata.devices);
+      final existingDeviceIndex = devices.indexWhere((d) => d.deviceId == deviceId);
+      
+      if (existingDeviceIndex >= 0) {
+        // Update existing device
+        devices[existingDeviceIndex] = DeviceInfo(
+          deviceId: deviceId,
+          deviceName: deviceName,
+          firstSeen: devices[existingDeviceIndex].firstSeen,
+          lastSeen: now,
+        );
+      } else {
+        // Add new device
+        devices.add(DeviceInfo(
+          deviceId: deviceId,
+          deviceName: deviceName,
+          firstSeen: now,
+          lastSeen: now,
+        ));
+      }
+
+      // Update metadata with device tracking
       final updatedMetadata = appUser.metadata.copyWith(
         loginCount: appUser.metadata.loginCount + 1,
+        devices: devices,
+        lastLoginUserAgent: (deviceInfo['userAgent'] as String?) ?? 'Unknown',
       );
 
       await _firestore.collection('users').doc(user.uid).update({
-        'lastLoginAt': Timestamp.fromDate(DateTime.now()),
+        'lastLoginAt': Timestamp.fromDate(now),
         'metadata': updatedMetadata.toMap(),
       });
+
+      // Log sign-in event for security monitoring
+      _observability.trackEvent('user_sign_in', attributes: {
+        'userId': user.uid,
+        'emailHash': _hashEmail(user.email ?? ''),
+        'deviceId': deviceId,
+        'deviceName': deviceName,
+        'platform': deviceInfo['platform'],
+        'loginCount': updatedMetadata.loginCount,
+        'timestamp': now.toIso8601String(),
+      });
+
+      _observability.log(
+        'User signed in successfully',
+        level: 'info',
+        context: {
+          'userId': user.uid,
+          'emailHash': _hashEmail(user.email ?? ''),
+          'deviceId': deviceId,
+          'deviceName': deviceName,
+          'loginCount': updatedMetadata.loginCount,
+        },
+      );
+
+      print('INFO: User ${_hashEmail(user.email ?? '')} signed in from $deviceName (device: $deviceId, login #${updatedMetadata.loginCount})');
     } catch (e) {
       print('Error updating last login: $e');
+      _observability.trackError(e, context: {
+        'operation': 'updateLastLogin',
+        'userId': user.uid,
+      });
     }
   }
 
@@ -272,11 +443,39 @@ class AuthService {
   }
 
   /// Sign out current user
+  ///
+  /// Logs the sign-out event for security monitoring before clearing the session.
   Future<void> signOut() async {
+    final user = currentUser;
+    
     try {
+      if (user != null) {
+        // Log sign-out event before clearing session
+        _observability.trackEvent('user_sign_out', attributes: {
+          'userId': user.uid,
+          'emailHash': _hashEmail(user.email ?? ''),
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+
+        _observability.log(
+          'User signed out',
+          level: 'info',
+          context: {
+            'userId': user.uid,
+            'emailHash': _hashEmail(user.email ?? ''),
+          },
+        );
+
+        print('INFO: User ${_hashEmail(user.email ?? '')} signed out');
+      }
+      
       await _auth.signOut();
     } catch (e) {
       print('Error signing out: $e');
+      _observability.trackError(e, context: {
+        'operation': 'signOut',
+        'userId': user?.uid,
+      });
       rethrow;
     }
   }
