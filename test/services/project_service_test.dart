@@ -131,19 +131,17 @@ void main() {
     test('Ensure default project - finds by ID', () async {
       // Manually create a project with the default ID
       final prefs = await SharedPreferences.getInstance();
-      final projects = [
-        Project(
-          id: 'default',
-          name: 'Custom Default',
-          createdAt: DateTime.now(),
-        ).toJson()
-      ];
+      final defaultProject = Project(
+        id: 'default',
+        name: 'Custom Default',
+        createdAt: DateTime.now(),
+      );
       await prefs.setString('projects', 
-          '${projects.map((p) => p).toList()}');
+          json.encode([defaultProject.toJson()]));
       
-      final defaultProject = await projectService.ensureDefaultProject();
+      final result = await projectService.ensureDefaultProject();
       
-      expect(defaultProject.id, 'default');
+      expect(result.id, 'default');
     });
 
     test('Load all projects includes deleted', () async {

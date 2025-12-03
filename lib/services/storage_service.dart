@@ -61,6 +61,11 @@ class StorageService {
   String get _key {
     if (_currentProjectId == null) {
       // Fallback to old key for backward compatibility
+      // This should only happen during migration
+      _observability.log(
+        'Warning: Using legacy storage key without project ID',
+        level: 'warn',
+      );
       return 'project-finances';
     }
     return '$_keyPrefix$_currentProjectId';

@@ -113,9 +113,18 @@ class ProjectProvider extends ChangeNotifier {
 
   /// Rename a project
   Future<bool> renameProject(String projectId, String newName) async {
-    final project = _projects.firstWhere((p) => p.id == projectId);
-    final updatedProject = project.copyWith(name: newName);
-    return await updateProject(updatedProject);
+    try {
+      final project = _projects.firstWhere(
+        (p) => p.id == projectId,
+        orElse: () => throw Exception('Project not found: $projectId'),
+      );
+      final updatedProject = project.copyWith(name: newName);
+      return await updateProject(updatedProject);
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+      return false;
+    }
   }
 
   /// Delete a project (soft delete)
@@ -150,10 +159,18 @@ class ProjectProvider extends ChangeNotifier {
 
   /// Select a project as the current project
   Future<void> selectProject(String projectId) async {
-    final project = _projects.firstWhere((p) => p.id == projectId);
-    _currentProject = project;
-    await projectService.setCurrentProjectId(projectId);
-    notifyListeners();
+    try {
+      final project = _projects.firstWhere(
+        (p) => p.id == projectId,
+        orElse: () => throw Exception('Project not found: $projectId'),
+      );
+      _currentProject = project;
+      await projectService.setCurrentProjectId(projectId);
+      notifyListeners();
+    } catch (e) {
+      _error = e.toString();
+      notifyListeners();
+    }
   }
 
   /// Get financial summary across all projects
