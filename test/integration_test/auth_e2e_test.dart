@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:artist_finance_manager/widgets/summary_cards.dart';
 
+@Tags(['integration'])
 void main() {
   group('SummaryCards Widget', () {
     testWidgets('renders income, expenses and balance (positive balance)', (tester) async {
