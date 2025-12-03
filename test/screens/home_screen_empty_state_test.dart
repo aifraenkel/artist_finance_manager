@@ -7,7 +7,6 @@ import 'package:artist_finance_manager/providers/project_provider.dart';
 import 'package:artist_finance_manager/models/app_user.dart';
 import 'package:artist_finance_manager/models/project.dart';
 import 'package:artist_finance_manager/services/project_service.dart';
-import 'package:artist_finance_manager/widgets/empty_project_state.dart';
 
 /// Integration tests for HomeScreen empty state behavior
 ///
@@ -15,7 +14,7 @@ import 'package:artist_finance_manager/widgets/empty_project_state.dart';
 
 class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   final bool _isAuthenticated = true;
-  final AppUser? _user = AppUser(
+  final AppUser _user = AppUser(
     uid: 'test-uid',
     email: 'test@example.com',
     name: 'Test User',

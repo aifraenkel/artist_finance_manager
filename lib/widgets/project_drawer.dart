@@ -51,7 +51,7 @@ class ProjectDrawer extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withOpacity(0.8),
+            Theme.of(context).primaryColor.withValues(alpha: 0.8),
           ],
         ),
       ),
@@ -208,7 +208,7 @@ class ProjectDrawer extends StatelessWidget {
               ),
               selected: isSelected,
               selectedTileColor:
-                  Theme.of(context).primaryColor.withOpacity(0.1),
+                  Theme.of(context).primaryColor.withValues(alpha: 0.1),
               onTap: () async {
                 if (!isSelected) {
                   await projectProvider.selectProject(project.id);
@@ -313,9 +313,9 @@ class ProjectDrawer extends StatelessWidget {
     if (trimmedName.length > maxLength) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content:
-                Text('Project name must be at most $maxLength characters.'),
+                Text('Project name must be at most 50 characters.'),
             backgroundColor: Colors.red,
           ),
         );
@@ -402,9 +402,9 @@ class ProjectDrawer extends StatelessWidget {
       if (context.mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+          const SnackBar(
             content:
-                Text('Project name must be at most $maxLength characters.'),
+                Text('Project name must be at most 50 characters.'),
             backgroundColor: Colors.red,
           ),
         );

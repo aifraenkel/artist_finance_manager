@@ -420,12 +420,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                           value: _analyticsConsent,
                           onChanged: (value) async {
+                            final messenger = ScaffoldMessenger.of(context);
                             await _userPreferences.setAnalyticsConsent(value);
                             setState(() {
                               _analyticsConsent = value;
                             });
                             if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
+                              messenger.showSnackBar(
                                 SnackBar(
                                   content: Text(
                                     value

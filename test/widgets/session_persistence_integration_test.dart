@@ -1,10 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:artist_finance_manager/main.dart';
 import 'package:artist_finance_manager/services/device_info_service.dart';
 
 /// Integration Test: Session Persistence Across App Restarts

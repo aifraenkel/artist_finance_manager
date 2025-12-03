@@ -3,7 +3,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:artist_finance_manager/services/export_service.dart';
 import 'package:artist_finance_manager/services/project_service.dart';
 import 'package:artist_finance_manager/services/storage_service.dart';
-import 'package:artist_finance_manager/models/project.dart';
 import 'package:artist_finance_manager/models/transaction.dart';
 import '../helpers/mock_sync_service.dart';
 

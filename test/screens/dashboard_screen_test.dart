@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:artist_finance_manager/screens/dashboard_screen.dart';
 import 'package:artist_finance_manager/providers/project_provider.dart';
 import 'package:artist_finance_manager/models/project.dart';
-import 'package:artist_finance_manager/models/transaction.dart';
 import 'package:artist_finance_manager/services/project_service.dart';
 
 /// Widget tests for DashboardScreen

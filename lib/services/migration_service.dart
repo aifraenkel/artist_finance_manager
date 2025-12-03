@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../models/project.dart';
 import '../models/transaction.dart';
 import 'project_service.dart';
 
