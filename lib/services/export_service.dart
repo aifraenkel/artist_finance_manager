@@ -62,7 +62,15 @@ class ExportService {
 
   /// Format transaction type for display
   String _formatType(String type) {
-    return type == 'income' ? 'Income' : 'Expense';
+    switch (type.toLowerCase()) {
+      case 'income':
+        return 'Income';
+      case 'expense':
+        return 'Expense';
+      default:
+        // Return the original type capitalized for unknown types
+        return type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
+    }
   }
 
   /// Format DateTime for CSV export
