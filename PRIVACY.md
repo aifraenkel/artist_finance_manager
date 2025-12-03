@@ -164,8 +164,10 @@ To exercise any of these rights:
 
 1. **Analytics Opt-Out**: Go to Settings > Privacy & Data in the app
 2. **Account Deletion**: Go to Profile > Delete Account
-3. **Data Export**: Contact us at [your-email@example.com]
-4. **Other Requests**: Email us at [your-email@example.com]
+3. **Data Export**: Contact us at privacy@artistfinancemanager.com (or create a GitHub issue)
+4. **Other Requests**: Email us at privacy@artistfinancemanager.com
+
+<!-- TODO: Replace placeholder email with actual contact email before production -->
 
 We will respond to requests within 30 days.
 
@@ -203,8 +205,10 @@ Continued use of the app after changes means you accept the updated policy.
 
 If you have questions about this Privacy Policy or our data practices:
 
-- **Email**: [your-email@example.com]
+- **Email**: privacy@artistfinancemanager.com
 - **GitHub Issues**: [github.com/aifraenkel/artist_finance_manager/issues](https://github.com/aifraenkel/artist_finance_manager/issues)
+
+<!-- TODO: Replace placeholder email with actual contact email before production -->
 
 ## Compliance & Certifications
 
