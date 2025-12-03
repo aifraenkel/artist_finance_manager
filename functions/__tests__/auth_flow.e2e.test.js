@@ -25,7 +25,9 @@ import admin from 'firebase-admin';
 
 // Initialize Firebase Admin SDK for cleanup
 if (!admin.apps.length) {
-  admin.initializeApp();
+  admin.initializeApp({
+    projectId: process.env.GOOGLE_CLOUD_PROJECT || 'artist-manager-479514'
+  });
 }
 
 const firestore = new Firestore();
