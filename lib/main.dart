@@ -3,6 +3,9 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'providers/auth_provider.dart';
+import 'providers/project_provider.dart';
+import 'services/project_service.dart';
+import 'services/firestore_project_sync_service.dart';
 import 'widgets/auth_wrapper.dart';
 
 void main() async {
@@ -24,6 +27,13 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => AuthProvider()),
+        ChangeNotifierProvider(
+          create: (_) => ProjectProvider(
+            ProjectService(
+              syncService: FirestoreProjectSyncService(),
+            ),
+          ),
+        ),
       ],
       child: MaterialApp(
         title: 'Art Finance Hub',

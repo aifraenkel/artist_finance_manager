@@ -9,7 +9,9 @@ import '../widgets/summary_cards.dart';
 import '../widgets/transaction_form.dart';
 import '../widgets/transaction_list.dart';
 import '../widgets/consent_dialog.dart';
+import '../widgets/project_drawer.dart';
 import '../providers/auth_provider.dart';
+import '../providers/project_provider.dart';
 import 'profile/profile_screen.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -21,11 +23,17 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late StorageService _storageService;
+  late FirestoreSyncService _syncService;
   final UserPreferences _userPreferences = UserPreferences();
   late ObservabilityService _observability;
   List<Transaction> _transactions = [];
   bool _isLoading = true;
   bool _isSyncing = false;
+  Map<String, double> _globalSummary = {
+    'income': 0,
+    'expenses': 0,
+    'balance': 0,
+  };
 
   @override
   void initState() {
@@ -52,9 +60,27 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     }
 
-    // Create storage service with optional sync service
-    final syncService = FirestoreSyncService();
-    _storageService = StorageService(syncService: syncService);
+    if (!mounted) return;
+
+    // Initialize project provider
+    final projectProvider = Provider.of<ProjectProvider>(context, listen: false);
+    await projectProvider.initialize();
+
+    // Get current project
+    final currentProject = projectProvider.currentProject;
+    if (currentProject == null) {
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // Create storage service with project context
+    _syncService = FirestoreSyncService(projectId: currentProject.id);
+    _storageService = StorageService(
+      syncService: _syncService,
+      projectId: currentProject.id,
+    );
     await _storageService.initialize();
 
     if (!mounted) return;
@@ -69,6 +95,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     await _loadTransactions();
+    await _loadGlobalSummary();
   }
 
   Future<void> _loadTransactions() async {
@@ -217,6 +244,67 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  /// Load global summary across all projects
+  Future<void> _loadGlobalSummary() async {
+    final projectProvider = Provider.of<ProjectProvider>(context, listen: false);
+    
+    try {
+      final summary = await projectProvider.getGlobalSummary((projectId) async {
+        // Create a temporary storage service for this project
+        final tempSyncService = FirestoreSyncService(projectId: projectId);
+        final tempStorage = StorageService(
+          syncService: tempSyncService,
+          projectId: projectId,
+        );
+        await tempStorage.initialize();
+        
+        // Load transactions for this project
+        final transactions = await tempStorage.loadTransactions();
+        
+        // Calculate summary
+        final income = transactions
+            .where((t) => t.type == 'income')
+            .fold(0.0, (sum, t) => sum + t.amount);
+        final expenses = transactions
+            .where((t) => t.type == 'expense')
+            .fold(0.0, (sum, t) => sum + t.amount);
+        
+        return {
+          'income': income,
+          'expenses': expenses,
+          'balance': income - expenses,
+        };
+      });
+      
+      setState(() {
+        _globalSummary = summary;
+      });
+    } catch (e) {
+      // Ignore errors in global summary calculation
+    }
+  }
+
+  /// Refresh all data (called when switching projects)
+  Future<void> _refreshAll() async {
+    final projectProvider = Provider.of<ProjectProvider>(context, listen: false);
+    final currentProject = projectProvider.currentProject;
+    
+    if (currentProject == null) {
+      setState(() {
+        _transactions = [];
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // Update storage service with new project
+    _syncService.setProjectId(currentProject.id);
+    _storageService.setProjectId(currentProject.id);
+
+    await _loadTransactions();
+    await _loadGlobalSummary();
+  }
+
   Future<void> _addTransaction(
     String description,
     double amount,
@@ -352,7 +440,12 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Project Finance Tracker'),
+        title: Consumer<ProjectProvider>(
+          builder: (context, projectProvider, child) {
+            final projectName = projectProvider.currentProject?.name ?? 'Loading...';
+            return Text(projectName);
+          },
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         actions: [
@@ -419,6 +512,10 @@ class _HomeScreenState extends State<HomeScreen> {
             },
           ),
         ],
+      ),
+      drawer: ProjectDrawer(
+        globalSummary: _globalSummary,
+        onRefresh: _refreshAll,
       ),
       body: Container(
         decoration: BoxDecoration(
