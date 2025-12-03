@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:artist_finance_manager/main.dart';
 import 'package:artist_finance_manager/services/device_info_service.dart';
 
@@ -25,6 +26,8 @@ void main() {
 
   group('Session Persistence Integration Tests', () {
     setUpAll(() async {
+      // Initialize SharedPreferences mock for testing
+      SharedPreferences.setMockInitialValues({});
       // Initialize Firebase for testing
       // Note: In a real test, you'd use Firebase Emulator or Test Lab
     });
