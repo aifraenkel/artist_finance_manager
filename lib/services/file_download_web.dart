@@ -7,7 +7,7 @@ import 'dart:convert';
 Future<void> downloadFileImpl(String content, String filename) async {
   // Create a Blob from the content
   final bytes = utf8.encode(content);
-  final blob = html.Blob([bytes], 'text/csv', );
+  final blob = html.Blob([bytes], 'text/csv');
 
   // Create a download link
   final url = html.Url.createObjectUrlFromBlob(blob);

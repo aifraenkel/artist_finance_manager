@@ -62,6 +62,10 @@ class ExportService {
 
   /// Format transaction type for display
   String _formatType(String type) {
+    if (type.isEmpty) {
+      return 'Unknown';
+    }
+    
     switch (type.toLowerCase()) {
       case 'income':
         return 'Income';
