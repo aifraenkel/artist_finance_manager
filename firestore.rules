@@ -38,7 +38,68 @@ service cloud.firestore {
       // Users can soft delete their account (set deletedAt)
       allow delete: if isOwner(userId);
 
-      // Transactions subcollection - user can only access their own transactions
+      // Projects subcollection - user can only access their own projects
+      match /projects/{projectId} {
+        // Helper to check if this is the sync metadata document
+        function isMetadataDoc() {
+          return projectId == '_sync_metadata';
+        }
+
+        // Helper to validate project data structure
+        function isValidProject() {
+          return request.resource.data.keys().hasAll(['name', 'createdAt'])
+            && request.resource.data.name is string
+            && request.resource.data.name.size() > 0
+            && request.resource.data.name.size() <= 100;
+        }
+
+        // Users can read their own projects
+        allow read: if isOwner(userId);
+
+        // Users can create projects or sync metadata in their own collection
+        allow create: if isOwner(userId)
+          && (isMetadataDoc() || isValidProject());
+
+        // Users can update their own projects or sync metadata
+        allow update: if isOwner(userId)
+          && (isMetadataDoc() || isValidProject());
+
+        // Users can delete their own projects
+        allow delete: if isOwner(userId);
+
+        // Transactions subcollection under projects
+        match /transactions/{transactionId} {
+          // Helper to check if this is the sync metadata document
+          function isTransactionMetadataDoc() {
+            return transactionId == '_sync_metadata';
+          }
+
+          // Helper to validate transaction data structure
+          function isValidTransaction() {
+            return request.resource.data.keys().hasAll(['description', 'amount', 'type', 'category', 'date'])
+              && request.resource.data.type in ['income', 'expense']
+              && request.resource.data.amount is number
+              && request.resource.data.amount >= 0;
+          }
+
+          // Users can read their own transactions
+          allow read: if isOwner(userId);
+
+          // Users can create transactions or sync metadata in their own project
+          allow create: if isOwner(userId)
+            && (isTransactionMetadataDoc() || isValidTransaction());
+
+          // Users can update their own transactions or sync metadata
+          allow update: if isOwner(userId)
+            && (isTransactionMetadataDoc() || isValidTransaction());
+
+          // Users can delete their own transactions
+          allow delete: if isOwner(userId);
+        }
+      }
+
+      // Legacy transactions subcollection - keep for backward compatibility
+      // This will be migrated to projects structure
       match /transactions/{transactionId} {
         // Helper to check if this is the sync metadata document
         function isMetadataDoc() {

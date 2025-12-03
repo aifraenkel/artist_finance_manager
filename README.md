@@ -20,22 +20,28 @@ The goal of this app is to enable artists to easily manage costs and income from
 - **Session Persistence**: Stay logged in across app restarts
 
 ### 💰 Finance Management
+- **Multiple Projects**: Organize finances by different art projects (new!)
+- **Project Switching**: Easily switch between projects with a drawer menu
+- **Global Summary**: View combined financial summary across all projects
 - **Track Expenses**: Record art-related costs (venue, musicians, materials, food & drinks, book printing, podcast, etc.)
 - **Track Income**: Log revenue from book sales, event tickets, and more
-- **Real-time Summary**: View income, expenses, and balance at a glance
+- **Real-time Summary**: View income, expenses, and balance at a glance (per project)
 - **Transaction History**: View all transactions in chronological order with category, description, date, and amount
+- **Project Management**: Create, rename, and delete projects (soft delete with data preservation)
 
 ### 📱 Cross-Platform Experience
 - **Works Everywhere**: iOS, Android, and Web from a single codebase
 - **Responsive Design**: Beautiful UI that adapts to any screen size
 - **Offline-First**: Local storage for fast access, with cloud sync capability
+- **Mobile-Optimized**: Drawer-first experience on mobile devices
 
 ### ☁️ Cloud Sync (Authenticated Users)
 - **Cross-Device Access**: Access your financial data from any device
-- **Automatic Sync**: Transactions automatically sync when connected
+- **Automatic Sync**: Projects and transactions automatically sync when connected
 - **Data Isolation**: Your data is securely isolated from other users
 - **Local-First**: Works offline, syncs when connectivity is restored
 - **Manual Refresh**: Sync button to force refresh from cloud
+- **Project-Scoped Storage**: Each project's data is stored separately for better organization
 
 ### 📊 Observability (Web)
 - **Performance Monitoring**: Track load times and Web Vitals via Grafana Faro
@@ -204,6 +210,16 @@ flutter build appbundle --release
 
 ## 🎯 Usage Guide
 
+### Managing Projects
+
+1. **Open Project Drawer**: Click the menu icon (☰) in the top-left corner
+2. **View Global Summary**: See combined income, expenses, and balance across all projects
+3. **Switch Projects**: Tap any project in the list to view its transactions
+4. **Create New Project**: Click the "Create Project" button at the bottom of the drawer
+5. **Rename Project**: Tap the three dots (⋮) next to a project and select "Rename"
+6. **Delete Project**: Tap the three dots (⋮) next to a project and select "Delete"
+   - ⚠️ Warning: This will delete all transactions for that project
+
 ### Adding a Transaction
 
 1. Select the **Type** (Expense or Income)
@@ -212,18 +228,30 @@ flutter build appbundle --release
 4. Enter the **Amount** in dollars
 5. Click **Add Transaction**
 
+*Note: Transactions are automatically added to the currently selected project*
+
 ### Viewing Summary
 
-The top cards show:
+The top cards show (for the current project):
 - 🟢 **Total Income**: All money earned
 - 🔴 **Total Expenses**: All money spent
 - 🔵 **Balance**: Income minus expenses
+
+The drawer shows a global summary across all projects.
 
 ### Managing Transactions
 
 - View all transactions in chronological order
 - Each transaction shows category, description, date, time, and amount
 - Delete any transaction by clicking the **Delete** button
+- Transactions are scoped to the current project
+
+### Data Migration
+
+If you're upgrading from a previous version:
+- Your existing transactions will be automatically migrated to a "Default" project
+- You'll see a notification when this happens
+- All your data is preserved and backed up during migration
 
 ## 🏗️ Architecture & Tech Stack
 

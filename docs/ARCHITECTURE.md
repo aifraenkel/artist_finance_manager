@@ -27,17 +27,23 @@ artist_finance_manager/
 │   ├── main.dart                 # App entry point & MaterialApp configuration
 │   ├── models/
 │   │   ├── transaction.dart      # Transaction data model with JSON serialization
+│   │   ├── project.dart          # Project data model for organizing finances
 │   │   └── app_user.dart         # User profile data model
 │   ├── services/
 │   │   ├── auth_service.dart     # Firebase authentication service
 │   │   ├── registration_api_service.dart  # Server-side registration API
-│   │   ├── storage_service.dart  # Local storage abstraction layer with sync support
-│   │   ├── sync_service.dart     # Abstract interface for cloud sync
-│   │   └── firestore_sync_service.dart  # Firestore implementation of sync
+│   │   ├── storage_service.dart  # Local storage abstraction layer (project-scoped)
+│   │   ├── sync_service.dart     # Abstract interface for transaction sync
+│   │   ├── firestore_sync_service.dart  # Firestore implementation of transaction sync
+│   │   ├── project_service.dart  # Project CRUD operations service
+│   │   ├── project_sync_service.dart  # Abstract interface for project sync
+│   │   ├── firestore_project_sync_service.dart  # Firestore implementation of project sync
+│   │   └── migration_service.dart # Data migration to multi-project structure
 │   ├── providers/
-│   │   └── auth_provider.dart    # Authentication state management
+│   │   ├── auth_provider.dart    # Authentication state management
+│   │   └── project_provider.dart # Project state management
 │   ├── screens/
-│   │   ├── home_screen.dart      # Main app screen (stateful widget)
+│   │   ├── home_screen.dart      # Main app screen (project-scoped)
 │   │   ├── auth/                 # Authentication screens
 │   │   │   ├── login_screen.dart
 │   │   │   ├── registration_screen.dart
@@ -48,12 +54,13 @@ artist_finance_manager/
 │       ├── auth_wrapper.dart     # Authentication state wrapper
 │       ├── summary_cards.dart    # Income/Expense/Balance display cards
 │       ├── transaction_form.dart # Transaction input form
-│       └── transaction_list.dart # Transaction history list view
+│       ├── transaction_list.dart # Transaction history list view
+│       └── project_drawer.dart   # Project selector with global summary
 ├── functions/                    # Cloud Functions (Node.js)
 │   ├── index.js                  # Function entry points
 │   ├── registration_service.js   # Token-based registration logic
 │   └── email_templates.js        # Email template generation
-├── firestore.rules               # Firestore security rules (user data isolation)
+├── firestore.rules               # Firestore security rules (user & project data isolation)
 ├── test/                         # All test files
 ├── android/                      # Android platform-specific files
 ├── ios/                          # iOS platform-specific files
@@ -207,6 +214,16 @@ StorageService (local-first)
 
 ## 📊 Data Storage Schema
 
+### Project Model
+```dart
+{
+  "id": "uuid-v4-string",
+  "name": "My Art Project",
+  "createdAt": "2024-01-15T10:30:00.000",
+  "deletedAt": null | "2024-06-15T10:30:00.000"
+}
+```
+
 ### Transaction Model
 ```dart
 {
@@ -219,10 +236,35 @@ StorageService (local-first)
 }
 ```
 
-### Storage Format
-Transactions are stored as JSON array in SharedPreferences:
-- **Key**: `'transactions'`
-- **Value**: JSON-encoded list of transaction objects
+### Local Storage Format (SharedPreferences)
+- **Projects**: `'projects'` → JSON-encoded list of project objects
+- **Current Project ID**: `'current_project_id'` → string
+- **Transactions (per project)**: `'project-finances-{projectId}'` → JSON-encoded list of transactions
+- **Legacy Transactions**: `'project-finances'` → migrated to default project
+
+### Cloud Storage Format (Firestore)
+```
+users/{userId}/
+  ├── projects/{projectId}/
+  │   ├── name: "My Art Project"
+  │   ├── createdAt: Timestamp
+  │   ├── deletedAt: Timestamp | null
+  │   └── transactions/{transactionId}/
+  │       ├── description: string
+  │       ├── amount: number
+  │       ├── type: "income" | "expense"
+  │       ├── category: string
+  │       └── date: Timestamp
+  └── (legacy) transactions/{transactionId}/  # Pre-migration structure
+```
+
+### Data Migration
+When upgrading from single-project to multi-project:
+1. Legacy transactions from `'project-finances'` key are detected
+2. A "Default" project is created with ID `'default'`
+3. Legacy transactions are moved to `'project-finances-default'`
+4. Original data is backed up to `'project-finances_backup'`
+5. Migration is marked complete in `'migration_to_projects_completed'`
 
 ## 🚀 Platform Considerations
 

@@ -10,6 +10,7 @@ void main() {
 
     setUp(() {
       storageService = StorageService();
+      storageService.setProjectId('test-project-id');
       SharedPreferences.setMockInitialValues({});
     });
 
@@ -108,6 +109,7 @@ void main() {
 
     setUp(() {
       storageService = StorageService();
+      storageService.setProjectId('test-project-id');
       SharedPreferences.setMockInitialValues({});
     });
 
@@ -125,6 +127,7 @@ void main() {
 
       // Create new instance and initialize
       final newStorageService = StorageService();
+      newStorageService.setProjectId('test-project-id');
       await newStorageService.initialize();
 
       expect(newStorageService.storageMode, StorageMode.cloudSync);
@@ -142,6 +145,7 @@ void main() {
     setUp(() {
       mockSyncService = MockSyncService();
       storageService = StorageService(syncService: mockSyncService);
+      storageService.setProjectId('test-project-id');
       SharedPreferences.setMockInitialValues({});
     });
 
@@ -357,6 +361,7 @@ void main() {
     setUp(() {
       mockSyncService = MockSyncService();
       storageService = StorageService(syncService: mockSyncService);
+      storageService.setProjectId('test-project-id');
       SharedPreferences.setMockInitialValues({});
     });
 

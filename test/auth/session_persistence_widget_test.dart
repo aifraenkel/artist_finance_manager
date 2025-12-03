@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:artist_finance_manager/providers/auth_provider.dart';
+import 'package:artist_finance_manager/providers/project_provider.dart';
 import 'package:artist_finance_manager/models/app_user.dart';
+import 'package:artist_finance_manager/models/project.dart';
+import 'package:artist_finance_manager/services/project_service.dart';
 import 'package:artist_finance_manager/widgets/auth_wrapper.dart';
 import 'package:artist_finance_manager/screens/auth/login_screen.dart';
 import 'package:artist_finance_manager/screens/home_screen.dart';
@@ -79,16 +82,77 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   Future<bool> updateProfile({required String name}) async => true;
 }
 
+class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
+  List<Project> _projects = [];
+  Project? _currentProject;
+  final bool _isLoading = false;
+  String? _error;
+
+  @override
+  List<Project> get projects => _projects;
+
+  @override
+  Project? get currentProject => _currentProject;
+
+  @override
+  bool get isLoading => _isLoading;
+
+  @override
+  String? get error => _error;
+
+  @override
+  ProjectService get projectService => throw UnimplementedError();
+
+  @override
+  Future<void> initialize() async {
+    _currentProject = Project(
+      id: 'default',
+      name: 'Default',
+      createdAt: DateTime.now(),
+    );
+    _projects = [_currentProject!];
+    notifyListeners();
+  }
+
+  @override
+  Future<void> refresh() async {}
+
+  @override
+  Future<Project?> createProject(String name) async => null;
+
+  @override
+  Future<void> selectProject(String projectId) async {}
+
+  @override
+  Future<bool> updateProject(Project project) async => true;
+
+  @override
+  Future<bool> renameProject(String projectId, String newName) async => true;
+
+  @override
+  Future<bool> deleteProject(String projectId) async => true;
+
+  @override
+  Future<Map<String, double>> getGlobalSummary(
+    Future<Map<String, double>> Function(String projectId) getSummary,
+  ) async => {'income': 0, 'expenses': 0, 'balance': 0};
+}
+
 void main() {
   late MockAuthProvider mockAuthProvider;
+  late MockProjectProvider mockProjectProvider;
 
   setUp(() {
     mockAuthProvider = MockAuthProvider();
+    mockProjectProvider = MockProjectProvider();
   });
 
   Widget createTestApp() {
-    return ChangeNotifierProvider<AuthProvider>.value(
-      value: mockAuthProvider,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<AuthProvider>.value(value: mockAuthProvider),
+        ChangeNotifierProvider<ProjectProvider>.value(value: mockProjectProvider),
+      ],
       child: const MaterialApp(home: AuthWrapper()),
     );
   }

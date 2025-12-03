@@ -22,13 +22,17 @@ enum StorageMode {
 /// - **Local-first**: Transactions are always stored locally for offline access
 /// - **Cloud sync**: When enabled, transactions are synced to the cloud
 /// - **Fallback behavior**: If cloud sync fails, local storage is used
+/// - **Project-scoped**: Transactions are stored per project
 ///
 /// The [SyncService] implementation can be swapped to use different backends
 /// (Firestore, REST API, etc.) without changing this class.
 class StorageService {
-  static const String _key = 'project-finances';
+  static const String _keyPrefix = 'project-finances-';
   static const String _syncModeKey = 'storage_sync_mode';
   final ObservabilityService _observability = ObservabilityService();
+  
+  /// Current project ID for scoping transactions
+  String? _currentProjectId;
 
   /// Optional sync service for cloud storage.
   /// Set this to enable cloud sync functionality.
@@ -44,7 +48,24 @@ class StorageService {
   /// Creates a new StorageService.
   ///
   /// [syncService] - Optional sync service for cloud storage.
-  StorageService({this.syncService});
+  /// [projectId] - Optional project ID to scope transactions.
+  StorageService({this.syncService, String? projectId})
+      : _currentProjectId = projectId;
+  
+  /// Set the current project ID for scoping transactions.
+  void setProjectId(String projectId) {
+    _currentProjectId = projectId;
+  }
+  
+  /// Get the storage key for the current project.
+  String get _key {
+    if (_currentProjectId == null) {
+      throw StateError(
+        'Project ID is not set. Accessing storage without a project ID can lead to data corruption. This should only happen during migration.'
+      );
+    }
+    return '$_keyPrefix$_currentProjectId';
+  }
 
   /// Initializes the storage service and loads the saved storage mode.
   Future<void> initialize() async {

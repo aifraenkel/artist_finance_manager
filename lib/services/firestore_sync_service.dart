@@ -9,7 +9,7 @@ import 'sync_service.dart';
 /// data structure for user data isolation:
 ///
 /// ```
-/// users/{userId}/transactions/{transactionId}
+/// users/{userId}/projects/{projectId}/transactions/{transactionId}
 /// ```
 ///
 /// Security is enforced by Firestore security rules that ensure users can only
@@ -20,9 +20,15 @@ import 'sync_service.dart';
 class FirestoreSyncService implements SyncService {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;
+  
+  /// Current project ID for scoping transactions
+  String? _currentProjectId;
 
-  /// Collection name for user transactions (subcollection under users)
+  /// Collection name for user transactions (subcollection under projects)
   static const String _transactionsCollection = 'transactions';
+  
+  /// Collection name for projects (subcollection under users)
+  static const String _projectsCollection = 'projects';
 
   /// Collection name for users
   static const String _usersCollection = 'users';
@@ -33,11 +39,19 @@ class FirestoreSyncService implements SyncService {
   /// Creates a new FirestoreSyncService instance.
   ///
   /// Uses default Firebase instances if not provided.
+  /// [projectId] - Optional project ID to scope transactions.
   FirestoreSyncService({
     FirebaseFirestore? firestore,
     FirebaseAuth? auth,
+    String? projectId,
   })  : _firestore = firestore ?? FirebaseFirestore.instance,
-        _auth = auth ?? FirebaseAuth.instance;
+        _auth = auth ?? FirebaseAuth.instance,
+        _currentProjectId = projectId;
+  
+  /// Set the current project ID for scoping transactions.
+  void setProjectId(String projectId) {
+    _currentProjectId = projectId;
+  }
 
   /// Gets the current authenticated user ID.
   ///
@@ -53,19 +67,35 @@ class FirestoreSyncService implements SyncService {
     return user.uid;
   }
 
-  /// Gets the reference to the user's transactions collection.
+  /// Gets the reference to the user's transactions collection for current project.
   CollectionReference<Map<String, dynamic>> _transactionsRef() {
+    if (_currentProjectId == null) {
+      throw SyncException(
+        code: SyncException.unknown,
+        message: 'Project ID must be set before syncing transactions',
+      );
+    }
     return _firestore
         .collection(_usersCollection)
         .doc(_userId)
+        .collection(_projectsCollection)
+        .doc(_currentProjectId)
         .collection(_transactionsCollection);
   }
 
-  /// Gets the reference to the user's sync metadata document.
+  /// Gets the reference to the user's sync metadata document for current project.
   DocumentReference<Map<String, dynamic>> _metadataRef() {
+    if (_currentProjectId == null) {
+      throw SyncException(
+        code: SyncException.unknown,
+        message: 'Project ID must be set before syncing transactions',
+      );
+    }
     return _firestore
         .collection(_usersCollection)
         .doc(_userId)
+        .collection(_projectsCollection)
+        .doc(_currentProjectId)
         .collection(_transactionsCollection)
         .doc(_metadataDoc);
   }
