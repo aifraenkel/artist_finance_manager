@@ -286,13 +286,26 @@ class ProjectDrawer extends StatelessWidget {
   }
 
   void _createProject(BuildContext context, String name) async {
-    if (name.trim().isEmpty) {
+    final trimmedName = name.trim();
+    if (trimmedName.isEmpty) {
+      return;
+    }
+    const maxLength = 50;
+    if (trimmedName.length > maxLength) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Project name must be at most $maxLength characters.'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
       return;
     }
 
     final projectProvider =
         Provider.of<ProjectProvider>(context, listen: false);
-    final project = await projectProvider.createProject(name.trim());
+    final project = await projectProvider.createProject(trimmedName);
 
     if (context.mounted) {
       Navigator.of(context).pop();
