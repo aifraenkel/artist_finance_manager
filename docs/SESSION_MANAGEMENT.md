@@ -231,7 +231,7 @@ Tests cover:
 
 ### Data NOT Collected
 
-- IP addresses (optional, can be added if needed)
+- IP addresses
 - Physical device identifiers (IMEI, MAC address)
 - Location data
 - Browsing history
