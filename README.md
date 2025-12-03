@@ -30,6 +30,14 @@ The goal of this app is to enable artists to easily manage costs and income from
 - **Project Management**: Create, rename, and delete projects (soft delete with data preservation)
 - **Data Export**: Export all projects and transactions to CSV for backup or analysis
 
+### 📊 Analytics & Insights
+- **Financial Dashboard**: Comprehensive analytics dashboard showing financial trends over time
+- **Project Contributions**: Visual breakdown of income by project with pie charts
+- **Timeline Charts**: Track income, expenses, and balance over time with interactive line charts
+- **Top Expensive Projects**: Identify projects with the highest expenses at a glance
+- **Summary Statistics**: View key metrics including total income, expenses, balance, and transaction counts
+- **Actionable Insights**: Get a clear big picture of project finances to make informed decisions
+
 ### 📱 Cross-Platform Experience
 - **Works Everywhere**: iOS, Android, and Web from a single codebase
 - **Responsive Design**: Beautiful UI that adapts to any screen size
@@ -220,6 +228,18 @@ flutter build appbundle --release
 5. **Rename Project**: Tap the three dots (⋮) next to a project and select "Rename"
 6. **Delete Project**: Tap the three dots (⋮) next to a project and select "Delete"
    - ⚠️ Warning: This will delete all transactions for that project
+
+### Viewing Analytics Dashboard
+
+1. **Open Project Drawer**: Click the menu icon (☰) in the top-left corner
+2. **Access Analytics**: Click the "View Analytics" button in the drawer
+3. **Explore Insights**: The dashboard shows:
+   - **Summary Cards**: Total income, expenses, balance, and transaction count
+   - **Project Contributions**: Pie chart showing income distribution across projects
+   - **Timeline Charts**: Line charts displaying income, expenses, and balance trends over time
+   - **Top Expensive Projects**: List of projects with highest expenses
+
+The analytics dashboard helps you understand which projects are most profitable, identify expense trends, and make data-driven decisions about your art business.
 
 ### Adding a Transaction
 

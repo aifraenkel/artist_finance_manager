@@ -38,12 +38,14 @@ artist_finance_manager/
 │   │   ├── project_service.dart  # Project CRUD operations service
 │   │   ├── project_sync_service.dart  # Abstract interface for project sync
 │   │   ├── firestore_project_sync_service.dart  # Firestore implementation of project sync
-│   │   └── migration_service.dart # Data migration to multi-project structure
+│   │   ├── migration_service.dart # Data migration to multi-project structure
+│   │   └── analytics_service.dart # Financial analytics and insights calculation
 │   ├── providers/
 │   │   ├── auth_provider.dart    # Authentication state management
 │   │   └── project_provider.dart # Project state management
 │   ├── screens/
 │   │   ├── home_screen.dart      # Main app screen (project-scoped)
+│   │   ├── dashboard_screen.dart # Analytics dashboard with charts and insights
 │   │   ├── auth/                 # Authentication screens
 │   │   │   ├── login_screen.dart
 │   │   │   ├── registration_screen.dart
