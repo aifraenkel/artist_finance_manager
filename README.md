@@ -42,6 +42,14 @@ The goal of this app is to enable artists to easily manage costs and income from
 - **Error Tracking**: Automatic JavaScript error capture and logging
 - **Usage Analytics**: Understand feature usage patterns (privacy-respecting)
 
+### 🔒 Privacy & Compliance
+- **GDPR/CCPA Compliant**: User consent for analytics tracking
+- **Privacy-First Approach**: Analytics disabled by default
+- **Transparent Data Collection**: Clear explanation of what's tracked
+- **User Control**: Toggle analytics anytime in settings
+- **Financial Data Protection**: Transaction amounts and descriptions are NEVER tracked
+- **Privacy Policy**: Full disclosure of data practices ([PRIVACY.md](PRIVACY.md))
+
 ## 🚀 Demo the App
 
 The app can be demoed in multiple ways:
@@ -225,18 +233,40 @@ The app is built with Flutter 3.x and uses a clean layered architecture with loc
 
 The web version includes **Grafana Faro** integration for real-time observability:
 
-### What's Tracked
-- **Custom Events**: Transaction additions/deletions, page loads
+### Privacy & Consent
+
+**Analytics are disabled by default** to respect user privacy. Users are shown a consent dialog on first launch where they can:
+- Learn exactly what data is collected (and what isn't)
+- Choose to enable analytics or use "Essential Only" mode
+- Change their preference anytime in Profile > Privacy & Data settings
+
+### What's Tracked (Only with User Consent)
+- **Custom Events**: Transaction additions/deletions, page loads (counts only, no amounts)
 - **Performance Metrics**: Load times, Web Vitals (LCP, FID, CLS)
 - **Error Tracking**: JavaScript errors, storage failures
 - **User Sessions**: Session duration and behavior
 - **Console Logs**: Application logging
 
+### What's NEVER Tracked
+- ❌ Transaction amounts or descriptions
+- ❌ Personal financial data
+- ❌ Browsing history outside the app
+- ❌ Geolocation data
+
 ### Setup
 1. Create a free Grafana Cloud account at [grafana.com](https://grafana.com)
 2. Follow the detailed setup guide in [GRAFANA_SETUP.md](docs/GRAFANA_SETUP.md)
 3. Configure your Faro collector URL in `web/index.html`
-4. Build and deploy - observability is automatic!
+4. Build and deploy - observability respects user consent automatically!
+
+### Compliance
+
+Our analytics implementation is:
+- **GDPR Compliant**: Explicit consent before tracking, easy opt-out
+- **CCPA Compliant**: Clear disclosure and opt-out mechanism
+- **Privacy-First**: Default is no tracking until user explicitly opts in
+
+See [PRIVACY.md](PRIVACY.md) for our full privacy policy.
 
 ### Benefits
 - Monitor real-time user activity
