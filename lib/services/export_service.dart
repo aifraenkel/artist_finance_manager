@@ -73,10 +73,8 @@ class ExportService {
         return 'Expense';
       default:
         // Return the original type capitalized for unknown types
-        if (type.length == 1) {
-          return type.toUpperCase();
-        }
-        return type.substring(0, 1).toUpperCase() + type.substring(1).toLowerCase();
+        return type[0].toUpperCase() + 
+            (type.length > 1 ? type.substring(1).toLowerCase() : '');
     }
   }
 

@@ -43,8 +43,9 @@ void main() {
       final csv = await exportService.exportToCSV();
 
       expect(csv, contains('Project name,Type,Category,Description,Amount,Datetime'));
-      // Should only have the header row
-      expect(csv.split('\n').length, 2); // Header + empty line
+      // CSV with only headers should have just one line
+      final lines = csv.trim().split('\n');
+      expect(lines.length, 1);
     });
 
     test('should export single project with transactions', () async {
