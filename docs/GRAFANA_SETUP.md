@@ -1,6 +1,6 @@
 # Grafana Cloud Observability Setup Guide
 
-This guide will help you configure Grafana Faro for web observability in the Artist Finance Manager app.
+This guide will help you configure Grafana Faro for web observability in the Art Finance Hub app.
 
 ## Prerequisites
 

@@ -103,7 +103,7 @@ void main() {
       await tester.pumpWidget(createTestApp(const LoginScreen()));
       await tester.pumpAndSettle();
 
-      expect(find.text('Artist Finance Manager'), findsOneWidget);
+      expect(find.text('Art Finance Hub'), findsOneWidget);
       expect(find.byType(TextFormField), findsOneWidget);
       expect(find.widgetWithText(ElevatedButton, 'Send Sign-In Link'), findsOneWidget);
     });

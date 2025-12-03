@@ -1,4 +1,4 @@
-# Artist Finance Manager 🎨💰
+# Art Finance Hub 🎨💰
 
 A cross-platform finance tracker app for artists to manage project income and expenses. Built with Flutter to run on iOS, Android, and Web.
 

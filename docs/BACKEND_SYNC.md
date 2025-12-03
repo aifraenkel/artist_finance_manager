@@ -1,6 +1,6 @@
 # Backend Sync Guide
 
-This guide explains how the backend synchronization feature works in the Artist Finance Manager app.
+This guide explains how the backend synchronization feature works in the Art Finance Hub app.
 
 ## Overview
 

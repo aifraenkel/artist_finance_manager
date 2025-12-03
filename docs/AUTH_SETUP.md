@@ -1,6 +1,6 @@
 # Authentication Setup Guide
 
-This guide explains how to set up and configure authentication for the Artist Finance Manager application.
+This guide explains how to set up and configure authentication for the Art Finance Hub application.
 
 ## Overview
 

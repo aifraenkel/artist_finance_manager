@@ -1,5 +1,5 @@
 /**
- * Cloud Functions for Artist Finance Manager
+ * Cloud Functions for Art Finance Hub
  *
  * Functions:
  * - onUserCreated: Send welcome email when user is created
@@ -340,7 +340,7 @@ functions.http('createRegistration', async (req, res) => {
     // Send email
     await sendEmail(
       email,
-      'Complete Your Registration - Artist Finance Manager',
+      'Complete Your Registration - Art Finance Hub',
       html,
       text
     );
@@ -609,7 +609,7 @@ functions.http('createSignInRequest', async (req, res) => {
     // Send email
     await sendEmail(
       email,
-      'Sign In to Your Account - Artist Finance Manager',
+      'Sign In to Your Account - Art Finance Hub',
       html,
       text
     );

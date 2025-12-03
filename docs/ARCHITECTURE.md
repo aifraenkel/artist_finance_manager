@@ -2,7 +2,7 @@
 
 ## 🏗️ Architecture Overview
 
-The Artist Finance Manager follows a clean, layered architecture designed for cross-platform compatibility and maintainability.
+The Art Finance Hub follows a clean, layered architecture designed for cross-platform compatibility and maintainability.
 
 ### Architecture Layers
 

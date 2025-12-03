@@ -1,6 +1,6 @@
 {
-    "name": "Artist Finance Manager",
-    "short_name": "Finance Manager",
+    "name": "Art Finance Hub",
+    "short_name": "ArtFinHub",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#2563EB",

@@ -29,7 +29,7 @@ export function generateRegistrationEmail(name, verificationUrl) {
           <tr>
             <td style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 40px 20px; text-align: center;">
               <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: bold;">
-                Welcome to Artist Finance Manager
+                Welcome to Art Finance Hub
               </h1>
             </td>
           </tr>
@@ -42,7 +42,7 @@ export function generateRegistrationEmail(name, verificationUrl) {
               </p>
 
               <p style="font-size: 16px; color: #333333; margin: 0 0 20px 0;">
-                Thanks for creating an account with Artist Finance Manager! We're excited to help you manage your finances.
+                Thanks for creating an account with Art Finance Hub! We're excited to help you manage your finances.
               </p>
 
               <p style="font-size: 16px; color: #333333; margin: 0 0 30px 0;">
@@ -83,7 +83,7 @@ export function generateRegistrationEmail(name, verificationUrl) {
           <tr>
             <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
               <p style="font-size: 14px; color: #666666; margin: 0 0 10px 0;">
-                Artist Finance Manager
+                Art Finance Hub
               </p>
               <p style="font-size: 12px; color: #999999; margin: 0;">
                 This is an automated message, please do not reply to this email.
@@ -98,11 +98,11 @@ export function generateRegistrationEmail(name, verificationUrl) {
 </html>`;
 
   const text = `
-Welcome to Artist Finance Manager!
+Welcome to Art Finance Hub!
 
 Hi ${name},
 
-Thanks for creating an account with Artist Finance Manager! We're excited to help you manage your finances.
+Thanks for creating an account with Art Finance Hub! We're excited to help you manage your finances.
 
 Complete your registration by visiting this link:
 ${verificationUrl}
@@ -112,7 +112,7 @@ Important: This link will expire in 24 hours for security reasons. You can compl
 If you didn't create this account, you can safely ignore this email.
 
 ---
-Artist Finance Manager
+Art Finance Hub
 This is an automated message, please do not reply to this email.
 `;
 
@@ -157,7 +157,7 @@ export function generateSignInEmail(name, signInUrl) {
               </p>
 
               <p style="font-size: 16px; color: #333333; margin: 0 0 30px 0;">
-                Click the button below to sign in to your Artist Finance Manager account:
+                Click the button below to sign in to your Art Finance Hub account:
               </p>
 
               <table width="100%" cellpadding="0" cellspacing="0">
@@ -194,7 +194,7 @@ export function generateSignInEmail(name, signInUrl) {
           <tr>
             <td style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
               <p style="font-size: 14px; color: #666666; margin: 0 0 10px 0;">
-                Artist Finance Manager
+                Art Finance Hub
               </p>
               <p style="font-size: 12px; color: #999999; margin: 0;">
                 This is an automated message, please do not reply to this email.
@@ -213,7 +213,7 @@ Sign In to Your Account
 
 Hi ${name},
 
-Click the link below to sign in to your Artist Finance Manager account:
+Click the link below to sign in to your Art Finance Hub account:
 ${signInUrl}
 
 Important: This link will expire in 24 hours for security reasons. You can sign in from any device (phone, tablet, or computer).
@@ -221,7 +221,7 @@ Important: This link will expire in 24 hours for security reasons. You can sign 
 If you didn't request this sign-in link, you can safely ignore this email.
 
 ---
-Artist Finance Manager
+Art Finance Hub
 This is an automated message, please do not reply to this email.
 `;
 

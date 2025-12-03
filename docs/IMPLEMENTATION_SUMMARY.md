@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document summarizes the implementation of GCP Cloud Run deployment for the Artist Finance Manager Flutter web app, as requested in issue #26.
+This document summarizes the implementation of GCP Cloud Run deployment for the Art Finance Hub Flutter web app, as requested in issue #26.
 
 ## ✅ What Was Implemented
 

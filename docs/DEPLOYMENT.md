@@ -430,7 +430,7 @@ Follow these steps to set up your GCP project manually:
 export PROJECT_ID="artist-finance-manager"
 
 # Create the project
-gcloud projects create $PROJECT_ID --name="Artist Finance Manager"
+gcloud projects create $PROJECT_ID --name="Art Finance Hub"
 
 # Set as current project
 gcloud config set project $PROJECT_ID
@@ -752,7 +752,7 @@ Cloud Run pricing (as of 2024):
 - 360,000 GB-seconds of memory
 - 180,000 vCPU-seconds
 
-**For Artist Finance Manager (estimated):**
+**For Art Finance Hub (estimated):**
 - **Low traffic** (1000 users/month): ~$5-10/month
 - **Medium traffic** (10,000 users/month): ~$20-40/month
 - **High traffic** (100,000 users/month): ~$100-200/month

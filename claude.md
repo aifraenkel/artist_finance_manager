@@ -2,13 +2,13 @@
 
 **Version:** 1.1.0
 **Last Updated:** 2025-11-28
-**Project:** Artist Finance Manager
+**Project:** Art Finance Hub
 
 ---
 
 ## About This Document
 
-This document serves as the **authoritative guide** for all LLM contributors (including Claude Code and future AI assistants) working on the Artist Finance Manager project. Every contribution must follow these guidelines strictly to maintain code quality, architectural integrity, and long-term maintainability.
+This document serves as the **authoritative guide** for all LLM contributors (including Claude Code and future AI assistants) working on the Art Finance Hub project. Every contribution must follow these guidelines strictly to maintain code quality, architectural integrity, and long-term maintainability.
 
 **Key Principle:** This guide is not a suggestion—it is a requirement. All LLM contributors must treat this document as the source of truth for how to work on this codebase.
 
@@ -34,9 +34,9 @@ This document serves as the **authoritative guide** for all LLM contributors (in
 
 ## 1. Project Identity
 
-### What is Artist Finance Manager?
+### What is Art Finance Hub?
 
-**Artist Finance Manager** is a multi-device, global application designed for artists to track and manage their finances across projects.
+**Art Finance Hub** is a multi-device, global application designed for artists to track and manage their finances across projects.
 
 ### Technology Stack
 
@@ -1267,7 +1267,7 @@ flutter test test/e2e/
 
 ## Conclusion
 
-This document defines the standards and practices for contributing to Artist Finance Manager. All LLM contributors must follow these guidelines to maintain code quality, architectural integrity, and long-term maintainability.
+This document defines the standards and practices for contributing to Art Finance Hub. All LLM contributors must follow these guidelines to maintain code quality, architectural integrity, and long-term maintainability.
 
 **Remember:** These are not suggestions—they are requirements. Following these guidelines ensures the project remains scalable, testable, and maintainable as it grows.
 

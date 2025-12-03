@@ -130,7 +130,7 @@ export PROJECT_ID="artist-finance-manager"
 export REGION="us-central1"
 
 # Create project
-gcloud projects create $PROJECT_ID --name="Artist Finance Manager"
+gcloud projects create $PROJECT_ID --name="Art Finance Hub"
 gcloud config set project $PROJECT_ID
 ```
 
