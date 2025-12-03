@@ -5,6 +5,7 @@ import '../services/storage_service.dart';
 import '../services/firestore_sync_service.dart';
 import '../services/observability_service.dart';
 import '../services/user_preferences.dart';
+import '../services/migration_service.dart';
 import '../widgets/summary_cards.dart';
 import '../widgets/transaction_form.dart';
 import '../widgets/transaction_list.dart';
@@ -64,6 +65,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Initialize project provider
     final projectProvider = Provider.of<ProjectProvider>(context, listen: false);
+    
+    // Run data migration before initializing projects
+    final migrationService = MigrationService(projectProvider.projectService);
+    final migrated = await migrationService.migrate();
+    
+    if (migrated && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Your data has been migrated to the Default project'),
+          duration: Duration(seconds: 3),
+          backgroundColor: Colors.blue,
+        ),
+      );
+    }
+    
     await projectProvider.initialize();
 
     // Get current project

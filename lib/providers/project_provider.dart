@@ -9,14 +9,14 @@ import '../services/project_service.dart';
 /// - Managing the currently selected project
 /// - Project CRUD operations
 class ProjectProvider extends ChangeNotifier {
-  final ProjectService _projectService;
+  final ProjectService projectService;
   
   List<Project> _projects = [];
   Project? _currentProject;
   bool _isLoading = false;
   String? _error;
 
-  ProjectProvider(this._projectService);
+  ProjectProvider(this.projectService);
 
   /// Get all active projects
   List<Project> get projects => _projects;
@@ -38,13 +38,13 @@ class ProjectProvider extends ChangeNotifier {
 
     try {
       // Load all projects
-      _projects = await _projectService.loadProjects();
+      _projects = await projectService.loadProjects();
 
       // Get or create default project
-      final defaultProject = await _projectService.ensureDefaultProject();
+      final defaultProject = await projectService.ensureDefaultProject();
 
       // Get the previously selected project or use default
-      final savedProjectId = await _projectService.getCurrentProjectId();
+      final savedProjectId = await projectService.getCurrentProjectId();
       if (savedProjectId != null) {
         _currentProject = _projects.firstWhere(
           (p) => p.id == savedProjectId,
@@ -52,7 +52,7 @@ class ProjectProvider extends ChangeNotifier {
         );
       } else {
         _currentProject = defaultProject;
-        await _projectService.setCurrentProjectId(defaultProject.id);
+        await projectService.setCurrentProjectId(defaultProject.id);
       }
 
       // If current project is not in the list, add it
@@ -76,7 +76,7 @@ class ProjectProvider extends ChangeNotifier {
   Future<Project?> createProject(String name) async {
     try {
       _error = null;
-      final project = await _projectService.createProject(name);
+      final project = await projectService.createProject(name);
       _projects.add(project);
       notifyListeners();
       return project;
@@ -91,7 +91,7 @@ class ProjectProvider extends ChangeNotifier {
   Future<bool> updateProject(Project project) async {
     try {
       _error = null;
-      await _projectService.updateProject(project);
+      await projectService.updateProject(project);
       
       final index = _projects.indexWhere((p) => p.id == project.id);
       if (index != -1) {
@@ -122,7 +122,7 @@ class ProjectProvider extends ChangeNotifier {
   Future<bool> deleteProject(String projectId) async {
     try {
       _error = null;
-      await _projectService.deleteProject(projectId);
+      await projectService.deleteProject(projectId);
       
       _projects.removeWhere((p) => p.id == projectId);
       
@@ -132,10 +132,10 @@ class ProjectProvider extends ChangeNotifier {
           await selectProject(_projects.first.id);
         } else {
           // Create a new default project if no projects remain
-          final defaultProject = await _projectService.ensureDefaultProject();
+          final defaultProject = await projectService.ensureDefaultProject();
           _projects.add(defaultProject);
           _currentProject = defaultProject;
-          await _projectService.setCurrentProjectId(defaultProject.id);
+          await projectService.setCurrentProjectId(defaultProject.id);
         }
       }
       
@@ -152,7 +152,7 @@ class ProjectProvider extends ChangeNotifier {
   Future<void> selectProject(String projectId) async {
     final project = _projects.firstWhere((p) => p.id == projectId);
     _currentProject = project;
-    await _projectService.setCurrentProjectId(projectId);
+    await projectService.setCurrentProjectId(projectId);
     notifyListeners();
   }
 
