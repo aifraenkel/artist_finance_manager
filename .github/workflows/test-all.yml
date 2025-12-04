@@ -3,9 +3,9 @@ name: All Tests
 on:
   pull_request:
     branches: [ main, master ]
-  # Removed push trigger - tests already run on PRs before merge
-  # No need to re-run after merge to main
-
+  push:
+    branches: [ main, master ]
+  
 jobs:
   # Job 1: Flutter Unit & Widget Tests
   flutter-unit-widget-tests:
