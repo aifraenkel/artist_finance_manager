@@ -11,8 +11,8 @@ void main() {
         createdAt: now,
       );
 
-      expect(goal.goalText,
-          'I want to have a positive balance of 200€ per month');
+      expect(
+          goal.goalText, 'I want to have a positive balance of 200€ per month');
       expect(goal.isActive, true);
       expect(goal.createdAt, now);
       expect(goal.updatedAt, null);

@@ -61,7 +61,8 @@ class OpenAIService {
       } else if (response.statusCode == 401) {
         throw OpenAIException('Invalid OpenAI API key');
       } else if (response.statusCode == 429) {
-        throw OpenAIException('OpenAI API rate limit exceeded. Please try again later.');
+        throw OpenAIException(
+            'OpenAI API rate limit exceeded. Please try again later.');
       } else {
         final errorData = jsonDecode(response.body);
         final errorMessage = errorData['error']?['message'] ?? 'Unknown error';
