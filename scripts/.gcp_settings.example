@@ -89,7 +89,11 @@ GCP_APIS="run.googleapis.com containerregistry.googleapis.com cloudbuild.googlea
 
 # IAM roles for the service account (space-separated list)
 # These permissions are required for CI/CD deployment
-GCP_SERVICE_ACCOUNT_ROLES="roles/run.admin roles/storage.admin roles/iam.serviceAccountUser"
+# - roles/run.admin: Deploy and manage Cloud Run services
+# - roles/storage.admin: Push images to Container Registry (legacy)
+# - roles/iam.serviceAccountUser: Act as service account for Cloud Run
+# - roles/artifactregistry.writer: Push images to Artifact Registry (required for gcr.io)
+GCP_SERVICE_ACCOUNT_ROLES="roles/run.admin roles/storage.admin roles/iam.serviceAccountUser roles/artifactregistry.writer"
 
 # Log file path (default: .gcp_setup.log)
 LOG_FILE=".gcp_setup.log"
