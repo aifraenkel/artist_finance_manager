@@ -89,7 +89,8 @@ void main() {
       ));
 
       expect(find.textContaining('\$1000.00'), findsOneWidget);
-      expect(find.textContaining('\$500.00'), findsOneWidget);
+      // Find both expense and balance amounts (both are $500.00)
+      expect(find.textContaining('\$500.00'), findsNWidgets(2));
     });
 
     testWidgets('defaults to Euro symbol when not specified', (tester) async {
@@ -104,7 +105,8 @@ void main() {
       ));
 
       expect(find.textContaining('€100.00'), findsOneWidget);
-      expect(find.textContaining('€50.00'), findsOneWidget);
+      // Find both expense and balance amounts (both are €50.00)
+      expect(find.textContaining('€50.00'), findsNWidgets(2));
     });
   });
 }

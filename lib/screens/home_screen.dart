@@ -29,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late StorageService _storageService;
   late FirestoreSyncService _syncService;
   final UserPreferences _userPreferences = UserPreferences();
-  final PreferencesService _preferencesService = PreferencesService();
+  PreferencesService? _preferencesService;
   late ObservabilityService _observability;
   List<Transaction> _transactions = [];
   bool _isLoading = true;
@@ -117,7 +117,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
       // Load user currency preference
       try {
-        final userPrefs = await _preferencesService.getPreferences(authProvider.currentUser!.uid);
+        // Lazy initialize PreferencesService to avoid Firebase initialization in tests
+        _preferencesService ??= PreferencesService();
+        final userPrefs = await _preferencesService!.getPreferences(authProvider.currentUser!.uid);
         if (mounted) {
           setState(() {
             _currencySymbol = userPrefs.currency.symbol;

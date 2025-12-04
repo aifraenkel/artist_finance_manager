@@ -16,7 +16,7 @@ void main() {
 
     test('should convert EUR to USD with rate', () async {
       final result = await service.convertEurToUsd(100, rate: 1.10);
-      expect(result, 110);
+      expect(result, closeTo(110, 0.01));
     });
 
     test('should convert USD to EUR with rate', () async {
@@ -31,7 +31,7 @@ void main() {
         'USD',
         rate: 1.12,
       );
-      expect(result, 112);
+      expect(result, closeTo(112, 0.01));
     });
 
     // Note: Real API tests are commented out as they require network access
