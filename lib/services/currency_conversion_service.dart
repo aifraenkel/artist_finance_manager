@@ -45,7 +45,7 @@ class CurrencyConversionService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body) as Map<String, dynamic>;
         final rates = data['rates'] as Map<String, dynamic>;
-        return rates['EUR'] as double;
+        return (rates['EUR'] as num).toDouble();
       } else {
         print('Failed to fetch conversion rate: ${response.statusCode}');
         return null;
