@@ -47,7 +47,7 @@ class UserPreferencesModel {
   final AppLanguage language;
   final AppCurrency currency;
   final DateTime updatedAt;
-  final double? conversionRate; // Stores last known conversion rate EUR->USD
+  final double? conversionRate; // Stores last known conversion rate when currency was changed
 
   UserPreferencesModel({
     required this.userId,
