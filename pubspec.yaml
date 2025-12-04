@@ -41,6 +41,8 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   fake_cloud_firestore: ^3.0.3
+  mockito: ^5.4.4
+  build_runner: ^2.4.8
 
 flutter:
   uses-material-design: true
