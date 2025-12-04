@@ -5,11 +5,13 @@ import '../models/transaction.dart' as app_models;
 class TransactionList extends StatelessWidget {
   final List<app_models.Transaction> transactions;
   final Function(int id) onDelete;
+  final String currencySymbol;
 
   const TransactionList({
     super.key,
     required this.transactions,
     required this.onDelete,
+    this.currencySymbol = '€', // Default to Euro for backward compatibility
   });
 
   @override
@@ -124,7 +126,7 @@ class TransactionList extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      '${isIncome ? '+' : '-'}€${transaction.amount.toStringAsFixed(2)}',
+                      '${isIncome ? '+' : '-'}$currencySymbol${transaction.amount.toStringAsFixed(2)}',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
@@ -197,7 +199,7 @@ class TransactionList extends StatelessWidget {
               ),
               const SizedBox(width: 16),
               Text(
-                '${isIncome ? '+' : '-'}€${transaction.amount.toStringAsFixed(2)}',
+                '${isIncome ? '+' : '-'}$currencySymbol${transaction.amount.toStringAsFixed(2)}',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

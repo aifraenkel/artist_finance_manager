@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/transaction.dart';
+import '../models/user_preferences.dart';
 import '../services/storage_service.dart';
 import '../services/firestore_sync_service.dart';
 import '../services/observability_service.dart';
 import '../services/user_preferences.dart';
 import '../services/migration_service.dart';
+import '../services/preferences_service.dart';
 import '../widgets/summary_cards.dart';
 import '../widgets/transaction_form.dart';
 import '../widgets/transaction_list.dart';
@@ -27,10 +29,12 @@ class _HomeScreenState extends State<HomeScreen> {
   late StorageService _storageService;
   late FirestoreSyncService _syncService;
   final UserPreferences _userPreferences = UserPreferences();
+  PreferencesService? _preferencesService;
   late ObservabilityService _observability;
   List<Transaction> _transactions = [];
   bool _isLoading = true;
   bool _isSyncing = false;
+  String _currencySymbol = '€'; // Default to Euro
   Map<String, double> _globalSummary = {
     'income': 0,
     'expenses': 0,
@@ -109,6 +113,22 @@ class _HomeScreenState extends State<HomeScreen> {
       final isSyncAvailable = await _storageService.isSyncAvailable();
       if (isSyncAvailable) {
         await _storageService.setStorageMode(StorageMode.cloudSync);
+      }
+
+      // Load user currency preference
+      try {
+        // Lazy initialize PreferencesService to avoid Firebase initialization in tests
+        _preferencesService ??= PreferencesService();
+        final userPrefs = await _preferencesService!
+            .getPreferences(authProvider.currentUser!.uid);
+        if (mounted) {
+          setState(() {
+            _currencySymbol = userPrefs.currency.symbol;
+          });
+        }
+      } catch (e) {
+        print('Error loading user preferences: $e');
+        // Keep default currency symbol
       }
     }
 
@@ -594,6 +614,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     totalIncome: _totalIncome,
                                     totalExpenses: _totalExpenses,
                                     balance: _balance,
+                                    currencySymbol: _currencySymbol,
                                   ),
                                   const SizedBox(height: 24),
                                   TransactionForm(
@@ -605,6 +626,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     key: const ValueKey('transaction-list'),
                                     transactions: _transactions,
                                     onDelete: _deleteTransaction,
+                                    currencySymbol: _currencySymbol,
                                   ),
                                   const SizedBox(height: 32),
                                   // Footer with privacy policy link
