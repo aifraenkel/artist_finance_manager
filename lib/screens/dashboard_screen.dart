@@ -112,11 +112,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       final analysis = await analysisService.analyzeGoal(goal);
       
+      if (!mounted) return;
       setState(() {
         _goalAnalysis = analysis;
         _isAnalyzingGoal = false;
       });
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _goalAnalysisError = e.toString().replaceAll('Exception: ', '');
         _isAnalyzingGoal = false;
