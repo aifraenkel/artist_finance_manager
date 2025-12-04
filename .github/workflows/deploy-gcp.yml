@@ -3,7 +3,7 @@ name: Deploy to GCP Cloud Run
 on:
   # Trigger deployment after Flutter CI completes successfully on main
   workflow_run:
-    workflows: ["Flutter CI"]
+    workflows: ["All Tests"]
     types:
       - completed
     branches:
