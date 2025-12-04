@@ -49,7 +49,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Flutter web app
-        run: flutter build web --release --web-renderer canvaskit
+        run: flutter build web --release
 
       - name: Authenticate to Google Cloud
         uses: google-github-actions/auth@v2
