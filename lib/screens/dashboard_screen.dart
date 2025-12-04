@@ -35,7 +35,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Map<String, List<Transaction>> _projectTransactions = {};
   Map<String, Project> _projects = {};
   String? _goalAnalysis;
-  String? _goalAnalysisError;;
+  String? _goalAnalysisError;
 
   // Month abbreviations for timeline chart
   static const List<String> _monthAbbreviations = [

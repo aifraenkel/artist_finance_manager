@@ -314,40 +314,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _saveApiKey() async {
-    final apiKey = _apiKeyController.text.trim();
-    
-    if (apiKey.isEmpty) {
-      await _userPreferences.clearOpenaiApiKey();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('OpenAI API key cleared'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } else {
-      await _userPreferences.setOpenaiApiKey(apiKey);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('OpenAI API key saved successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
+    try {
+      final apiKey = _apiKeyController.text.trim();
+      
+      if (apiKey.isEmpty) {
+        await _userPreferences.clearOpenaiApiKey();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('OpenAI API key cleared'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        await _userPreferences.setOpenaiApiKey(apiKey);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('OpenAI API key saved successfully'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to export: ${e.toString()}'),
+            content: Text('Failed to save API key: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isExporting = false);
       }
     }
   }

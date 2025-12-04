@@ -30,8 +30,16 @@ The goal of this app is to enable artists to easily manage costs and income from
 - **Project Management**: Create, rename, and delete projects (soft delete with data preservation)
 - **Data Export**: Export all projects and transactions to CSV for backup or analysis
 
+### 🎯 Budget Planning & AI Analysis
+- **Financial Goals**: Set personalized budget goals in natural language
+- **AI-Powered Analysis**: Get intelligent insights on goal progress using OpenAI
+- **Smart Recommendations**: Receive actionable suggestions to meet your financial targets
+- **Privacy-First**: Your API key and data stay secure on your device
+- **Flexible Configuration**: Enable/disable goal tracking anytime
+
 ### 📊 Analytics & Insights
 - **Financial Dashboard**: Comprehensive analytics dashboard showing financial trends over time
+- **Budget Goal Tracking**: View AI analysis of your financial goals at dashboard top
 - **Project Contributions**: Visual breakdown of income by project with pie charts
 - **Timeline Charts**: Track income, expenses, and balance over time with interactive line charts
 - **Top Expensive Projects**: Identify projects with the highest expenses at a glance
@@ -234,12 +242,25 @@ flutter build appbundle --release
 1. **Open Project Drawer**: Click the menu icon (☰) in the top-left corner
 2. **Access Analytics**: Click the "View Analytics" button in the drawer
 3. **Explore Insights**: The dashboard shows:
+   - **Budget Goal Analysis**: AI-powered insights on your financial goals (if configured)
    - **Summary Cards**: Total income, expenses, balance, and transaction count
    - **Project Contributions**: Pie chart showing income distribution across projects
    - **Timeline Charts**: Line charts displaying income, expenses, and balance trends over time
    - **Top Expensive Projects**: List of projects with highest expenses
 
 The analytics dashboard helps you understand which projects are most profitable, identify expense trends, and make data-driven decisions about your art business.
+
+### Setting and Tracking Budget Goals
+
+1. **Navigate to Profile & Settings**: Tap your profile icon
+2. **Set Your Goal**: In the Budget Goal section, enter your financial goal in natural language
+   - Example: "I want to have a positive balance of 200€ per month"
+3. **Configure OpenAI**: Enter your OpenAI API key in the OpenAI Configuration section
+   - Get your key from [OpenAI Platform](https://platform.openai.com/api-keys)
+4. **Activate Goal**: Toggle the "Goal Active" switch to enable tracking
+5. **View Analysis**: Open the Analytics Dashboard to see AI-powered insights
+
+For detailed documentation on budget planning features, see [BUDGET_PLANNING.md](docs/BUDGET_PLANNING.md).
 
 ### Adding a Transaction
 
