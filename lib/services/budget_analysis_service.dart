@@ -46,6 +46,7 @@ class BudgetAnalysisService {
     for (final project in projects) {
       projectMap[project.id] = project;
       final storageService = createStorageService(project.id);
+      await storageService.initialize();
       final transactions = await storageService.loadTransactions();
       projectTransactions[project.id] = transactions;
     }
