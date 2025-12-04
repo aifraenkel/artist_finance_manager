@@ -75,7 +75,7 @@ class UserPreferencesModel {
       userId: userId,
       language: AppLanguage.fromCode(data['language'] as String? ?? 'en'),
       currency: AppCurrency.fromCode(data['currency'] as String? ?? 'EUR'),
-      updatedAt: (data['updatedAt'] as Timestamp).toDate(),
+      updatedAt: (data['updatedAt'] as Timestamp?)?.toDate() ?? DateTime.now(),
       conversionRate: data['conversionRate'] as double?,
     );
   }
