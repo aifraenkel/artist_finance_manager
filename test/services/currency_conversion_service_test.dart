@@ -41,24 +41,24 @@ void main() {
     //   final rate = await service.getEurToUsdRate();
     //   expect(rate, isNotNull);
     //   expect(rate, greaterThan(0));
-    // }, skip: 'Requires network access');
+    // });
 
     // test('should fetch USD to EUR rate from API', () async {
     //   final rate = await service.getUsdToEurRate();
     //   expect(rate, isNotNull);
     //   expect(rate, greaterThan(0));
-    // }, skip: 'Requires network access');
+    // });
 
     // test('should convert EUR to USD using live rate', () async {
     //   final result = await service.convertEurToUsd(100);
     //   expect(result, isNotNull);
     //   expect(result, greaterThan(0));
-    // }, skip: 'Requires network access');
+    // });
 
     // test('should convert USD to EUR using live rate', () async {
     //   final result = await service.convertUsdToEur(100);
     //   expect(result, isNotNull);
     //   expect(result, greaterThan(0));
-    // }, skip: 'Requires network access');
+    // });
   });
 }
