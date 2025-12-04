@@ -43,8 +43,10 @@ void main() {
 
       final csv = await exportService.exportToCSV();
 
-      expect(csv,
-          contains('Project name,Type,Category,Description,Amount,Currency,Datetime'));
+      expect(
+          csv,
+          contains(
+              'Project name,Type,Category,Description,Amount,Currency,Datetime'));
       // CSV with only headers should have just one line
       final lines = csv.trim().split('\n');
       expect(lines.length, 1);
@@ -84,8 +86,10 @@ void main() {
       final csv = await exportService.exportToCSV();
 
       // Check header
-      expect(csv,
-          contains('Project name,Type,Category,Description,Amount,Currency,Datetime'));
+      expect(
+          csv,
+          contains(
+              'Project name,Type,Category,Description,Amount,Currency,Datetime'));
 
       // Check data rows
       expect(

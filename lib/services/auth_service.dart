@@ -105,7 +105,8 @@ class AuthService {
       try {
         await _preferencesService.migrateUserPreferences(user.uid);
       } catch (e) {
-        print('WARN: Failed to migrate preferences for user ${_hashEmail(user.email ?? '')}: $e');
+        print(
+            'WARN: Failed to migrate preferences for user ${_hashEmail(user.email ?? '')}: $e');
         // Don't fail the login
       }
 
@@ -248,10 +249,12 @@ class AuthService {
       // Initialize default preferences for new user
       try {
         await _preferencesService.initializeDefaultPreferences(user.uid);
-        print('INFO: Default preferences initialized for user ${_hashEmail(email)}');
+        print(
+            'INFO: Default preferences initialized for user ${_hashEmail(email)}');
       } catch (e) {
         // Log error but don't fail registration
-        print('WARN: Failed to initialize preferences for user ${_hashEmail(email)}: $e');
+        print(
+            'WARN: Failed to initialize preferences for user ${_hashEmail(email)}: $e');
       }
 
       // Log registration event
@@ -374,7 +377,8 @@ class AuthService {
       try {
         await _preferencesService.migrateUserPreferences(user.uid);
       } catch (e) {
-        print('WARN: Failed to migrate preferences for user ${_hashEmail(user.email ?? '')}: $e');
+        print(
+            'WARN: Failed to migrate preferences for user ${_hashEmail(user.email ?? '')}: $e');
         // Don't fail the login
       }
     } catch (e) {

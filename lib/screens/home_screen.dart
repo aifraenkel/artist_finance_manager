@@ -119,7 +119,8 @@ class _HomeScreenState extends State<HomeScreen> {
       try {
         // Lazy initialize PreferencesService to avoid Firebase initialization in tests
         _preferencesService ??= PreferencesService();
-        final userPrefs = await _preferencesService!.getPreferences(authProvider.currentUser!.uid);
+        final userPrefs = await _preferencesService!
+            .getPreferences(authProvider.currentUser!.uid);
         if (mounted) {
           setState(() {
             _currencySymbol = userPrefs.currency.symbol;

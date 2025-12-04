@@ -7,10 +7,10 @@ void main() {
     test('should have correct codes and display names', () {
       expect(AppLanguage.english.code, 'en');
       expect(AppLanguage.english.displayName, 'English');
-      
+
       expect(AppLanguage.spanish.code, 'es');
       expect(AppLanguage.spanish.displayName, 'Spanish');
-      
+
       expect(AppLanguage.catalan.code, 'ca');
       expect(AppLanguage.catalan.displayName, 'Catalan');
     });
@@ -32,7 +32,7 @@ void main() {
       expect(AppCurrency.eur.code, 'EUR');
       expect(AppCurrency.eur.symbol, '€');
       expect(AppCurrency.eur.displayName, 'Euro');
-      
+
       expect(AppCurrency.usd.code, 'USD');
       expect(AppCurrency.usd.symbol, '\$');
       expect(AppCurrency.usd.displayName, 'US Dollar');
@@ -52,7 +52,7 @@ void main() {
   group('UserPreferencesModel', () {
     test('should create default preferences', () {
       final prefs = UserPreferencesModel.defaultPreferences('user123');
-      
+
       expect(prefs.userId, 'user123');
       expect(prefs.language, AppLanguage.english);
       expect(prefs.currency, AppCurrency.eur);

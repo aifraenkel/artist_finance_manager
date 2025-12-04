@@ -377,10 +377,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
       // Fetch conversion rate based on the direction of currency change
       double? conversionRate;
-      if (currency == AppCurrency.usd && _userPrefs!.currency == AppCurrency.eur) {
+      if (currency == AppCurrency.usd &&
+          _userPrefs!.currency == AppCurrency.eur) {
         // Converting from EUR to USD
         conversionRate = await _currencyService.getEurToUsdRate();
-      } else if (currency == AppCurrency.eur && _userPrefs!.currency == AppCurrency.usd) {
+      } else if (currency == AppCurrency.eur &&
+          _userPrefs!.currency == AppCurrency.usd) {
         // Converting from USD to EUR
         conversionRate = await _currencyService.getUsdToEurRate();
       }
@@ -567,7 +569,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                             DropdownButton<AppLanguage>(
-                              value: _userPrefs?.language ?? AppLanguage.english,
+                              value:
+                                  _userPrefs?.language ?? AppLanguage.english,
                               items: AppLanguage.values.map((lang) {
                                 return DropdownMenuItem(
                                   value: lang,

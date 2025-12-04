@@ -36,7 +36,7 @@ void main() {
 
     // Note: Real API tests are commented out as they require network access
     // and may fail in CI environment. Uncomment to test manually.
-    
+
     // test('should fetch EUR to USD rate from API', () async {
     //   final rate = await service.getEurToUsdRate();
     //   expect(rate, isNotNull);

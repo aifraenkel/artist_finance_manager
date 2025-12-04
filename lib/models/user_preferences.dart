@@ -54,7 +54,8 @@ class UserPreferencesModel {
   final AppLanguage language;
   final AppCurrency currency;
   final DateTime updatedAt;
-  final double? conversionRate; // Stores last known conversion rate when currency was changed
+  final double?
+      conversionRate; // Stores last known conversion rate when currency was changed
 
   UserPreferencesModel({
     required this.userId,
@@ -98,7 +99,7 @@ class UserPreferencesModel {
   }
 
   /// Create a copy with updated fields
-  /// 
+  ///
   /// To explicitly set conversionRate to null, pass conversionRate: null
   /// To keep the existing value, don't pass conversionRate at all
   UserPreferencesModel copyWith({
@@ -113,8 +114,8 @@ class UserPreferencesModel {
       language: language ?? this.language,
       currency: currency ?? this.currency,
       updatedAt: updatedAt ?? this.updatedAt,
-      conversionRate: conversionRate == _undefined 
-          ? this.conversionRate 
+      conversionRate: conversionRate == _undefined
+          ? this.conversionRate
           : conversionRate as double?,
     );
   }

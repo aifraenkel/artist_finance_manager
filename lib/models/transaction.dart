@@ -5,7 +5,8 @@ class Transaction {
   final String type; // 'income' or 'expense'
   final String category;
   final DateTime date;
-  final String? currency; // Currency code (EUR, USD) - optional for backward compatibility
+  final String?
+      currency; // Currency code (EUR, USD) - optional for backward compatibility
 
   Transaction({
     required this.id,

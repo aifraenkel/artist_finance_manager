@@ -105,7 +105,7 @@ class PreferencesService {
   }
 
   /// Migrate existing users to have default preferences
-  /// 
+  ///
   /// This should be called once per user when they log in
   /// to ensure all users have preferences set
   Future<void> migrateUserPreferences(String userId) async {
