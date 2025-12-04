@@ -126,7 +126,7 @@ match /users/{userId}/preferences/{preferencesId} {
 #### Currency Change
 1. User selects new currency from dropdown
 2. Confirmation dialog appears with:
-   - Warning that conversion will be applied to all transactions
+   - Warning that the currency symbol displayed will be updated, but existing transaction amounts will not be converted
    - Information about the conversion rate source (ECB via Frankfurter)
 3. If confirmed:
    - Latest exchange rate is fetched
