@@ -749,8 +749,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 'Required for budget goal analysis. Get your key from platform.openai.com',
                           ),
                           obscureText: true,
-                          onChanged: (value) {
-                            // Auto-save on change
+                          onEditingComplete: () {
+                            // Save API key when editing is complete
                             _saveApiKey();
                           },
                         ),
