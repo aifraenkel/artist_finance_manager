@@ -23,10 +23,10 @@ This document summarizes the security considerations and measures implemented in
 ### 2. Data Privacy
 
 ✅ **Minimal Data Transmission**
-- Only necessary financial data (totals, averages) is sent to OpenAI
+- Only necessary financial data (totals, averages) and project names are sent to OpenAI
 - Transaction descriptions and amounts are aggregated, not sent individually
-- User's financial goal text is the only user-generated content in prompts
-- No personally identifiable information (PII) is included in API requests
+- User's financial goal text and project names are included in prompts
+- No direct personally identifiable information (PII) such as names, emails, or addresses is included in API requests, but project names may contain identifying or sensitive information if not carefully managed
 
 ✅ **No Intermediate Storage**
 - Financial data is exported in-memory only (not written to files)
