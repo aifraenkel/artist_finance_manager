@@ -52,14 +52,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) {
       setState(() {
         _analyticsConsent = _userPreferences.analyticsConsent;
-        
+
         // Load budget goal if exists
         final goal = _userPreferences.budgetGoal;
         if (goal != null) {
           _goalController.text = goal.goalText;
           _goalActive = goal.isActive;
         }
-        
+
         // Load API key if exists
         final apiKey = _userPreferences.openaiApiKey;
         if (apiKey != null) {
@@ -267,7 +267,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _saveBudgetGoal() async {
     final goalText = _goalController.text.trim();
-    
+
     if (goalText.isEmpty) {
       // Clear the goal if text is empty
       await _userPreferences.clearBudgetGoal();
@@ -275,7 +275,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         _goalActive = false;
         _isEditingGoal = false;
       });
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -289,7 +289,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     final now = DateTime.now();
     final existingGoal = _userPreferences.budgetGoal;
-    
+
     final goal = BudgetGoal(
       goalText: goalText,
       isActive: _goalActive,
@@ -298,7 +298,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
 
     await _userPreferences.setBudgetGoal(goal);
-    
+
     setState(() {
       _isEditingGoal = false;
     });
@@ -316,7 +316,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _saveApiKey() async {
     try {
       final apiKey = _apiKeyController.text.trim();
-      
+
       if (apiKey.isEmpty) {
         await _userPreferences.clearOpenaiApiKey();
         if (mounted) {

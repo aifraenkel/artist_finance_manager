@@ -151,10 +151,14 @@ class BudgetAnalysisService {
         final monthlyExpenses = totalExpenses / months;
         final monthlyBalance = balance / months;
 
-        buffer.writeln('MONTHLY AVERAGES (based on ${months.toStringAsFixed(1)} months):');
-        buffer.writeln('Average Monthly Income: €${monthlyIncome.toStringAsFixed(2)}');
-        buffer.writeln('Average Monthly Expenses: €${monthlyExpenses.toStringAsFixed(2)}');
-        buffer.writeln('Average Monthly Balance: €${monthlyBalance.toStringAsFixed(2)}');
+        buffer.writeln(
+            'MONTHLY AVERAGES (based on ${months.toStringAsFixed(1)} months):');
+        buffer.writeln(
+            'Average Monthly Income: €${monthlyIncome.toStringAsFixed(2)}');
+        buffer.writeln(
+            'Average Monthly Expenses: €${monthlyExpenses.toStringAsFixed(2)}');
+        buffer.writeln(
+            'Average Monthly Balance: €${monthlyBalance.toStringAsFixed(2)}');
       }
     }
 

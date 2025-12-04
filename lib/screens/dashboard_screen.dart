@@ -65,7 +65,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<void> _loadPreferencesAndAnalyzeGoal() async {
     await _userPreferences.initialize();
-    
+
     // Check if we have an active goal
     final goal = _userPreferences.budgetGoal;
     if (goal != null && goal.isActive && goal.isValid) {
@@ -111,7 +111,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
 
       final analysis = await analysisService.analyzeGoal(goal);
-      
+
       if (!mounted) return;
       setState(() {
         _goalAnalysis = analysis;
@@ -294,7 +294,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Widget _buildGoalAnalysisSection() {
     final goal = _userPreferences.budgetGoal;
-    
+
     return Card(
       elevation: 2,
       child: Padding(
@@ -316,7 +316,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ],
             ),
             const SizedBox(height: 12),
-            
+
             // Show the goal
             Container(
               padding: const EdgeInsets.all(12),
@@ -342,7 +342,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            
+
             // Show analysis result or loading/error state
             if (_isAnalyzingGoal)
               Center(
