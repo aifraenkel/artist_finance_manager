@@ -482,6 +482,11 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:github-actions@${PROJECT_ID}.iam.gserviceaccount.com" \
     --role="roles/iam.serviceAccountUser"
 
+# Required for pushing Docker images to Artifact Registry (gcr.io)
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:github-actions@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/artifactregistry.writer"
+
 # Create and download service account key
 gcloud iam service-accounts keys create gcp-key.json \
     --iam-account=github-actions@${PROJECT_ID}.iam.gserviceaccount.com
@@ -762,6 +767,22 @@ Cloud Run pricing (as of 2024):
 ---
 
 ## Troubleshooting
+
+### Docker Push Permission Denied (Artifact Registry)
+
+If you see an error like:
+```
+denied: Permission "artifactregistry.repositories.uploadArtifacts" denied on resource "projects/.../repositories/gcr.io"
+```
+
+This means the service account needs the Artifact Registry Writer role:
+
+```bash
+# Grant Artifact Registry Writer role
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:github-actions@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/artifactregistry.writer"
+```
 
 ### Deployment Fails
 

@@ -161,7 +161,7 @@ initialize() {
     LOG_FILE="${LOG_FILE:-$DEFAULT_LOG_FILE}"
     STATE_FILE="${STATE_FILE:-$DEFAULT_STATE_FILE}"
     GCP_APIS="${GCP_APIS:-run.googleapis.com containerregistry.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com}"
-    GCP_SERVICE_ACCOUNT_ROLES="${GCP_SERVICE_ACCOUNT_ROLES:-roles/run.admin roles/storage.admin roles/iam.serviceAccountUser}"
+    GCP_SERVICE_ACCOUNT_ROLES="${GCP_SERVICE_ACCOUNT_ROLES:-roles/run.admin roles/storage.admin roles/iam.serviceAccountUser roles/artifactregistry.writer}"
 
     # Initialize log file
     echo "==============================================================================" > "${LOG_FILE}"
