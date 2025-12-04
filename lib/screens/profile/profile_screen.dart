@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/project_provider.dart';
 import '../../models/app_user.dart';
+import '../../models/budget_goal.dart';
 import '../../services/user_preferences.dart';
 import '../../services/export_service.dart';
 import '../../services/storage_service.dart';
@@ -16,6 +17,8 @@ import '../../widgets/consent_dialog.dart';
 /// Allows users to:
 /// - View their profile information
 /// - Update their name
+/// - Set financial budget goals
+/// - Configure OpenAI API key
 /// - Log out
 /// - Delete their account
 class ProfileScreen extends StatefulWidget {
@@ -28,11 +31,15 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _goalController = TextEditingController();
+  final _apiKeyController = TextEditingController();
   bool _isEditing = false;
   bool _isLoading = false;
   bool _isExporting = false;
   final UserPreferences _userPreferences = UserPreferences();
   bool _analyticsConsent = false;
+  bool _goalActive = false;
+  bool _isEditingGoal = false;
 
   @override
   void initState() {
@@ -45,6 +52,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) {
       setState(() {
         _analyticsConsent = _userPreferences.analyticsConsent;
+        
+        // Load budget goal if exists
+        final goal = _userPreferences.budgetGoal;
+        if (goal != null) {
+          _goalController.text = goal.goalText;
+          _goalActive = goal.isActive;
+        }
+        
+        // Load API key if exists
+        final apiKey = _userPreferences.openaiApiKey;
+        if (apiKey != null) {
+          _apiKeyController.text = apiKey;
+        }
       });
     }
   }
@@ -52,6 +72,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _goalController.dispose();
+    _apiKeyController.dispose();
     super.dispose();
   }
 
@@ -223,6 +245,93 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Projects exported successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to export: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isExporting = false);
+      }
+    }
+  }
+
+  Future<void> _saveBudgetGoal() async {
+    final goalText = _goalController.text.trim();
+    
+    if (goalText.isEmpty) {
+      // Clear the goal if text is empty
+      await _userPreferences.clearBudgetGoal();
+      setState(() {
+        _goalActive = false;
+        _isEditingGoal = false;
+      });
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Budget goal cleared'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+      return;
+    }
+
+    final now = DateTime.now();
+    final existingGoal = _userPreferences.budgetGoal;
+    
+    final goal = BudgetGoal(
+      goalText: goalText,
+      isActive: _goalActive,
+      createdAt: existingGoal?.createdAt ?? now,
+      updatedAt: now,
+    );
+
+    await _userPreferences.setBudgetGoal(goal);
+    
+    setState(() {
+      _isEditingGoal = false;
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Budget goal saved successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  Future<void> _saveApiKey() async {
+    final apiKey = _apiKeyController.text.trim();
+    
+    if (apiKey.isEmpty) {
+      await _userPreferences.clearOpenaiApiKey();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('OpenAI API key cleared'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } else {
+      await _userPreferences.setOpenaiApiKey(apiKey);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('OpenAI API key saved successfully'),
             backgroundColor: Colors.green,
           ),
         );
@@ -459,6 +568,215 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextButton.styleFrom(
                             alignment: Alignment.centerLeft,
                             padding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Budget Goal Settings
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Budget Goal',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        if (_isEditingGoal) ...[
+                          TextField(
+                            controller: _goalController,
+                            decoration: const InputDecoration(
+                              labelText: 'Financial Goal',
+                              hintText:
+                                  'e.g., I want to have a positive balance of 200€ per month',
+                              border: OutlineInputBorder(),
+                              helperText:
+                                  'Describe your financial goal in natural language',
+                            ),
+                            maxLines: 3,
+                          ),
+                          const SizedBox(height: 12),
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: const Text('Goal Active'),
+                            subtitle: const Text(
+                              'Activate goal to see analysis in dashboard',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                            value: _goalActive,
+                            onChanged: (value) {
+                              setState(() {
+                                _goalActive = value;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    // Reload from preferences
+                                    final goal = _userPreferences.budgetGoal;
+                                    setState(() {
+                                      _goalController.text =
+                                          goal?.goalText ?? '';
+                                      _goalActive = goal?.isActive ?? false;
+                                      _isEditingGoal = false;
+                                    });
+                                  },
+                                  child: const Text('Cancel'),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: _saveBudgetGoal,
+                                  child: const Text('Save Goal'),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                          if (_goalController.text.isEmpty)
+                            Text(
+                              'No budget goal set',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            )
+                          else ...[
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: _goalActive
+                                    ? Colors.green.withValues(alpha: 0.1)
+                                    : Colors.grey.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: _goalActive
+                                      ? Colors.green.withValues(alpha: 0.3)
+                                      : Colors.grey.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        _goalActive
+                                            ? Icons.check_circle
+                                            : Icons.pause_circle,
+                                        size: 16,
+                                        color: _goalActive
+                                            ? Colors.green
+                                            : Colors.grey,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _goalActive ? 'Active' : 'Inactive',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: _goalActive
+                                              ? Colors.green
+                                              : Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    _goalController.text,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 12),
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                _isEditingGoal = true;
+                              });
+                            },
+                            icon: Icon(_goalController.text.isEmpty
+                                ? Icons.add
+                                : Icons.edit),
+                            label: Text(_goalController.text.isEmpty
+                                ? 'Set Budget Goal'
+                                : 'Edit Budget Goal'),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // OpenAI API Key Configuration
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'OpenAI Configuration',
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _apiKeyController,
+                          decoration: const InputDecoration(
+                            labelText: 'OpenAI API Key',
+                            hintText: 'sk-...',
+                            border: OutlineInputBorder(),
+                            helperText:
+                                'Required for budget goal analysis. Get your key from platform.openai.com',
+                          ),
+                          obscureText: true,
+                          onChanged: (value) {
+                            // Auto-save on change
+                            _saveApiKey();
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color: Colors.blue.withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline,
+                                  size: 20, color: Colors.blue[700]),
+                              const SizedBox(width: 8),
+                              const Expanded(
+                                child: Text(
+                                  'Your API key is stored locally and never shared. It\'s used only for analyzing your budget goals.',
+                                  style: TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
