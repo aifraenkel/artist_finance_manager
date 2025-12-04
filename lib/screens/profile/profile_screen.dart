@@ -375,13 +375,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       setState(() => _isLoading = true);
 
-      // Fetch conversion rate
+      // Fetch conversion rate based on the direction of currency change
       double? conversionRate;
-      if (_userPrefs!.currency == AppCurrency.eur &&
-          currency == AppCurrency.usd) {
+      if (currency == AppCurrency.usd && _userPrefs!.currency == AppCurrency.eur) {
+        // Converting from EUR to USD
         conversionRate = await _currencyService.getEurToUsdRate();
-      } else if (_userPrefs!.currency == AppCurrency.usd &&
-          currency == AppCurrency.eur) {
+      } else if (currency == AppCurrency.eur && _userPrefs!.currency == AppCurrency.usd) {
+        // Converting from USD to EUR
         conversionRate = await _currencyService.getUsdToEurRate();
       }
 

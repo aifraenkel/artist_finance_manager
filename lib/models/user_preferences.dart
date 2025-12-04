@@ -1,5 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/// Sentinel value for optional parameters in copyWith
+class _Undefined {
+  const _Undefined();
+}
+
+const _undefined = _Undefined();
+
 /// Supported languages in the application
 enum AppLanguage {
   english('en', 'English'),
@@ -91,19 +98,24 @@ class UserPreferencesModel {
   }
 
   /// Create a copy with updated fields
+  /// 
+  /// To explicitly set conversionRate to null, pass conversionRate: null
+  /// To keep the existing value, don't pass conversionRate at all
   UserPreferencesModel copyWith({
     String? userId,
     AppLanguage? language,
     AppCurrency? currency,
     DateTime? updatedAt,
-    double? conversionRate,
+    Object? conversionRate = _undefined,
   }) {
     return UserPreferencesModel(
       userId: userId ?? this.userId,
       language: language ?? this.language,
       currency: currency ?? this.currency,
       updatedAt: updatedAt ?? this.updatedAt,
-      conversionRate: conversionRate ?? this.conversionRate,
+      conversionRate: conversionRate == _undefined 
+          ? this.conversionRate 
+          : conversionRate as double?,
     );
   }
 
