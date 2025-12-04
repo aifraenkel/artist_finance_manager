@@ -61,11 +61,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final authProvider = Provider.of<AuthProvider>(context, listen: false);
     final user = authProvider.currentUser;
     if (user != null) {
-      final prefs = await _preferencesService.getPreferences(user.uid);
-      if (mounted) {
-        setState(() {
-          _userPrefs = prefs;
-        });
+      try {
+        final prefs = await _preferencesService.getPreferences(user.uid);
+        if (mounted) {
+          setState(() {
+            _userPrefs = prefs;
+          });
+        }
+      } catch (e) {
+        print('Error loading user preferences: $e');
+        // Optionally, show a snackbar to the user
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Failed to load user preferences'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     }
   }
