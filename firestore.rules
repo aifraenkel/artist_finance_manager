@@ -38,6 +38,21 @@ service cloud.firestore {
       // Users can soft delete their account (set deletedAt)
       allow delete: if isOwner(userId);
 
+      // Preferences subcollection - user can only access their own preferences
+      match /preferences/{preferencesId} {
+        // Users can read their own preferences
+        allow read: if isOwner(userId);
+
+        // Users can create their own preferences
+        allow create: if isOwner(userId);
+
+        // Users can update their own preferences
+        allow update: if isOwner(userId);
+
+        // Users can delete their own preferences
+        allow delete: if isOwner(userId);
+      }
+
       // Projects subcollection - user can only access their own projects
       match /projects/{projectId} {
         // Helper to check if this is the sync metadata document

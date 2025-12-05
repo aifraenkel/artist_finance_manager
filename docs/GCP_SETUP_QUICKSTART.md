@@ -169,6 +169,11 @@ gcloud projects add-iam-policy-binding $PROJECT_ID \
     --member="serviceAccount:github-actions@${PROJECT_ID}.iam.gserviceaccount.com" \
     --role="roles/iam.serviceAccountUser"
 
+# Required for pushing Docker images to Artifact Registry (gcr.io)
+gcloud projects add-iam-policy-binding $PROJECT_ID \
+    --member="serviceAccount:github-actions@${PROJECT_ID}.iam.gserviceaccount.com" \
+    --role="roles/artifactregistry.writer"
+
 # Create and download key
 gcloud iam service-accounts keys create gcp-key.json \
     --iam-account=github-actions@${PROJECT_ID}.iam.gserviceaccount.com

@@ -4,12 +4,14 @@ class SummaryCards extends StatelessWidget {
   final double totalIncome;
   final double totalExpenses;
   final double balance;
+  final String currencySymbol;
 
   const SummaryCards({
     super.key,
     required this.totalIncome,
     required this.totalExpenses,
     required this.balance,
+    this.currencySymbol = '€', // Default to Euro for backward compatibility
   });
 
   @override
@@ -68,7 +70,7 @@ class SummaryCards extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '€${totalIncome.toStringAsFixed(2)}',
+                        '$currencySymbol${totalIncome.toStringAsFixed(2)}',
                         key: const ValueKey('income-amount'),
                         style: const TextStyle(
                           fontSize: 24,
@@ -117,7 +119,7 @@ class SummaryCards extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '€${totalExpenses.toStringAsFixed(2)}',
+                        '$currencySymbol${totalExpenses.toStringAsFixed(2)}',
                         key: const ValueKey('expenses-amount'),
                         style: const TextStyle(
                           fontSize: 24,
@@ -169,8 +171,8 @@ class SummaryCards extends StatelessWidget {
                       const SizedBox(height: 4),
                       Text(
                         balance < 0
-                            ? '-€${balance.abs().toStringAsFixed(2)}'
-                            : '€${balance.toStringAsFixed(2)}',
+                            ? '-$currencySymbol${balance.abs().toStringAsFixed(2)}'
+                            : '$currencySymbol${balance.toStringAsFixed(2)}',
                         key: const ValueKey('balance-amount'),
                         style: TextStyle(
                           fontSize: 24,

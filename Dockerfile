@@ -33,7 +33,7 @@ RUN flutter pub get
 COPY . .
 
 # Build the Flutter web app
-RUN flutter build web --release --web-renderer canvaskit
+RUN flutter build web --release
 
 # Stage 2: Setup the nginx server
 FROM nginx:alpine
