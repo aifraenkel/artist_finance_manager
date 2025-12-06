@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../models/transaction.dart';
+import '../models/user_preferences.dart';
 import '../services/storage_service.dart';
 import '../services/firestore_sync_service.dart';
 import '../services/observability_service.dart';
