@@ -3,19 +3,38 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:artist_finance_manager/widgets/summary_cards.dart';
+import 'package:artist_finance_manager/l10n/app_localizations.dart';
 
 void main() {
+  // Helper function to wrap widgets with localization
+  Widget wrapWithLocalizations(Widget child) {
+    return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('en'),
+        Locale('de'),
+        Locale('es'),
+      ],
+      locale: const Locale('en'),
+      home: Scaffold(body: child),
+    );
+  }
+
   group('SummaryCards Widget', () {
     testWidgets('renders income, expenses and balance (positive balance)',
         (tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: SummaryCards(
-            totalIncome: 1500.25,
-            totalExpenses: 500.75,
-            balance: 999.50,
-          ),
+      await tester.pumpWidget(wrapWithLocalizations(
+        const SummaryCards(
+          totalIncome: 1500.25,
+          totalExpenses: 500.75,
+          balance: 999.50,
         ),
       ));
 
@@ -30,13 +49,11 @@ void main() {
 
     testWidgets('renders negative balance with minus sign and red styling',
         (tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: SummaryCards(
-            totalIncome: 100.0,
-            totalExpenses: 250.0,
-            balance: -150.0,
-          ),
+      await tester.pumpWidget(wrapWithLocalizations(
+        const SummaryCards(
+          totalIncome: 100.0,
+          totalExpenses: 250.0,
+          balance: -150.0,
         ),
       ));
 
@@ -48,13 +65,11 @@ void main() {
         (tester) async {
       // Narrow layout
       await tester.binding.setSurfaceSize(const Size(400, 800));
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: SummaryCards(
-            totalIncome: 10,
-            totalExpenses: 5,
-            balance: 5,
-          ),
+      await tester.pumpWidget(wrapWithLocalizations(
+        const SummaryCards(
+          totalIncome: 10,
+          totalExpenses: 5,
+          balance: 5,
         ),
       ));
       // Expect Column children ordered vertically
@@ -63,13 +78,11 @@ void main() {
 
       // Wide layout
       await tester.binding.setSurfaceSize(const Size(1200, 800));
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: SummaryCards(
-            totalIncome: 10,
-            totalExpenses: 5,
-            balance: 5,
-          ),
+      await tester.pumpWidget(wrapWithLocalizations(
+        const SummaryCards(
+          totalIncome: 10,
+          totalExpenses: 5,
+          balance: 5,
         ),
       ));
       // For wide layout a Row should be used
@@ -77,14 +90,12 @@ void main() {
     });
 
     testWidgets('supports custom currency symbol', (tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: SummaryCards(
-            totalIncome: 1000.0,
-            totalExpenses: 500.0,
-            balance: 500.0,
-            currencySymbol: '\$',
-          ),
+      await tester.pumpWidget(wrapWithLocalizations(
+        const SummaryCards(
+          totalIncome: 1000.0,
+          totalExpenses: 500.0,
+          balance: 500.0,
+          currencySymbol: '\$',
         ),
       ));
 
@@ -94,13 +105,11 @@ void main() {
     });
 
     testWidgets('defaults to Euro symbol when not specified', (tester) async {
-      await tester.pumpWidget(const MaterialApp(
-        home: Scaffold(
-          body: SummaryCards(
-            totalIncome: 100.0,
-            totalExpenses: 50.0,
-            balance: 50.0,
-          ),
+      await tester.pumpWidget(wrapWithLocalizations(
+        const SummaryCards(
+          totalIncome: 100.0,
+          totalExpenses: 50.0,
+          balance: 50.0,
         ),
       ));
 

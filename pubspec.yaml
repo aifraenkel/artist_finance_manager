@@ -9,6 +9,8 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
 
   # Firebase & Authentication
   firebase_core: ^3.8.1
@@ -20,7 +22,7 @@ dependencies:
   provider: ^6.1.2
 
   # Utilities
-  intl: ^0.19.0
+  intl: ^0.20.2
   http: ^1.2.0
   device_info_plus: ^10.1.0
   uuid: ^4.5.1
@@ -46,6 +48,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
 
 flutter_launcher_icons:
   android: true

@@ -9,6 +9,8 @@ import 'package:artist_finance_manager/services/project_service.dart';
 import 'package:artist_finance_manager/widgets/auth_wrapper.dart';
 import 'package:artist_finance_manager/screens/auth/login_screen.dart';
 import 'package:artist_finance_manager/screens/home_screen.dart';
+import 'package:artist_finance_manager/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Auth Wrapper Session Persistence Widget Tests
 ///
@@ -92,6 +94,7 @@ class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
   Project? _currentProject;
   final bool _isLoading = false;
   String? _error;
+  final ProjectService _projectService = FakeProjectService();
 
   @override
   List<Project> get projects => _projects;
@@ -106,7 +109,7 @@ class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
   String? get error => _error;
 
   @override
-  ProjectService get projectService => throw UnimplementedError();
+  ProjectService get projectService => _projectService;
 
   @override
   Future<void> initialize() async {
@@ -144,11 +147,25 @@ class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
       {'income': 0, 'expenses': 0, 'balance': 0};
 }
 
+class FakeProjectService extends ProjectService {
+  @override
+  Future<Project> ensureDefaultProject() async {
+    return Project(
+      id: 'default',
+      name: 'Default',
+      createdAt: DateTime.now(),
+    );
+  }
+}
+
 void main() {
   late MockAuthProvider mockAuthProvider;
   late MockProjectProvider mockProjectProvider;
 
-  setUp(() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({
+      'consent_timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
     mockAuthProvider = MockAuthProvider();
     mockProjectProvider = MockProjectProvider();
   });
@@ -160,7 +177,12 @@ void main() {
         ChangeNotifierProvider<ProjectProvider>.value(
             value: mockProjectProvider),
       ],
-      child: const MaterialApp(home: AuthWrapper()),
+      child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('en'),
+        home: AuthWrapper(),
+      ),
     );
   }
 

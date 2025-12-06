@@ -8,17 +8,17 @@ void main() {
       expect(AppLanguage.english.code, 'en');
       expect(AppLanguage.english.displayName, 'English');
 
-      expect(AppLanguage.spanish.code, 'es');
-      expect(AppLanguage.spanish.displayName, 'Spanish');
+      expect(AppLanguage.german.code, 'de');
+      expect(AppLanguage.german.displayName, 'Deutsch');
 
-      expect(AppLanguage.catalan.code, 'ca');
-      expect(AppLanguage.catalan.displayName, 'Catalan');
+      expect(AppLanguage.spanish.code, 'es');
+      expect(AppLanguage.spanish.displayName, 'Español');
     });
 
     test('should parse from code correctly', () {
       expect(AppLanguage.fromCode('en'), AppLanguage.english);
+      expect(AppLanguage.fromCode('de'), AppLanguage.german);
       expect(AppLanguage.fromCode('es'), AppLanguage.spanish);
-      expect(AppLanguage.fromCode('ca'), AppLanguage.catalan);
     });
 
     test('should default to English for invalid code', () {
@@ -80,7 +80,7 @@ void main() {
     test('should parse from Firestore format', () {
       final now = DateTime.now();
       final data = {
-        'language': 'ca',
+        'language': 'de',
         'currency': 'EUR',
         'updatedAt': Timestamp.fromDate(now),
         'conversionRate': 1.08,
@@ -89,7 +89,7 @@ void main() {
       final prefs = UserPreferencesModel.fromFirestore('user456', data);
 
       expect(prefs.userId, 'user456');
-      expect(prefs.language, AppLanguage.catalan);
+      expect(prefs.language, AppLanguage.german);
       expect(prefs.currency, AppCurrency.eur);
       expect(prefs.conversionRate, 1.08);
     });
@@ -124,12 +124,12 @@ void main() {
     test('should create copy with updated fields', () {
       final original = UserPreferencesModel.defaultPreferences('user123');
       final updated = original.copyWith(
-        language: AppLanguage.catalan,
+        language: AppLanguage.german,
         conversionRate: 1.15,
       );
 
       expect(updated.userId, original.userId);
-      expect(updated.language, AppLanguage.catalan);
+      expect(updated.language, AppLanguage.german);
       expect(updated.currency, AppCurrency.eur);
       expect(updated.conversionRate, 1.15);
     });

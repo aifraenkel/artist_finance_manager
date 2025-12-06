@@ -10,8 +10,8 @@ const _undefined = _Undefined();
 /// Supported languages in the application
 enum AppLanguage {
   english('en', 'English'),
-  spanish('es', 'Spanish'),
-  catalan('ca', 'Catalan');
+  german('de', 'Deutsch'),
+  spanish('es', 'Español');
 
   final String code;
   final String displayName;

@@ -7,10 +7,16 @@ import '../providers/project_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/storage_service.dart';
 import '../services/firestore_sync_service.dart';
+import '../services/user_preferences.dart';
+import '../services/openai_service.dart';
+import '../services/budget_analysis_service.dart';
+import '../services/project_service.dart';
+import '../l10n/app_localizations.dart';
 
 /// Dashboard screen showing financial analytics and insights.
 ///
 /// Features:
+/// - Budget goal analysis (if configured)
 /// - Project contribution breakdown (pie chart)
 /// - Timeline charts for income, expenses, and balance
 /// - Top expensive projects
@@ -24,9 +30,13 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final AnalyticsService _analyticsService = AnalyticsService();
+  final UserPreferences _userPreferences = UserPreferences();
   bool _isLoading = true;
+  bool _isAnalyzingGoal = false;
   Map<String, List<Transaction>> _projectTransactions = {};
   Map<String, Project> _projects = {};
+  String? _goalAnalysis;
+  String? _goalAnalysisError;
 
   // Month abbreviations for timeline chart
   static const List<String> _monthAbbreviations = [
@@ -50,7 +60,71 @@ class _DashboardScreenState extends State<DashboardScreen> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
+      _loadPreferencesAndAnalyzeGoal();
     });
+  }
+
+  Future<void> _loadPreferencesAndAnalyzeGoal() async {
+    await _userPreferences.initialize();
+
+    // Check if we have an active goal
+    final goal = _userPreferences.budgetGoal;
+    if (goal != null && goal.isActive && goal.isValid) {
+      await _analyzeGoal();
+    }
+  }
+
+  Future<void> _analyzeGoal() async {
+    final goal = _userPreferences.budgetGoal;
+    if (goal == null || !goal.isActive || !goal.isValid) {
+      return;
+    }
+
+    final apiKey = _userPreferences.openaiApiKey;
+    if (apiKey == null || apiKey.isEmpty) {
+      setState(() {
+        _goalAnalysisError = 'OpenAI API key not set';
+      });
+      return;
+    }
+
+    setState(() {
+      _isAnalyzingGoal = true;
+      _goalAnalysis = null;
+      _goalAnalysisError = null;
+    });
+
+    try {
+      final projectProvider =
+          Provider.of<ProjectProvider>(context, listen: false);
+
+      final openAIService = OpenAIService(apiKey: apiKey);
+      final analysisService = BudgetAnalysisService(
+        projectService: projectProvider.projectService,
+        createStorageService: (projectId) {
+          final syncService = FirestoreSyncService(projectId: projectId);
+          return StorageService(
+            syncService: syncService,
+            projectId: projectId,
+          );
+        },
+        openAIService: openAIService,
+      );
+
+      final analysis = await analysisService.analyzeGoal(goal);
+
+      if (!mounted) return;
+      setState(() {
+        _goalAnalysis = analysis;
+        _isAnalyzingGoal = false;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      setState(() {
+        _goalAnalysisError = e.toString().replaceAll('Exception: ', '');
+        _isAnalyzingGoal = false;
+      });
+    }
   }
 
   Future<void> _loadData() async {
@@ -91,9 +165,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analytics Dashboard'),
+        title: Text(l10n.analyticsDashboard),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -110,12 +185,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _buildDashboard(),
+            : _buildDashboard(context),
       ),
     );
   }
 
-  Widget _buildDashboard() {
+  Widget _buildDashboard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final allTransactions =
         _projectTransactions.values.expand((txns) => txns).toList();
 
@@ -131,7 +207,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No data available',
+              l10n.noDataAvailable,
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey.shade600,
@@ -140,7 +216,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Add some transactions to see analytics',
+              l10n.addTransactionsToSeeAnalytics,
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey.shade500,
@@ -169,6 +245,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // Budget Goal Analysis Section (if active)
+          if (_userPreferences.budgetGoal != null &&
+              _userPreferences.budgetGoal!.isActive) ...[
+            _buildGoalAnalysisSection(context),
+            const SizedBox(height: 24),
+          ],
+
           // Summary statistics
           _buildSummarySection(summary),
           const SizedBox(height: 24),
@@ -208,6 +291,136 @@ class _DashboardScreenState extends State<DashboardScreen> {
         fontSize: 20,
         fontWeight: FontWeight.bold,
         color: Colors.black87,
+      ),
+    );
+  }
+
+  Widget _buildGoalAnalysisSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final goal = _userPreferences.budgetGoal;
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.track_changes, color: Colors.blue[700], size: 24),
+                const SizedBox(width: 8),
+                const Text(
+                  'Budget Goal Analysis',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Show the goal
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.blue.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.flag, size: 16, color: Colors.blue[700]),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      goal?.goalText ?? '',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Show analysis result or loading/error state
+            if (_isAnalyzingGoal)
+              Center(
+                child: Column(
+                  children: [
+                    const CircularProgressIndicator(),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Analyzing your financial goal...',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (_goalAnalysisError != null)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.red.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.error_outline, color: Colors.red[700], size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _goalAnalysisError!,
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: Colors.red[700],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else if (_goalAnalysis != null)
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.green.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border:
+                      Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.lightbulb_outline,
+                        color: Colors.green[700], size: 20),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _goalAnalysis!,
+                        style: const TextStyle(fontSize: 14),
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            else
+              TextButton.icon(
+                onPressed: _analyzeGoal,
+                icon: const Icon(Icons.refresh),
+                label: Text(l10n.analyzeGoal),
+              ),
+          ],
+        ),
       ),
     );
   }
