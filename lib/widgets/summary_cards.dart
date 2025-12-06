@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 
 class SummaryCards extends StatelessWidget {
   final double totalIncome;
@@ -22,11 +23,11 @@ class SummaryCards extends StatelessWidget {
         if (constraints.maxWidth < 600) {
           return Column(
             children: [
-              _buildIncomeCard(),
+              _buildIncomeCard(context),
               const SizedBox(height: 12),
-              _buildExpensesCard(),
+              _buildExpensesCard(context),
               const SizedBox(height: 12),
-              _buildBalanceCard(),
+              _buildBalanceCard(context),
             ],
           );
         }
@@ -34,18 +35,18 @@ class SummaryCards extends StatelessWidget {
         // Use row layout for wider screens (tablet, desktop, mobile landscape)
         return Row(
           children: [
-            Expanded(child: _buildIncomeCard()),
+            Expanded(child: _buildIncomeCard(context)),
             const SizedBox(width: 12),
-            Expanded(child: _buildExpensesCard()),
+            Expanded(child: _buildExpensesCard(context)),
             const SizedBox(width: 12),
-            Expanded(child: _buildBalanceCard()),
+            Expanded(child: _buildBalanceCard(context)),
           ],
         );
       },
     );
   }
 
-  Widget _buildIncomeCard() {
+  Widget _buildIncomeCard(BuildContext context) {
     return Card(
       key: const ValueKey('income-card'),
       child: Padding(
@@ -60,9 +61,9 @@ class SummaryCards extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Income',
-                        key: ValueKey('income-label'),
+                      Text(
+                        AppLocalizations.of(context)!.income,
+                        key: const ValueKey('income-label'),
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
@@ -94,7 +95,7 @@ class SummaryCards extends StatelessWidget {
     );
   }
 
-  Widget _buildExpensesCard() {
+  Widget _buildExpensesCard(BuildContext context) {
     return Card(
       key: const ValueKey('expenses-card'),
       child: Padding(
@@ -109,9 +110,9 @@ class SummaryCards extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Expenses',
-                        key: ValueKey('expenses-label'),
+                      Text(
+                        AppLocalizations.of(context)!.expenses,
+                        key: const ValueKey('expenses-label'),
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey,
@@ -143,7 +144,7 @@ class SummaryCards extends StatelessWidget {
     );
   }
 
-  Widget _buildBalanceCard() {
+  Widget _buildBalanceCard(BuildContext context) {
     final balanceColor = balance >= 0 ? Colors.blue : Colors.red;
 
     return Card(
@@ -160,9 +161,9 @@ class SummaryCards extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Balance',
-                        key: ValueKey('balance-label'),
+                      Text(
+                        AppLocalizations.of(context)!.balance,
+                        key: const ValueKey('balance-label'),
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.grey,

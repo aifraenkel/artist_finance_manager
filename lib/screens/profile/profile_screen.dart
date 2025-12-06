@@ -14,6 +14,8 @@ import '../../services/file_download.dart';
 import '../../services/preferences_service.dart';
 import '../../services/currency_conversion_service.dart';
 import '../../widgets/consent_dialog.dart';
+import '../../l10n/app_localizations.dart';
+import '../../main.dart';
 
 /// User profile and settings screen
 ///
@@ -93,8 +95,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // Optionally, show a snackbar to the user
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to load user preferences'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.failedToLoadUserPreferences),
               backgroundColor: Colors.red,
             ),
           );
@@ -127,16 +129,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (success && mounted) {
       setState(() => _isEditing = false);
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile updated successfully'),
+        SnackBar(
+          content: Text(l10n.profileUpdatedSuccess),
           backgroundColor: Colors.green,
         ),
       );
     } else if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.error ?? 'Failed to update profile'),
+          content: Text(authProvider.error ?? l10n.failedToUpdateProfile),
           backgroundColor: Colors.red,
         ),
       );
@@ -144,19 +148,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _logout() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text('Are you sure you want to sign out?'),
+        title: Text(l10n.signOut),
+        content: Text(l10n.signOutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Sign Out'),
+            child: Text(l10n.signOut),
           ),
         ],
       ),
@@ -169,24 +174,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _deleteAccount() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
+        title: Text(l10n.deleteAccount),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Are you sure you want to delete your account?',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              l10n.deleteAccountWarning,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            const Text('This will:'),
+            Text(l10n.deleteAccountDetails),
             const SizedBox(height: 8),
-            const Text('• Remove access to your account'),
-            const Text(
-                '• Keep your data for 90 days in case you change your mind'),
+            Text(l10n.deleteAccountRemoveAccess),
+            Text(l10n.deleteAccountKeepData),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -199,10 +204,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'You can recover your account within 90 days by signing in again',
-                      style: TextStyle(fontSize: 12),
+                      l10n.recoverAccountInfo,
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ],
@@ -213,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -221,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Delete Account'),
+            child: Text(l10n.deleteAccount),
           ),
         ],
       ),
@@ -236,9 +241,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() => _isLoading = false);
 
       if (!success && mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(authProvider.error ?? 'Failed to delete account'),
+            content: Text(authProvider.error ?? l10n.failedToDeleteAccount),
             backgroundColor: Colors.red,
           ),
         );
@@ -276,18 +282,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await downloadFile(csvContent, filename);
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Projects exported successfully'),
+          SnackBar(
+            content: Text(l10n.projectsExportedSuccess),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to export: ${e.toString()}'),
+            content: Text('${l10n.failedToExport}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -311,9 +319,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Budget goal cleared'),
+          SnackBar(
+            content: Text(l10n.budgetGoalCleared),
             backgroundColor: Colors.green,
           ),
         );
@@ -338,9 +347,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
 
     if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Budget goal saved successfully'),
+        SnackBar(
+          content: Text(l10n.budgetGoalSavedSuccess),
           backgroundColor: Colors.green,
         ),
       );
@@ -354,9 +364,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       if (apiKey.isEmpty) {
         await _userPreferences.clearOpenaiApiKey();
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('OpenAI API key cleared'),
+            SnackBar(
+              content: Text(l10n.openaiApiKeyCleared),
               backgroundColor: Colors.green,
             ),
           );
@@ -364,9 +375,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       } else {
         await _userPreferences.setOpenaiApiKey(apiKey);
         if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('OpenAI API key saved successfully'),
+            SnackBar(
+              content: Text(l10n.openaiApiKeySavedSuccess),
               backgroundColor: Colors.green,
             ),
           );
@@ -374,9 +386,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to save API key: ${e.toString()}'),
+            content: Text('${l10n.failedToSaveApiKey}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -392,20 +405,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await _preferencesService.updateLanguage(user.uid, language);
       await _loadUserPreferences();
+      await MyApp.of(context)?.refreshUserPreferences(user.uid);
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Language updated to ${language.displayName}'),
+            content: Text('${l10n.languageUpdatedTo} ${language.displayName}'),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update language: ${e.toString()}'),
+            content: Text('${l10n.failedToUpdateLanguage}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -422,21 +438,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_userPrefs!.currency == currency) return;
 
     // Show conversion warning dialog
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change Currency'),
+        title: Text(l10n.changeCurrency),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Changing from ${_userPrefs!.currency.code} to ${currency.code} will update the currency symbol displayed in the app.',
+              '${l10n.changingFrom} ${_userPrefs!.currency.code} to ${currency.code} ${l10n.currencyChangeDescription}',
             ),
             const SizedBox(height: 16),
-            const Text(
-              'The conversion rate from the European Central Bank (via Frankfurter API) will be fetched and stored for your reference.',
-              style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+            Text(
+              l10n.currencyRateInfo,
+              style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 16),
             Container(
@@ -450,10 +467,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Note: This does not convert existing transaction amounts',
-                      style: TextStyle(fontSize: 12),
+                      l10n.noteNoConvertExistingAmounts,
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ],
@@ -464,14 +481,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
             ),
-            child: const Text('Update Currency'),
+            child: Text(l10n.updateCurrency),
           ),
         ],
       ),
@@ -507,19 +525,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await _loadUserPreferences();
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Currency updated to ${currency.code} (rate: ${conversionRate.toStringAsFixed(4)})'),
+                '${l10n.currencyUpdatedWithRate} ${currency.code} (rate: ${conversionRate.toStringAsFixed(4)})'),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update currency: ${e.toString()}'),
+            content: Text('${l10n.failedToUpdateCurrency}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -533,9 +553,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile & Settings'),
+        title: Text(l10n.profileAndSettings),
       ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
@@ -578,16 +599,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             key: _formKey,
                             child: TextFormField(
                               controller: _nameController,
-                              decoration: const InputDecoration(
-                                labelText: 'Name',
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                labelText: l10n.name,
+                                border: const OutlineInputBorder(),
                               ),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter your name';
+                                  return l10n.pleaseEnterYourName;
                                 }
                                 if (value.trim().length < 2) {
-                                  return 'Name must be at least 2 characters';
+                                  return l10n.nameMinimumLength;
                                 }
                                 return null;
                               },
@@ -618,7 +639,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 onPressed: _isLoading
                                     ? null
                                     : () => setState(() => _isEditing = false),
-                                child: const Text('Cancel'),
+                                child: Text(l10n.cancel),
                               ),
                               const SizedBox(width: 8),
                               ElevatedButton(
@@ -633,7 +654,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : const Text('Save'),
+                                    : Text(l10n.save),
                               ),
                             ],
                           )
@@ -641,7 +662,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           OutlinedButton.icon(
                             onPressed: () => setState(() => _isEditing = true),
                             icon: const Icon(Icons.edit),
-                            label: const Text('Edit Profile'),
+                            label: Text(l10n.editProfile),
                           ),
                       ],
                     ),
@@ -657,7 +678,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Preferences',
+                          l10n.preferences,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -669,7 +690,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Language',
+                              l10n.language,
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 14,
@@ -700,7 +721,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Currency',
+                              l10n.currency,
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 14,
@@ -739,7 +760,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Account Information',
+                          l10n.accountInformation,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -747,17 +768,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         const SizedBox(height: 16),
                         _buildInfoRow(
-                          'Member since',
+                          l10n.memberSince,
                           DateFormat('MMM d, y').format(user.createdAt),
                         ),
                         const Divider(height: 24),
                         _buildInfoRow(
-                          'Last login',
+                          l10n.lastLogin,
                           DateFormat('MMM d, y HH:mm').format(user.lastLoginAt),
                         ),
                         const Divider(height: 24),
                         _buildInfoRow(
-                          'Login count',
+                          l10n.loginCount,
                           user.metadata.loginCount.toString(),
                         ),
                       ],
@@ -774,7 +795,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Privacy & Data',
+                          l10n.privacyAndData,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -783,10 +804,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 16),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Analytics'),
-                          subtitle: const Text(
-                            'Help improve the app by sharing anonymous usage data',
-                            style: TextStyle(fontSize: 12),
+                          title: Text(l10n.analytics),
+                          subtitle: Text(
+                            l10n.analyticsHelperText,
+                            style: const TextStyle(fontSize: 12),
                           ),
                           value: _analyticsConsent,
                           onChanged: (value) async {
@@ -800,8 +821,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 SnackBar(
                                   content: Text(
                                     value
-                                        ? 'Analytics enabled - thank you!'
-                                        : 'Analytics disabled',
+                                        ? l10n.analyticsEnabledThankYou
+                                        : l10n.analyticsDisabled,
                                   ),
                                   backgroundColor: Colors.green,
                                 ),
@@ -822,9 +843,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             );
                           },
                           icon: const Icon(Icons.info_outline, size: 18),
-                          label: const Text(
-                            'What data do we collect?',
-                            style: TextStyle(fontSize: 13),
+                          label: Text(
+                            l10n.whatDataDoWeCollect,
+                            style: const TextStyle(fontSize: 13),
                           ),
                           style: TextButton.styleFrom(
                             alignment: Alignment.centerLeft,
@@ -845,7 +866,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Budget Goal',
+                          l10n.budgetGoal,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -855,23 +876,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         if (_isEditingGoal) ...[
                           TextField(
                             controller: _goalController,
-                            decoration: const InputDecoration(
-                              labelText: 'Financial Goal',
-                              hintText:
-                                  'e.g., I want to have a positive balance of 200€ per month',
-                              border: OutlineInputBorder(),
-                              helperText:
-                                  'Describe your financial goal in natural language',
+                            decoration: InputDecoration(
+                              labelText: l10n.financialGoal,
+                              hintText: l10n.financialGoalHint,
+                              border: const OutlineInputBorder(),
+                              helperText: l10n.financialGoalHelper,
                             ),
                             maxLines: 3,
                           ),
                           const SizedBox(height: 12),
                           SwitchListTile(
                             contentPadding: EdgeInsets.zero,
-                            title: const Text('Goal Active'),
-                            subtitle: const Text(
-                              'Activate goal to see analysis in dashboard',
-                              style: TextStyle(fontSize: 12),
+                            title: Text(l10n.goalActive),
+                            subtitle: Text(
+                              l10n.goalActiveHelper,
+                              style: const TextStyle(fontSize: 12),
                             ),
                             value: _goalActive,
                             onChanged: (value) {
@@ -895,14 +914,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       _isEditingGoal = false;
                                     });
                                   },
-                                  child: const Text('Cancel'),
+                                  child: Text(l10n.cancel),
                                 ),
                               ),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: ElevatedButton(
                                   onPressed: _saveBudgetGoal,
-                                  child: const Text('Save Goal'),
+                                  child: Text(l10n.saveGoal),
                                 ),
                               ),
                             ],
@@ -910,7 +929,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ] else ...[
                           if (_goalController.text.isEmpty)
                             Text(
-                              'No budget goal set',
+                              l10n.noBudgetGoalSet,
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 14,
@@ -946,7 +965,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        _goalActive ? 'Active' : 'Inactive',
+                                        _goalActive ? l10n.active : l10n.inactive,
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
@@ -977,8 +996,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ? Icons.add
                                 : Icons.edit),
                             label: Text(_goalController.text.isEmpty
-                                ? 'Set Budget Goal'
-                                : 'Edit Budget Goal'),
+                                ? l10n.setBudgetGoal
+                                : l10n.editBudgetGoal),
                           ),
                         ],
                       ],
@@ -995,7 +1014,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'OpenAI Configuration',
+                          l10n.openaiConfiguration,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -1004,12 +1023,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         const SizedBox(height: 16),
                         TextField(
                           controller: _apiKeyController,
-                          decoration: const InputDecoration(
-                            labelText: 'OpenAI API Key',
-                            hintText: 'sk-...',
-                            border: OutlineInputBorder(),
-                            helperText:
-                                'Required for budget goal analysis. Get your key from platform.openai.com',
+                          decoration: InputDecoration(
+                            labelText: l10n.openaiApiKey,
+                            hintText: l10n.openaiApiKeyPlaceholder,
+                            border: const OutlineInputBorder(),
+                            helperText: l10n.openaiApiKeyHelper,
                           ),
                           obscureText: true,
                           onEditingComplete: () {
@@ -1031,10 +1049,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Icon(Icons.info_outline,
                                   size: 20, color: Colors.blue[700]),
                               const SizedBox(width: 8),
-                              const Expanded(
+                              Expanded(
                                 child: Text(
-                                  'Your API key is stored locally and never shared. It\'s used only for analyzing your budget goals.',
-                                  style: TextStyle(fontSize: 12),
+                                  l10n.openaiApiKeySecurityInfo,
+                                  style: const TextStyle(fontSize: 12),
                                 ),
                               ),
                             ],
@@ -1054,7 +1072,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Account Actions',
+                          l10n.accountActions,
                           style: Theme.of(context)
                               .textTheme
                               .titleMedium
@@ -1074,7 +1092,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 )
                               : const Icon(Icons.download),
-                          label: const Text('Export to CSV'),
+                          label: Text(l10n.exportToCSV),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
@@ -1083,7 +1101,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         OutlinedButton.icon(
                           onPressed: _isLoading ? null : _logout,
                           icon: const Icon(Icons.logout),
-                          label: const Text('Sign Out'),
+                          label: Text(l10n.signOut),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
@@ -1092,7 +1110,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         OutlinedButton.icon(
                           onPressed: _isLoading ? null : _deleteAccount,
                           icon: const Icon(Icons.delete_forever),
-                          label: const Text('Delete Account'),
+                          label: Text(l10n.deleteAccount),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.red,
                             padding: const EdgeInsets.symmetric(vertical: 12),

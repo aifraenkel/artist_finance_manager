@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:firebase_core/firebase_core.dart';
 import '../models/transaction.dart';
 import '../services/storage_service.dart';
 import '../services/firestore_sync_service.dart';
@@ -16,6 +18,7 @@ import '../widgets/empty_project_state.dart';
 import '../providers/auth_provider.dart';
 import '../providers/project_provider.dart';
 import 'profile/profile_screen.dart';
+import '../l10n/app_localizations.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -26,7 +29,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late StorageService _storageService;
-  late FirestoreSyncService _syncService;
+  FirestoreSyncService? _syncService;
   final UserPreferences _userPreferences = UserPreferences();
   PreferencesService? _preferencesService;
   late ObservabilityService _observability;
@@ -39,22 +42,36 @@ class _HomeScreenState extends State<HomeScreen> {
     'expenses': 0,
     'balance': 0,
   };
+  StreamSubscription<UserPreferencesModel>? _prefsSubscription;
+
+  bool get _isFirebaseAvailable {
+    try {
+      return Firebase.apps.isNotEmpty;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    print('[HomeScreen] initState called');
     // Use post-frame callback to safely access Provider context
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      print('[HomeScreen] PostFrameCallback - calling _initializeStorage');
       _initializeStorage();
     });
   }
 
   Future<void> _initializeStorage() async {
+    print('[HomeScreen] _initializeStorage called');
     // Initialize user preferences first
     await _userPreferences.initialize();
+    print('[HomeScreen] User preferences initialized');
 
     // Initialize observability with user preferences
     _observability = ObservabilityService(userPreferences: _userPreferences);
+    print('[HomeScreen] Observability service initialized');
 
     // Show consent dialog if user hasn't seen it yet
     if (!_userPreferences.hasSeenConsentPrompt && mounted) {
@@ -97,9 +114,20 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     // Create storage service with project context
-    _syncService = FirestoreSyncService(projectId: currentProject.id);
+    FirestoreSyncService? syncService;
+    try {
+      // Firestore may be unavailable in tests or offline scenarios; fall back to local-only storage.
+      if (Firebase.apps.isNotEmpty) {
+        syncService = FirestoreSyncService(projectId: currentProject.id);
+      }
+    } catch (e) {
+      syncService = null;
+      print('[HomeScreen] Firestore not initialized, using local storage only: $e');
+    }
+
+    _syncService = syncService;
     _storageService = StorageService(
-      syncService: _syncService,
+      syncService: syncService,
       projectId: currentProject.id,
     );
     await _storageService.initialize();
@@ -115,24 +143,73 @@ class _HomeScreenState extends State<HomeScreen> {
       }
 
       // Load user currency preference
-      try {
-        // Lazy initialize PreferencesService to avoid Firebase initialization in tests
-        _preferencesService ??= PreferencesService();
-        final userPrefs = await _preferencesService!
-            .getPreferences(authProvider.currentUser!.uid);
-        if (mounted) {
-          setState(() {
-            _currencySymbol = userPrefs.currency.symbol;
-          });
-        }
-      } catch (e) {
-        print('Error loading user preferences: $e');
-        // Keep default currency symbol
-      }
+      await _loadCurrencyPreference();
+      _listenToPreferenceChanges();
     }
 
-    await _loadTransactions();
-    await _loadGlobalSummary();
+    // Load transactions and mark initialization as complete
+    if (mounted) {
+      await _loadTransactions();
+    }
+  }
+
+  Future<void> _loadCurrencyPreference() async {
+    print('[HomeScreen] _loadCurrencyPreference called');
+    if (!_isFirebaseAvailable) {
+      print('[HomeScreen] Firebase not available, skipping currency preference load');
+      return;
+    }
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.currentUser == null) {
+      print('[HomeScreen] No current user, skipping currency preference load');
+      return;
+    }
+
+    print(
+        '[HomeScreen] Loading currency preference for user: ${authProvider.currentUser!.uid}');
+    try {
+      // Lazy initialize PreferencesService to avoid Firebase initialization in tests
+      _preferencesService ??= PreferencesService();
+      print('[HomeScreen] Fetching preferences from PreferencesService...');
+      final userPrefs = await _preferencesService!
+          .getPreferences(authProvider.currentUser!.uid);
+      print(
+          '[HomeScreen] Got preferences - currency: ${userPrefs.currency.code}, symbol: ${userPrefs.currency.symbol}');
+      if (mounted) {
+        setState(() {
+          _currencySymbol = userPrefs.currency.symbol;
+        });
+        print('[HomeScreen] Updated currency symbol to: $_currencySymbol');
+      }
+    } catch (e) {
+      print('[HomeScreen] ERROR loading user preferences: $e');
+      print('[HomeScreen] Stack trace: ${StackTrace.current}');
+      // Keep default currency symbol
+    }
+  }
+
+  void _listenToPreferenceChanges() {
+    if (!_isFirebaseAvailable) {
+      return;
+    }
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    if (authProvider.currentUser == null) return;
+
+    _preferencesService ??= PreferencesService();
+    _prefsSubscription?.cancel();
+    _prefsSubscription = _preferencesService!
+        .watchPreferences(authProvider.currentUser!.uid)
+        .listen((prefs) {
+      if (!mounted) return;
+      if (_currencySymbol != prefs.currency.symbol) {
+        setState(() {
+          _currencySymbol = prefs.currency.symbol;
+        });
+        print('[HomeScreen] Preference stream updated currency to: $_currencySymbol');
+      }
+    });
   }
 
   Future<void> _loadTransactions() async {
@@ -347,7 +424,7 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     // Update storage service with new project
-    _syncService.setProjectId(currentProject.id);
+    _syncService?.setProjectId(currentProject.id);
     _storageService.setProjectId(currentProject.id);
 
     await _loadTransactions();
@@ -459,26 +536,18 @@ class _HomeScreenState extends State<HomeScreen> {
   double get _balance => _totalIncome - _totalExpenses;
 
   void _showPrivacyPolicy(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Privacy Policy'),
-        content: const SingleChildScrollView(
-          child: Text(
-            'Our Privacy Policy explains how we collect, use, and protect your data.\n\n'
-            'Key points:\n'
-            '• Analytics are disabled by default\n'
-            '• We never track transaction amounts or descriptions\n'
-            '• You control your privacy settings\n'
-            '• You can delete your data anytime\n\n'
-            'For the full privacy policy, please visit our GitHub repository:\n'
-            'github.com/aifraenkel/artist_finance_manager/blob/main/PRIVACY.md',
-          ),
+        title: Text(l10n.privacyPolicy),
+        content: SingleChildScrollView(
+          child: Text(l10n.privacyPolicyCallout),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Close'),
+            child: Text(l10n.close),
           ),
         ],
       ),
@@ -487,12 +556,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         title: Consumer<ProjectProvider>(
           builder: (context, projectProvider, child) {
             final projectName =
-                projectProvider.currentProject?.name ?? 'Loading...';
+                projectProvider.currentProject?.name ?? l10n.loading;
             return Text(projectName);
           },
         ),
@@ -551,11 +621,16 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   tooltip: 'Profile & Settings',
                   onPressed: () {
-                    Navigator.of(context).push(
+                    Navigator.of(context)
+                        .push(
                       MaterialPageRoute(
                         builder: (context) => const ProfileScreen(),
                       ),
-                    );
+                    )
+                        .then((_) {
+                      // Reload currency preference when returning from ProfileScreen
+                      _loadCurrencyPreference();
+                    });
                   },
                 ),
               );
@@ -638,9 +713,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                       icon: const Icon(
                                           Icons.privacy_tip_outlined,
                                           size: 16),
-                                      label: const Text(
-                                        'Privacy Policy',
-                                        style: TextStyle(fontSize: 13),
+                                      label: Text(
+                                        l10n.privacyPolicy,
+                                        style: const TextStyle(fontSize: 13),
                                       ),
                                     ),
                                   ),
@@ -657,5 +732,11 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _prefsSubscription?.cancel();
+    super.dispose();
   }
 }

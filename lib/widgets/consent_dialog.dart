@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../l10n/app_localizations.dart';
 import '../services/user_preferences.dart';
 
 /// Dialog to get user consent for analytics and observability
@@ -33,15 +34,16 @@ class ConsentDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Row(
+      title: Row(
         children: [
-          Icon(Icons.privacy_tip_outlined, color: Colors.blue),
-          SizedBox(width: 12),
+          const Icon(Icons.privacy_tip_outlined, color: Colors.blue),
+          const SizedBox(width: 12),
           Expanded(
             child: Text(
-              'Privacy & Analytics',
-              style: TextStyle(fontSize: 20),
+              l10n.privacyAnalyticsTitle,
+              style: const TextStyle(fontSize: 20),
             ),
           ),
         ],
@@ -51,36 +53,34 @@ class ConsentDialog extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Help us improve the app by sharing anonymous analytics data.',
-              style: TextStyle(
+            Text(
+              l10n.privacyAnalyticsIntro,
+              style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'What we collect:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              l10n.privacyAnalyticsCollect,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            _buildBulletPoint(
-                'Transaction events (add/delete/load)', Icons.check),
-            _buildBulletPoint(
-                'Performance metrics (load times, Web Vitals)', Icons.check),
-            _buildBulletPoint('Error tracking', Icons.check),
-            _buildBulletPoint('Session analytics', Icons.check),
+            _buildBulletPoint(l10n.privacyCollectTransactions, Icons.check),
+            _buildBulletPoint(l10n.privacyCollectPerformance, Icons.check),
+            _buildBulletPoint(l10n.privacyCollectErrors, Icons.check),
+            _buildBulletPoint(l10n.privacyCollectSessions, Icons.check),
             const SizedBox(height: 16),
-            const Text(
-              'What we DON\'T collect:',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              l10n.privacyAnalyticsNoCollect,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            _buildBulletPoint('Transaction amounts', Icons.close,
+            _buildBulletPoint(l10n.privacyNoCollectAmounts, Icons.close,
                 isNegative: true),
-            _buildBulletPoint('Transaction descriptions', Icons.close,
+            _buildBulletPoint(l10n.privacyNoCollectDescriptions, Icons.close,
                 isNegative: true),
-            _buildBulletPoint('Personal financial data', Icons.close,
+            _buildBulletPoint(l10n.privacyNoCollectPersonal, Icons.close,
                 isNegative: true),
             const SizedBox(height: 16),
             Container(
@@ -94,10 +94,10 @@ class ConsentDialog extends StatelessWidget {
                 children: [
                   Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'You can change this preference anytime in Settings.',
-                      style: TextStyle(fontSize: 12),
+                      l10n.privacyChangeAnytime,
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ],
@@ -109,11 +109,11 @@ class ConsentDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () => _handleDecline(context),
-          child: const Text('Essential Only'),
+          child: Text(l10n.essentialOnly),
         ),
         ElevatedButton(
           onPressed: () => _handleAccept(context),
-          child: const Text('Accept'),
+          child: Text(l10n.accept),
         ),
       ],
     );

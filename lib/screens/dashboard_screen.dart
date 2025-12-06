@@ -11,6 +11,7 @@ import '../services/user_preferences.dart';
 import '../services/openai_service.dart';
 import '../services/budget_analysis_service.dart';
 import '../services/project_service.dart';
+import '../l10n/app_localizations.dart';
 
 /// Dashboard screen showing financial analytics and insights.
 ///
@@ -164,9 +165,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Analytics Dashboard'),
+        title: Text(l10n.analyticsDashboard),
         backgroundColor: Colors.transparent,
         elevation: 0,
       ),
@@ -183,12 +185,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
-            : _buildDashboard(),
+            : _buildDashboard(context),
       ),
     );
   }
 
-  Widget _buildDashboard() {
+  Widget _buildDashboard(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final allTransactions =
         _projectTransactions.values.expand((txns) => txns).toList();
 
@@ -204,7 +207,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No data available',
+              l10n.noDataAvailable,
               style: TextStyle(
                 fontSize: 18,
                 color: Colors.grey.shade600,
@@ -213,7 +216,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Add some transactions to see analytics',
+              l10n.addTransactionsToSeeAnalytics,
               style: TextStyle(
                 fontSize: 14,
                 color: Colors.grey.shade500,
@@ -245,7 +248,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           // Budget Goal Analysis Section (if active)
           if (_userPreferences.budgetGoal != null &&
               _userPreferences.budgetGoal!.isActive) ...[
-            _buildGoalAnalysisSection(),
+            _buildGoalAnalysisSection(context),
             const SizedBox(height: 24),
           ],
 
@@ -292,7 +295,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildGoalAnalysisSection() {
+  Widget _buildGoalAnalysisSection(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final goal = _userPreferences.budgetGoal;
 
     return Card(
@@ -413,7 +417,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               TextButton.icon(
                 onPressed: _analyzeGoal,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Analyze Goal'),
+                label: Text(l10n.analyzeGoal),
               ),
           ],
         ),

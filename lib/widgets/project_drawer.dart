@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/project_provider.dart';
 import '../models/project.dart';
 import '../screens/dashboard_screen.dart';
+import '../l10n/app_localizations.dart';
 
 /// Drawer widget for displaying projects and global financial summary.
 ///
@@ -69,6 +70,7 @@ class ProjectDrawer extends StatelessWidget {
   }
 
   Widget _buildGlobalSummary(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final income = globalSummary['income'] ?? 0;
     final expenses = globalSummary['expenses'] ?? 0;
     final balance = globalSummary['balance'] ?? 0;
@@ -78,9 +80,9 @@ class ProjectDrawer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Balance',
-            style: TextStyle(
+          Text(
+            l10n.balance,
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
               color: Colors.grey,
@@ -91,17 +93,17 @@ class ProjectDrawer extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               _buildSummaryItem(
-                'Total Income',
+                l10n.totalIncome,
                 income,
                 Colors.green,
               ),
               _buildSummaryItem(
-                'Total Expenses',
+                l10n.totalExpenses,
                 expenses,
                 Colors.red,
               ),
               _buildSummaryItem(
-                'Balance',
+                l10n.balance,
                 balance,
                 balance >= 0 ? Colors.blue : Colors.orange,
               ),
@@ -137,6 +139,7 @@ class ProjectDrawer extends StatelessWidget {
   }
 
   Widget _buildAnalyticsButton(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
       child: SizedBox(
@@ -151,7 +154,7 @@ class ProjectDrawer extends StatelessWidget {
             );
           },
           icon: const Icon(Icons.analytics),
-          label: const Text('View Analytics'),
+          label: Text(l10n.viewAnalytics),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 12),
             backgroundColor: Theme.of(context).primaryColor,
@@ -170,13 +173,13 @@ class ProjectDrawer extends StatelessWidget {
         }
 
         if (projectProvider.projects.isEmpty) {
-          return const Center(
+          return Center(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Text(
-                'Create a project to start\nmanaging your finances',
+                AppLocalizations.of(context)!.createProjectToStart,
                 textAlign: TextAlign.center,
-                style: TextStyle(
+                style: const TextStyle(
                   color: Colors.grey,
                   fontSize: 16,
                 ),
@@ -227,28 +230,32 @@ class ProjectDrawer extends StatelessWidget {
                     _showDeleteDialog(context, project);
                   }
                 },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'rename',
-                    child: Row(
-                      children: [
-                        Icon(Icons.edit, size: 20),
-                        SizedBox(width: 8),
-                        Text('Rename'),
-                      ],
+                itemBuilder: (context) {
+                  final l10n = AppLocalizations.of(context)!;
+                  return [
+                    PopupMenuItem(
+                      value: 'rename',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.edit, size: 20),
+                          const SizedBox(width: 8),
+                          Text(l10n.rename),
+                        ],
+                      ),
                     ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'delete',
-                    child: Row(
-                      children: [
-                        Icon(Icons.delete, size: 20, color: Colors.red),
-                        SizedBox(width: 8),
-                        Text('Delete', style: TextStyle(color: Colors.red)),
-                      ],
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          const Icon(Icons.delete, size: 20, color: Colors.red),
+                          const SizedBox(width: 8),
+                          Text(l10n.delete,
+                              style: const TextStyle(color: Colors.red)),
+                        ],
+                      ),
                     ),
-                  ),
-                ],
+                  ];
+                },
               ),
             );
           },
@@ -258,6 +265,7 @@ class ProjectDrawer extends StatelessWidget {
   }
 
   Widget _buildCreateProjectButton(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SizedBox(
@@ -265,7 +273,7 @@ class ProjectDrawer extends StatelessWidget {
         child: ElevatedButton.icon(
           onPressed: () => _showCreateDialog(context),
           icon: const Icon(Icons.add),
-          label: const Text('Create Project'),
+          label: Text(l10n.createProject),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 12),
           ),
@@ -275,17 +283,18 @@ class ProjectDrawer extends StatelessWidget {
   }
 
   void _showCreateDialog(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Create Project'),
+        title: Text(l10n.createProject),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Project Name',
-            hintText: 'Enter project name',
+          decoration: InputDecoration(
+            labelText: l10n.projectName,
+            hintText: l10n.enterProjectName,
           ),
           autofocus: true,
           onSubmitted: (_) => _createProject(context, controller.text),
@@ -293,11 +302,11 @@ class ProjectDrawer extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => _createProject(context, controller.text),
-            child: const Text('Create'),
+            child: Text(l10n.create),
           ),
         ],
       ),
@@ -305,6 +314,7 @@ class ProjectDrawer extends StatelessWidget {
   }
 
   void _createProject(BuildContext context, String name) async {
+    final l10n = AppLocalizations.of(context)!;
     final trimmedName = name.trim();
     if (trimmedName.isEmpty) {
       return;
@@ -313,8 +323,8 @@ class ProjectDrawer extends StatelessWidget {
     if (trimmedName.length > maxLength) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Project name must be at most 50 characters.'),
+          SnackBar(
+            content: Text(l10n.projectNameTooLong),
             backgroundColor: Colors.red,
           ),
         );
@@ -333,7 +343,8 @@ class ProjectDrawer extends StatelessWidget {
         if (project != null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Project "$trimmedName" created'),
+              content: Text(
+                  l10n.projectCreatedSuccess.replaceAll('\$name', trimmedName)),
               backgroundColor: Colors.green,
             ),
           );
@@ -341,7 +352,8 @@ class ProjectDrawer extends StatelessWidget {
           final error = projectProvider.error ?? 'Unknown error';
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Failed to create project: $error'),
+              content:
+                  Text(l10n.failedToCreateProject.replaceAll('\$error', error)),
               backgroundColor: Colors.red,
             ),
           );
@@ -352,7 +364,8 @@ class ProjectDrawer extends StatelessWidget {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to create project: $e'),
+            content:
+                Text(l10n.failedToCreateProject.replaceAll('\$error', '$e')),
             backgroundColor: Colors.red,
           ),
         );
@@ -361,16 +374,17 @@ class ProjectDrawer extends StatelessWidget {
   }
 
   void _showRenameDialog(BuildContext context, Project project) {
+    final l10n = AppLocalizations.of(context)!;
     final controller = TextEditingController(text: project.name);
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Rename Project'),
+        title: Text(l10n.renameProject),
         content: TextField(
           controller: controller,
-          decoration: const InputDecoration(
-            labelText: 'Project Name',
+          decoration: InputDecoration(
+            labelText: l10n.projectName,
           ),
           autofocus: true,
           onSubmitted: (_) => _renameProject(context, project, controller.text),
@@ -378,11 +392,11 @@ class ProjectDrawer extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => _renameProject(context, project, controller.text),
-            child: const Text('Rename'),
+            child: Text(l10n.rename),
           ),
         ],
       ),
@@ -391,6 +405,7 @@ class ProjectDrawer extends StatelessWidget {
 
   void _renameProject(
       BuildContext context, Project project, String newName) async {
+    final l10n = AppLocalizations.of(context)!;
     final trimmedName = newName.trim();
     if (trimmedName.isEmpty || trimmedName == project.name) {
       return;
@@ -401,8 +416,8 @@ class ProjectDrawer extends StatelessWidget {
       if (context.mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Project name must be at most 50 characters.'),
+          SnackBar(
+            content: Text(l10n.projectNameTooLong),
             backgroundColor: Colors.red,
           ),
         );
@@ -421,7 +436,8 @@ class ProjectDrawer extends StatelessWidget {
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Project renamed to "$trimmedName"'),
+            content: Text(
+                l10n.projectRenamedSuccess.replaceAll('\$name', trimmedName)),
             backgroundColor: Colors.green,
           ),
         );
@@ -429,7 +445,8 @@ class ProjectDrawer extends StatelessWidget {
         final error = projectProvider.error ?? 'Unknown error';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to rename project: $error'),
+            content:
+                Text(l10n.failedToRenameProject.replaceAll('\$error', error)),
             backgroundColor: Colors.red,
           ),
         );
@@ -438,18 +455,18 @@ class ProjectDrawer extends StatelessWidget {
   }
 
   void _showDeleteDialog(BuildContext context, Project project) {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Project'),
+        title: Text(l10n.deleteProject),
         content: Text(
-          'Are you sure you want to delete "${project.name}"?\n\n'
-          'All transactions for this project will be lost. This action cannot be undone.',
+          l10n.deleteProjectWarning.replaceAll('\$name', project.name),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => _deleteProject(context, project),
@@ -457,7 +474,7 @@ class ProjectDrawer extends StatelessWidget {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Delete'),
+            child: Text(l10n.delete),
           ),
         ],
       ),
@@ -465,6 +482,7 @@ class ProjectDrawer extends StatelessWidget {
   }
 
   void _deleteProject(BuildContext context, Project project) async {
+    final l10n = AppLocalizations.of(context)!;
     final projectProvider =
         Provider.of<ProjectProvider>(context, listen: false);
     final success = await projectProvider.deleteProject(project.id);
@@ -476,7 +494,8 @@ class ProjectDrawer extends StatelessWidget {
         onRefresh();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Project "${project.name}" deleted'),
+            content: Text(
+                l10n.projectDeletedSuccess.replaceAll('\$name', project.name)),
             backgroundColor: Colors.red,
           ),
         );
@@ -484,7 +503,8 @@ class ProjectDrawer extends StatelessWidget {
         final error = projectProvider.error ?? 'Unknown error';
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to delete project: $error'),
+            content:
+                Text(l10n.failedToDeleteProject.replaceAll('\$error', error)),
             backgroundColor: Colors.red,
           ),
         );
