@@ -9,7 +9,6 @@ import 'providers/project_provider.dart';
 import 'services/project_service.dart';
 import 'services/firestore_project_sync_service.dart';
 import 'services/preferences_service.dart';
-import 'models/user_preferences.dart';
 import 'widgets/auth_wrapper.dart';
 import 'config/app_theme.dart';
 

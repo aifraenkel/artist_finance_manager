@@ -175,7 +175,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                     decoration: BoxDecoration(
                       color: AppColors.primary.withAlpha(25),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.primary.withAlpha(76)),
+                      border:
+                          Border.all(color: AppColors.primary.withAlpha(76)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,

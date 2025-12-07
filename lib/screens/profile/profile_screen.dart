@@ -97,7 +97,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(AppLocalizations.of(context)!.failedToLoadUserPreferences),
+              content: Text(
+                  AppLocalizations.of(context)!.failedToLoadUserPreferences),
               backgroundColor: AppColors.destructive,
             ),
           );
@@ -966,7 +967,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
-                                        _goalActive ? l10n.active : l10n.inactive,
+                                        _goalActive
+                                            ? l10n.active
+                                            : l10n.inactive,
                                         style: TextStyle(
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,

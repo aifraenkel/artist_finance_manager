@@ -124,7 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       syncService = null;
-      print('[HomeScreen] Firestore not initialized, using local storage only: $e');
+      print(
+          '[HomeScreen] Firestore not initialized, using local storage only: $e');
     }
 
     _syncService = syncService;
@@ -158,7 +159,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadCurrencyPreference() async {
     print('[HomeScreen] _loadCurrencyPreference called');
     if (!_isFirebaseAvailable) {
-      print('[HomeScreen] Firebase not available, skipping currency preference load');
+      print(
+          '[HomeScreen] Firebase not available, skipping currency preference load');
       return;
     }
 
@@ -209,7 +211,8 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _currencySymbol = prefs.currency.symbol;
         });
-        print('[HomeScreen] Preference stream updated currency to: $_currencySymbol');
+        print(
+            '[HomeScreen] Preference stream updated currency to: $_currencySymbol');
       }
     });
   }

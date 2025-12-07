@@ -191,21 +191,17 @@ class ProjectDrawer extends StatelessWidget {
             return ListTile(
               leading: Icon(
                 Icons.folder,
-                color:
-                    isSelected ? AppColors.primary : AppColors.textMuted,
+                color: isSelected ? AppColors.primary : AppColors.textMuted,
               ),
               title: Text(
                 project.name,
                 style: TextStyle(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected
-                      ? AppColors.primary
-                      : AppColors.textPrimary,
+                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
                 ),
               ),
               selected: isSelected,
-              selectedTileColor:
-                  AppColors.primarySurface,
+              selectedTileColor: AppColors.primarySurface,
               onTap: () async {
                 if (!isSelected) {
                   await projectProvider.selectProject(project.id);

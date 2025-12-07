@@ -11,7 +11,6 @@ import '../services/firestore_sync_service.dart';
 import '../services/user_preferences.dart';
 import '../services/openai_service.dart';
 import '../services/budget_analysis_service.dart';
-import '../services/project_service.dart';
 import '../l10n/app_localizations.dart';
 
 /// Dashboard screen showing financial analytics and insights.
@@ -364,12 +363,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.destructive.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.destructive.withAlpha(76)),
+                  border:
+                      Border.all(color: AppColors.destructive.withAlpha(76)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.error_outline, color: AppColors.destructive, size: 20),
+                    Icon(Icons.error_outline,
+                        color: AppColors.destructive, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -389,8 +390,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 decoration: BoxDecoration(
                   color: AppColors.success.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
-                  border:
-                      Border.all(color: AppColors.success.withAlpha(76)),
+                  border: Border.all(color: AppColors.success.withAlpha(76)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -463,7 +463,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: _buildSummaryCard(
                     'Balance',
                     '\$${summary.balance.toStringAsFixed(2)}',
-                    summary.balance >= 0 ? AppColors.primary : AppColors.expense,
+                    summary.balance >= 0
+                        ? AppColors.primary
+                        : AppColors.expense,
                     Icons.account_balance_wallet,
                   ),
                 ),

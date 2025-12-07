@@ -163,9 +163,8 @@ void main() {
           .map((file) => file.path.split('/').last)
           .toList();
 
-      final expectedFiles = AppLanguage.values
-          .map((lang) => 'app_${lang.code}.arb')
-          .toSet();
+      final expectedFiles =
+          AppLanguage.values.map((lang) => 'app_${lang.code}.arb').toSet();
 
       for (final arbFile in arbFiles) {
         expect(expectedFiles, contains(arbFile),

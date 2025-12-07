@@ -93,7 +93,8 @@ class ConsentDialog extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.info_outline, color: AppColors.primary, size: 20),
+                  const Icon(Icons.info_outline,
+                      color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(

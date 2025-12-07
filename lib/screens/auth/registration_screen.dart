@@ -200,7 +200,8 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                         decoration: BoxDecoration(
                           color: AppColors.primarySurface,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: AppColors.primary.withAlpha(51)),
+                          border: Border.all(
+                              color: AppColors.primary.withAlpha(51)),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
