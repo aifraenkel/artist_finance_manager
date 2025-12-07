@@ -185,13 +185,23 @@ flutter build web --release
 
 ## 🚀 Deployment
 
-The app is automatically deployed to Google Cloud Run when code is merged to `main`. See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for full documentation.
+The app is deployed to Google Cloud Run and accessible via the custom domain:
+
+| Environment | URL |
+|-------------|-----|
+| **Production** | https://app.artfinhub.com |
+| **Cloud Run** | https://artist-finance-manager-456648586026.us-central1.run.app |
+
+See [DEPLOYMENT.md](docs/DEPLOYMENT.md) for full documentation.
 
 ### Quick Deploy Commands
 
 ```bash
 # Deploy to GCP Cloud Run (one command)
 ./scripts/deploy.sh
+
+# Deploy Firebase Hosting (custom domain proxy)
+firebase deploy --only hosting:app
 
 # Rollback to previous version
 ./scripts/rollback.sh
