@@ -29,6 +29,9 @@ dependencies:
   crypto: ^3.0.3
   csv: ^6.0.0
 
+  # Typography
+  google_fonts: ^6.2.1
+
   # Charts and visualization
   fl_chart: ^0.69.0
 

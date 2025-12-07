@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import 'registration_screen.dart';
 import 'email_verification_screen.dart';
@@ -59,7 +60,7 @@ class _LoginScreenState extends State<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.error ?? 'Failed to sign in'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.destructive,
         ),
       );
     }
@@ -81,7 +82,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Icon(
                   Icons.account_balance_wallet,
                   size: 80,
-                  color: Theme.of(context).primaryColor,
+                  color: AppColors.primary,
                 ),
                 const SizedBox(height: 32),
 
@@ -98,7 +99,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 Text(
                   'Sign in to manage your finances',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.textMuted,
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -154,7 +155,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       Text(
                         'We\'ll send a secure sign-in link to your email',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
+                              color: AppColors.textMuted,
                             ),
                         textAlign: TextAlign.center,
                       ),
@@ -168,7 +169,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             padding: const EdgeInsets.symmetric(horizontal: 16),
                             child: Text(
                               'New user?',
-                              style: TextStyle(color: Colors.grey[600]),
+                              style: TextStyle(color: AppColors.textMuted),
                             ),
                           ),
                           const Expanded(child: Divider()),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../config/app_colors.dart';
 import '../models/transaction.dart';
 import '../models/project.dart';
 import '../providers/project_provider.dart';
@@ -10,7 +11,6 @@ import '../services/firestore_sync_service.dart';
 import '../services/user_preferences.dart';
 import '../services/openai_service.dart';
 import '../services/budget_analysis_service.dart';
-import '../services/project_service.dart';
 import '../l10n/app_localizations.dart';
 
 /// Dashboard screen showing financial analytics and insights.
@@ -173,15 +173,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
         elevation: 0,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.blue.shade50,
-              Colors.indigo.shade100,
-            ],
-          ),
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundGradient,
         ),
         child: _isLoading
             ? const Center(child: CircularProgressIndicator())
@@ -203,23 +196,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Icon(
               Icons.analytics_outlined,
               size: 80,
-              color: Colors.grey.shade400,
+              color: AppColors.textMuted,
             ),
             const SizedBox(height: 16),
             Text(
               l10n.noDataAvailable,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
-                color: Colors.grey.shade600,
+                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               l10n.addTransactionsToSeeAnalytics,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 14,
-                color: Colors.grey.shade500,
+                color: AppColors.textMuted,
               ),
             ),
           ],
@@ -290,7 +283,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       style: const TextStyle(
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: Colors.black87,
+        color: AppColors.textPrimary,
       ),
     );
   }
@@ -308,7 +301,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.track_changes, color: Colors.blue[700], size: 24),
+                Icon(Icons.track_changes, color: AppColors.primary, size: 24),
                 const SizedBox(width: 8),
                 const Text(
                   'Budget Goal Analysis',
@@ -325,13 +318,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
+                color: AppColors.primary.withAlpha(25),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                border: Border.all(color: AppColors.primary.withAlpha(76)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.flag, size: 16, color: Colors.blue[700]),
+                  Icon(Icons.flag, size: 16, color: AppColors.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -358,7 +351,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       'Analyzing your financial goal...',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: AppColors.textMuted,
                       ),
                     ),
                   ],
@@ -368,21 +361,23 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
+                  color: AppColors.destructive.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                  border:
+                      Border.all(color: AppColors.destructive.withAlpha(76)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.error_outline, color: Colors.red[700], size: 20),
+                    Icon(Icons.error_outline,
+                        color: AppColors.destructive, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _goalAnalysisError!,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.red[700],
+                          color: AppColors.destructive,
                         ),
                       ),
                     ),
@@ -393,16 +388,15 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
+                  color: AppColors.success.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
-                  border:
-                      Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                  border: Border.all(color: AppColors.success.withAlpha(76)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Icons.lightbulb_outline,
-                        color: Colors.green[700], size: 20),
+                        color: AppColors.success, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
@@ -447,7 +441,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: _buildSummaryCard(
                     'Income',
                     '\$${summary.totalIncome.toStringAsFixed(2)}',
-                    Colors.green,
+                    AppColors.income,
                     Icons.trending_up,
                   ),
                 ),
@@ -456,7 +450,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: _buildSummaryCard(
                     'Expenses',
                     '\$${summary.totalExpenses.toStringAsFixed(2)}',
-                    Colors.red,
+                    AppColors.expense,
                     Icons.trending_down,
                   ),
                 ),
@@ -469,7 +463,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: _buildSummaryCard(
                     'Balance',
                     '\$${summary.balance.toStringAsFixed(2)}',
-                    summary.balance >= 0 ? Colors.blue : Colors.orange,
+                    summary.balance >= 0
+                        ? AppColors.primary
+                        : AppColors.expense,
                     Icons.account_balance_wallet,
                   ),
                 ),
@@ -478,7 +474,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: _buildSummaryCard(
                     'Transactions',
                     summary.numberOfTransactions.toString(),
-                    Colors.purple,
+                    AppColors.accent,
                     Icons.receipt_long,
                   ),
                 ),
@@ -495,9 +491,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withAlpha(25),
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withAlpha(76)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -508,9 +504,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(width: 4),
               Text(
                 label,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 12,
-                  color: Colors.grey.shade700,
+                  color: AppColors.textSecondary,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -719,27 +715,27 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   lineBarsData: [
                     LineChartBarData(
                       spots: incomeSpots,
-                      color: Colors.green,
+                      color: AppColors.income,
                       barWidth: 3,
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Colors.green.withValues(alpha: 0.1),
+                        color: AppColors.income.withAlpha(25),
                       ),
                     ),
                     LineChartBarData(
                       spots: expensesSpots,
-                      color: Colors.red,
+                      color: AppColors.expense,
                       barWidth: 3,
                       dotData: const FlDotData(show: false),
                       belowBarData: BarAreaData(
                         show: true,
-                        color: Colors.red.withValues(alpha: 0.1),
+                        color: AppColors.expense.withAlpha(25),
                       ),
                     ),
                     LineChartBarData(
                       spots: balanceSpots,
-                      color: Colors.blue,
+                      color: AppColors.primary,
                       barWidth: 3,
                       dotData: const FlDotData(show: false),
                     ),
@@ -761,11 +757,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        _buildLegendItem('Income', Colors.green),
+        _buildLegendItem('Income', AppColors.income),
         const SizedBox(width: 16),
-        _buildLegendItem('Expenses', Colors.red),
+        _buildLegendItem('Expenses', AppColors.expense),
         const SizedBox(width: 16),
-        _buildLegendItem('Balance', Colors.blue),
+        _buildLegendItem('Balance', AppColors.primary),
       ],
     );
   }
@@ -818,7 +814,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.bold,
-                      color: Colors.red,
+                      color: AppColors.expense,
                     ),
                   ),
                 ],
@@ -832,16 +828,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   List<Color> _generateColors(int count) {
     return [
-      Colors.blue,
-      Colors.green,
-      Colors.orange,
-      Colors.purple,
-      Colors.teal,
-      Colors.pink,
-      Colors.indigo,
-      Colors.amber,
-      Colors.cyan,
-      Colors.deepOrange,
+      AppColors.primary,
+      AppColors.income,
+      AppColors.warning,
+      AppColors.accent,
+      AppColors.primaryLight,
+      AppColors.accentLight,
+      AppColors.info,
+      AppColors.success,
+      AppColors.primaryDark,
+      AppColors.accentDark,
     ];
   }
 

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:firebase_core/firebase_core.dart';
+import '../config/app_colors.dart';
 import '../models/transaction.dart';
 import '../models/user_preferences.dart';
 import '../services/storage_service.dart';
@@ -98,7 +99,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SnackBar(
           content: Text('Your data has been migrated to the Default project'),
           duration: Duration(seconds: 3),
-          backgroundColor: Colors.blue,
+          backgroundColor: AppColors.primary,
         ),
       );
     }
@@ -123,7 +124,8 @@ class _HomeScreenState extends State<HomeScreen> {
       }
     } catch (e) {
       syncService = null;
-      print('[HomeScreen] Firestore not initialized, using local storage only: $e');
+      print(
+          '[HomeScreen] Firestore not initialized, using local storage only: $e');
     }
 
     _syncService = syncService;
@@ -157,7 +159,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadCurrencyPreference() async {
     print('[HomeScreen] _loadCurrencyPreference called');
     if (!_isFirebaseAvailable) {
-      print('[HomeScreen] Firebase not available, skipping currency preference load');
+      print(
+          '[HomeScreen] Firebase not available, skipping currency preference load');
       return;
     }
 
@@ -208,7 +211,8 @@ class _HomeScreenState extends State<HomeScreen> {
         setState(() {
           _currencySymbol = prefs.currency.symbol;
         });
-        print('[HomeScreen] Preference stream updated currency to: $_currencySymbol');
+        print(
+            '[HomeScreen] Preference stream updated currency to: $_currencySymbol');
       }
     });
   }
@@ -289,7 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SnackBar(
             content: Text('Data synced to cloud'),
             duration: Duration(seconds: 2),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -299,7 +303,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SnackBar(
             content: Text('Failed to sync data'),
             duration: Duration(seconds: 2),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warning,
           ),
         );
       }
@@ -328,7 +332,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SnackBar(
             content: Text('Data refreshed from cloud'),
             duration: Duration(seconds: 2),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       } else if (mounted) {
@@ -336,7 +340,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SnackBar(
             content: Text('Sync unavailable'),
             duration: Duration(seconds: 2),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warning,
           ),
         );
       }
@@ -346,7 +350,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SnackBar(
             content: Text('Failed to refresh data'),
             duration: Duration(seconds: 2),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warning,
           ),
         );
       }
@@ -403,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SnackBar(
             content: Text('Global summary may be incomplete'),
             duration: Duration(seconds: 2),
-            backgroundColor: Colors.orange,
+            backgroundColor: AppColors.warning,
           ),
         );
       }
@@ -471,7 +475,7 @@ class _HomeScreenState extends State<HomeScreen> {
       SnackBar(
         content: Text('Transaction added: $description'),
         duration: const Duration(seconds: 2),
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.success,
       ),
     );
   }
@@ -485,7 +489,7 @@ class _HomeScreenState extends State<HomeScreen> {
         const SnackBar(
           content: Text('Transaction not found'),
           duration: Duration(seconds: 2),
-          backgroundColor: Colors.orange,
+          backgroundColor: AppColors.warning,
         ),
       );
       return;
@@ -517,7 +521,7 @@ class _HomeScreenState extends State<HomeScreen> {
       const SnackBar(
         content: Text('Transaction deleted'),
         duration: Duration(seconds: 2),
-        backgroundColor: Colors.red,
+        backgroundColor: AppColors.destructive,
       ),
     );
   }
@@ -644,15 +648,8 @@ class _HomeScreenState extends State<HomeScreen> {
         onRefresh: _refreshAll,
       ),
       body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.blue.shade50,
-              Colors.indigo.shade100,
-            ],
-          ),
+        decoration: const BoxDecoration(
+          gradient: AppColors.backgroundGradient,
         ),
         child: SafeArea(
           child: _isLoading

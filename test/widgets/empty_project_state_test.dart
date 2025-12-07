@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:artist_finance_manager/widgets/empty_project_state.dart';
+import 'package:artist_finance_manager/config/app_colors.dart';
 
 /// Widget tests for EmptyProjectState
 ///
@@ -112,7 +113,7 @@ void main() {
 
       final Icon iconWidget = tester.widget(iconFinder);
       expect(iconWidget.size, 120.0);
-      expect(iconWidget.color, Colors.grey.shade400);
+      expect(iconWidget.color, AppColors.textMuted);
     });
 
     testWidgets('Texts have correct styling', (WidgetTester tester) async {
@@ -131,7 +132,7 @@ void main() {
       final Text titleWidget = tester.widget(titleFinder);
       expect(titleWidget.style?.fontSize, 24);
       expect(titleWidget.style?.fontWeight, FontWeight.bold);
-      expect(titleWidget.style?.color, Colors.grey.shade700);
+      expect(titleWidget.style?.color, AppColors.textPrimary);
 
       // Find the subtitle text
       final subtitleFinder = find.text(
@@ -141,7 +142,7 @@ void main() {
 
       final Text subtitleWidget = tester.widget(subtitleFinder);
       expect(subtitleWidget.style?.fontSize, 16);
-      expect(subtitleWidget.style?.color, Colors.grey.shade600);
+      expect(subtitleWidget.style?.color, AppColors.textSecondary);
       expect(subtitleWidget.textAlign, TextAlign.center);
     });
 

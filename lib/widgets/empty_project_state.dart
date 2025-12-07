@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_colors.dart';
 
 /// Widget displayed when user has no projects.
 ///
@@ -26,7 +27,7 @@ class EmptyProjectState extends StatelessWidget {
             Icon(
               Icons.folder_open,
               size: 120,
-              color: Colors.grey.shade400,
+              color: AppColors.textMuted,
             ),
             const SizedBox(height: 32),
 
@@ -36,7 +37,7 @@ class EmptyProjectState extends StatelessWidget {
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.grey.shade700,
+                color: AppColors.textPrimary,
               ),
             ),
             const SizedBox(height: 16),
@@ -47,7 +48,7 @@ class EmptyProjectState extends StatelessWidget {
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
-                color: Colors.grey.shade600,
+                color: AppColors.textSecondary,
               ),
             ),
             const SizedBox(height: 32),

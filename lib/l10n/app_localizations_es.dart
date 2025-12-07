@@ -472,8 +472,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get privacyNoCollectAmounts => 'Montos de transacciones';
 
   @override
-  String get privacyNoCollectDescriptions =>
-      'Descripciones de transacciones';
+  String get privacyNoCollectDescriptions => 'Descripciones de transacciones';
 
   @override
   String get privacyNoCollectPersonal => 'Datos financieros personales';

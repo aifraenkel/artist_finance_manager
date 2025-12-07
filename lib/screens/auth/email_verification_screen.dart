@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_colors.dart';
 import '../../providers/auth_provider.dart';
 
 /// Email verification waiting screen
@@ -61,7 +62,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(authProvider.error ?? 'Failed to sign in'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.destructive,
           ),
         );
       }
@@ -81,7 +82,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(authProvider.error ?? 'Failed to create account'),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.destructive,
             ),
           );
         }
@@ -109,7 +110,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 ? 'Verification email sent!'
                 : authProvider.error ?? 'Failed to resend email',
           ),
-          backgroundColor: success ? Colors.green : Colors.red,
+          backgroundColor: success ? AppColors.success : AppColors.destructive,
         ),
       );
     }
@@ -134,7 +135,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                 Icon(
                   _isProcessing ? Icons.hourglass_empty : Icons.mail_outline,
                   size: 80,
-                  color: Theme.of(context).primaryColor,
+                  color: AppColors.primary,
                 ),
                 const SizedBox(height: 32),
 
@@ -153,7 +154,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                   Text(
                     'We\'ve sent a ${widget.isRegistration ? 'verification' : 'sign-in'} link to:',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
+                          color: AppColors.textMuted,
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -162,7 +163,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                     widget.email,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Theme.of(context).primaryColor,
+                          color: AppColors.primary,
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -172,9 +173,10 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.blue[50],
+                      color: AppColors.primary.withAlpha(25),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.blue[200]!),
+                      border:
+                          Border.all(color: AppColors.primary.withAlpha(76)),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +185,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                           children: [
                             Icon(
                               Icons.info_outline,
-                              color: Colors.blue[700],
+                              color: AppColors.primary,
                               size: 20,
                             ),
                             const SizedBox(width: 8),
@@ -194,7 +196,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                                   .titleSmall
                                   ?.copyWith(
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.blue[900],
+                                    color: AppColors.primaryDark,
                                   ),
                             ),
                           ],
@@ -221,7 +223,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                   Text(
                     'The link will expire in 15 minutes',
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Colors.grey[600],
+                          color: AppColors.textMuted,
                           fontStyle: FontStyle.italic,
                         ),
                     textAlign: TextAlign.center,
@@ -253,7 +255,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                   Text(
                     'Please wait while we verify your email...',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
+                          color: AppColors.textMuted,
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -276,7 +278,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             width: 24,
             height: 24,
             decoration: BoxDecoration(
-              color: Theme.of(context).primaryColor,
+              color: AppColors.primary,
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -295,7 +297,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.blue[900],
+                    color: AppColors.primaryDark,
                   ),
             ),
           ),

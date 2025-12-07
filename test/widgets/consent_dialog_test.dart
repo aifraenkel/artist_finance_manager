@@ -43,8 +43,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify dialog is shown
-        expect(find.text(l10n.privacyAnalyticsTitle), findsOneWidget);
-        expect(find.text(l10n.privacyAnalyticsIntro), findsOneWidget);
+      expect(find.text(l10n.privacyAnalyticsTitle), findsOneWidget);
+      expect(find.text(l10n.privacyAnalyticsIntro), findsOneWidget);
     });
 
     testWidgets('Has Accept and Essential Only buttons',

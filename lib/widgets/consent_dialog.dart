@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_colors.dart';
 import '../l10n/app_localizations.dart';
 import '../services/user_preferences.dart';
 
@@ -38,7 +39,7 @@ class ConsentDialog extends StatelessWidget {
     return AlertDialog(
       title: Row(
         children: [
-          const Icon(Icons.privacy_tip_outlined, color: Colors.blue),
+          const Icon(Icons.privacy_tip_outlined, color: AppColors.primary),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
@@ -86,13 +87,14 @@ class ConsentDialog extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: AppColors.primarySurface,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue[200]!),
+                border: Border.all(color: AppColors.primary.withAlpha(51)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                  const Icon(Icons.info_outline,
+                      color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -128,7 +130,7 @@ class ConsentDialog extends StatelessWidget {
           Icon(
             icon,
             size: 16,
-            color: isNegative ? Colors.red[700] : Colors.green[700],
+            color: isNegative ? AppColors.destructive : AppColors.success,
           ),
           const SizedBox(width: 8),
           Expanded(

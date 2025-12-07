@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../config/app_colors.dart';
 import '../providers/project_provider.dart';
 import '../models/project.dart';
 import '../screens/dashboard_screen.dart';
@@ -47,14 +48,7 @@ class ProjectDrawer extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Theme.of(context).primaryColor,
-            Theme.of(context).primaryColor.withValues(alpha: 0.8),
-          ],
-        ),
+        gradient: AppColors.primaryGradient,
       ),
       child: const SafeArea(
         child: Text(
@@ -85,7 +79,7 @@ class ProjectDrawer extends StatelessWidget {
             style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: Colors.grey,
+              color: AppColors.textSecondary,
             ),
           ),
           const SizedBox(height: 8),
@@ -95,17 +89,17 @@ class ProjectDrawer extends StatelessWidget {
               _buildSummaryItem(
                 l10n.totalIncome,
                 income,
-                Colors.green,
+                AppColors.income,
               ),
               _buildSummaryItem(
                 l10n.totalExpenses,
                 expenses,
-                Colors.red,
+                AppColors.expense,
               ),
               _buildSummaryItem(
                 l10n.balance,
                 balance,
-                balance >= 0 ? Colors.blue : Colors.orange,
+                balance >= 0 ? AppColors.primary : AppColors.warning,
               ),
             ],
           ),
@@ -122,7 +116,7 @@ class ProjectDrawer extends StatelessWidget {
           label,
           style: const TextStyle(
             fontSize: 10,
-            color: Colors.grey,
+            color: AppColors.textMuted,
           ),
         ),
         const SizedBox(height: 2),
@@ -157,7 +151,7 @@ class ProjectDrawer extends StatelessWidget {
           label: Text(l10n.viewAnalytics),
           style: ElevatedButton.styleFrom(
             padding: const EdgeInsets.symmetric(vertical: 12),
-            backgroundColor: Theme.of(context).primaryColor,
+            backgroundColor: AppColors.primary,
             foregroundColor: Colors.white,
           ),
         ),
@@ -180,7 +174,7 @@ class ProjectDrawer extends StatelessWidget {
                 AppLocalizations.of(context)!.createProjectToStart,
                 textAlign: TextAlign.center,
                 style: const TextStyle(
-                  color: Colors.grey,
+                  color: AppColors.textMuted,
                   fontSize: 16,
                 ),
               ),
@@ -197,21 +191,17 @@ class ProjectDrawer extends StatelessWidget {
             return ListTile(
               leading: Icon(
                 Icons.folder,
-                color:
-                    isSelected ? Theme.of(context).primaryColor : Colors.grey,
+                color: isSelected ? AppColors.primary : AppColors.textMuted,
               ),
               title: Text(
                 project.name,
                 style: TextStyle(
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected
-                      ? Theme.of(context).primaryColor
-                      : Colors.black,
+                  color: isSelected ? AppColors.primary : AppColors.textPrimary,
                 ),
               ),
               selected: isSelected,
-              selectedTileColor:
-                  Theme.of(context).primaryColor.withValues(alpha: 0.1),
+              selectedTileColor: AppColors.primarySurface,
               onTap: () async {
                 if (!isSelected) {
                   await projectProvider.selectProject(project.id);

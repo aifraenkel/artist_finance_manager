@@ -460,7 +460,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get privacyCollectSessions => 'Session analytics';
 
   @override
-  String get privacyAnalyticsNoCollect => "What we DON'T collect:";
+  String get privacyAnalyticsNoCollect => 'What we DON\'T collect:';
 
   @override
   String get privacyNoCollectAmounts => 'Transaction amounts';
