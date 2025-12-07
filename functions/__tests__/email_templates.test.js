@@ -154,6 +154,44 @@ describe('Email Templates', () => {
     });
   });
 
+  describe('Branding', () => {
+    it('should reference Art Finance Hub in registration email', () => {
+      const name = 'Test User';
+      const url = 'https://app.example.com?token=test';
+
+      const result = generateRegistrationEmail(name, url);
+
+      expect(result.html).toContain('Art Finance Hub');
+      expect(result.text).toContain('Art Finance Hub');
+    });
+
+    it('should reference Art Finance Hub in sign-in email', () => {
+      const name = 'Test User';
+      const url = 'https://app.example.com?token=test';
+
+      const result = generateSignInEmail(name, url);
+
+      expect(result.html).toContain('Art Finance Hub');
+      expect(result.text).toContain('Art Finance Hub');
+    });
+
+    it('should use Art Finance Hub brand colors', () => {
+      const name = 'Test User';
+      const url = 'https://app.example.com?token=test';
+
+      const registrationResult = generateRegistrationEmail(name, url);
+      const signInResult = generateSignInEmail(name, url);
+
+      // Primary teal color (#2E9A85)
+      expect(registrationResult.html).toContain('#2E9A85');
+      expect(signInResult.html).toContain('#2E9A85');
+
+      // Accent gold color (#F5A54A)
+      expect(registrationResult.html).toContain('#F5A54A');
+      expect(signInResult.html).toContain('#F5A54A');
+    });
+  });
+
   describe('Email Format Validation', () => {
     it('registration email HTML should be valid HTML structure', () => {
       const name = 'Test User';
@@ -163,7 +201,7 @@ describe('Email Templates', () => {
 
       // Check for basic HTML structure
       expect(result.html).toContain('<!DOCTYPE html>');
-      expect(result.html).toContain('<html>');
+      expect(result.html).toContain('<html');
       expect(result.html).toContain('</html>');
       expect(result.html).toContain('<body');
       expect(result.html).toContain('</body>');
@@ -177,10 +215,24 @@ describe('Email Templates', () => {
 
       // Check for basic HTML structure
       expect(result.html).toContain('<!DOCTYPE html>');
-      expect(result.html).toContain('<html>');
+      expect(result.html).toContain('<html');
       expect(result.html).toContain('</html>');
       expect(result.html).toContain('<body');
       expect(result.html).toContain('</body>');
+    });
+
+    it('HTML emails should have Gmail-compatible link attributes', () => {
+      const name = 'Test User';
+      const url = 'https://app.example.com?token=test';
+
+      const registrationResult = generateRegistrationEmail(name, url);
+      const signInResult = generateSignInEmail(name, url);
+
+      // Check for target="_blank" and rel="noopener noreferrer"
+      expect(registrationResult.html).toContain('target="_blank"');
+      expect(registrationResult.html).toContain('rel="noopener noreferrer"');
+      expect(signInResult.html).toContain('target="_blank"');
+      expect(signInResult.html).toContain('rel="noopener noreferrer"');
     });
 
     it('text emails should not contain HTML tags', () => {
