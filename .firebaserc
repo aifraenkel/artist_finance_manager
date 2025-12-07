@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "artist-manager-479514"
+  },
+  "targets": {
+    "artist-manager-479514": {
+      "hosting": {
+        "app": [
+          "artfinhub-app"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

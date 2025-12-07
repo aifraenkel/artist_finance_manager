@@ -1,13 +1,25 @@
 # Deployment Guide - GCP Cloud Run
 
 ## Table of Contents
+- [Live URLs](#live-urls)
 - [Service Recommendation](#service-recommendation)
+- [Custom Domain Setup](#custom-domain-setup)
 - [Prerequisites](#prerequisites)
 - [GCP Setup Checklist](#gcp-setup-checklist)
 - [Local Deployment](#local-deployment)
 - [CI/CD Deployment](#cicd-deployment)
 - [Rollback](#rollback)
 - [Future Backend Extension](#future-backend-extension)
+
+---
+
+## Live URLs
+
+| Environment | URL | Description |
+|-------------|-----|-------------|
+| **Production** | https://app.artfinhub.com | Custom domain (via Firebase Hosting proxy) |
+| **Cloud Run** | https://artist-finance-manager-456648586026.us-central1.run.app | Direct Cloud Run URL |
+| **Firebase Hosting** | https://artfinhub-app.web.app | Firebase Hosting default URL |
 
 ---
 
@@ -46,6 +58,66 @@ We've chosen **Google Cloud Run** as our deployment platform for the following r
 | Setup complexity | ⚡ Low | ⚡ Very low | ⚡⚡ Medium |
 
 **Verdict**: Cloud Run offers the best balance of simplicity now and flexibility for future growth.
+
+---
+
+## Custom Domain Setup
+
+The Flutter app is accessible via the custom domain `app.artfinhub.com` using Firebase Hosting as a reverse proxy to Cloud Run.
+
+### Architecture
+
+```
+app.artfinhub.com
+    └── DNS (CNAME) → artfinhub-app.web.app
+        └── Firebase Hosting (artfinhub-app)
+            └── Cloud Run (artist-finance-manager)
+                └── Flutter Web App
+```
+
+### Configuration Files
+
+| File | Purpose |
+|------|---------|
+| `firebase.json` | Firebase Hosting config with Cloud Run rewrite |
+| `.firebaserc` | Firebase project and target configuration |
+
+### Firebase Hosting Configuration
+
+The `firebase.json` configures Firebase Hosting to proxy all requests to Cloud Run:
+
+```json
+{
+  "hosting": [
+    {
+      "target": "app",
+      "public": "build/web",
+      "rewrites": [
+        {
+          "source": "**",
+          "run": {
+            "serviceId": "artist-finance-manager",
+            "region": "us-central1"
+          }
+        }
+      ]
+    }
+  ]
+}
+```
+
+### Deploy Firebase Hosting
+
+```bash
+# Deploy the Firebase Hosting configuration
+firebase deploy --only hosting:app
+```
+
+### DNS Configuration (at domain registrar)
+
+| Type | Host | Value |
+|------|------|-------|
+| CNAME | app | artfinhub-app.web.app |
 
 ---
 
