@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/project_provider.dart';
 import '../../models/app_user.dart';
+import '../../models/budget_goal.dart';
 import '../../models/user_preferences.dart';
 import '../../services/user_preferences.dart';
 import '../../services/export_service.dart';
@@ -13,12 +14,16 @@ import '../../services/file_download.dart';
 import '../../services/preferences_service.dart';
 import '../../services/currency_conversion_service.dart';
 import '../../widgets/consent_dialog.dart';
+import '../../l10n/app_localizations.dart';
+import '../../main.dart';
 
 /// User profile and settings screen
 ///
 /// Allows users to:
 /// - View their profile information
 /// - Update their name
+/// - Set financial budget goals
+/// - Configure OpenAI API key
 /// - Log out
 /// - Delete their account
 class ProfileScreen extends StatefulWidget {
@@ -31,6 +36,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _goalController = TextEditingController();
+  final _apiKeyController = TextEditingController();
   bool _isEditing = false;
   bool _isLoading = false;
   bool _isExporting = false;
@@ -39,6 +46,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final CurrencyConversionService _currencyService =
       CurrencyConversionService();
   bool _analyticsConsent = false;
+  bool _goalActive = false;
+  bool _isEditingGoal = false;
   UserPreferencesModel? _userPrefs;
 
   @override
@@ -53,6 +62,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) {
       setState(() {
         _analyticsConsent = _userPreferences.analyticsConsent;
+
+        // Load budget goal if exists
+        final goal = _userPreferences.budgetGoal;
+        if (goal != null) {
+          _goalController.text = goal.goalText;
+          _goalActive = goal.isActive;
+        }
+
+        // Load API key if exists
+        final apiKey = _userPreferences.openaiApiKey;
+        if (apiKey != null) {
+          _apiKeyController.text = apiKey;
+        }
       });
     }
   }
@@ -73,8 +95,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         // Optionally, show a snackbar to the user
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Failed to load user preferences'),
+            SnackBar(
+              content: Text(AppLocalizations.of(context)!.failedToLoadUserPreferences),
               backgroundColor: Colors.red,
             ),
           );
@@ -86,6 +108,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void dispose() {
     _nameController.dispose();
+    _goalController.dispose();
+    _apiKeyController.dispose();
     super.dispose();
   }
 
@@ -105,16 +129,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
     if (success && mounted) {
       setState(() => _isEditing = false);
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Profile updated successfully'),
+        SnackBar(
+          content: Text(l10n.profileUpdatedSuccess),
           backgroundColor: Colors.green,
         ),
       );
     } else if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(authProvider.error ?? 'Failed to update profile'),
+          content: Text(authProvider.error ?? l10n.failedToUpdateProfile),
           backgroundColor: Colors.red,
         ),
       );
@@ -122,19 +148,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _logout() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Sign Out'),
-        content: const Text('Are you sure you want to sign out?'),
+        title: Text(l10n.signOut),
+        content: Text(l10n.signOutConfirm),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Sign Out'),
+            child: Text(l10n.signOut),
           ),
         ],
       ),
@@ -147,25 +174,24 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _deleteAccount() async {
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Account'),
+        title: Text(l10n.deleteAccount),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'Are you sure you want to delete your account?',
-              style: TextStyle(fontWeight: FontWeight.bold),
+            Text(
+              l10n.deleteAccountWarning,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 16),
-            const Text('This will:'),
+            Text(l10n.deleteAccountDetails),
             const SizedBox(height: 8),
-            const Text('• Remove access to your account'),
-            const Text(
-              '• Keep your data for 90 days in case you change your mind',
-            ),
+            Text(l10n.deleteAccountRemoveAccess),
+            Text(l10n.deleteAccountKeepData),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -178,10 +204,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'You can recover your account within 90 days by signing in again',
-                      style: TextStyle(fontSize: 12),
+                      l10n.recoverAccountInfo,
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ],
@@ -192,7 +218,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -200,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               backgroundColor: Colors.red,
               foregroundColor: Colors.white,
             ),
-            child: const Text('Delete Account'),
+            child: Text(l10n.deleteAccount),
           ),
         ],
       ),
@@ -215,9 +241,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
       setState(() => _isLoading = false);
 
       if (!success && mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(authProvider.error ?? 'Failed to delete account'),
+            content: Text(authProvider.error ?? l10n.failedToDeleteAccount),
             backgroundColor: Colors.red,
           ),
         );
@@ -254,18 +281,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await downloadFile(csvContent, filename);
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Projects exported successfully'),
+          SnackBar(
+            content: Text(l10n.projectsExportedSuccess),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to export: ${e.toString()}'),
+            content: Text('${l10n.failedToExport}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -273,6 +302,96 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } finally {
       if (mounted) {
         setState(() => _isExporting = false);
+      }
+    }
+  }
+
+  Future<void> _saveBudgetGoal() async {
+    final goalText = _goalController.text.trim();
+
+    if (goalText.isEmpty) {
+      // Clear the goal if text is empty
+      await _userPreferences.clearBudgetGoal();
+      setState(() {
+        _goalActive = false;
+        _isEditingGoal = false;
+      });
+
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.budgetGoalCleared),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+      return;
+    }
+
+    final now = DateTime.now();
+    final existingGoal = _userPreferences.budgetGoal;
+
+    final goal = BudgetGoal(
+      goalText: goalText,
+      isActive: _goalActive,
+      createdAt: existingGoal?.createdAt ?? now,
+      updatedAt: now,
+    );
+
+    await _userPreferences.setBudgetGoal(goal);
+
+    setState(() {
+      _isEditingGoal = false;
+    });
+
+    if (mounted) {
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.budgetGoalSavedSuccess),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  }
+
+  Future<void> _saveApiKey() async {
+    try {
+      final apiKey = _apiKeyController.text.trim();
+
+      if (apiKey.isEmpty) {
+        await _userPreferences.clearOpenaiApiKey();
+        if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.openaiApiKeyCleared),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        await _userPreferences.setOpenaiApiKey(apiKey);
+        if (mounted) {
+          final l10n = AppLocalizations.of(context)!;
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.openaiApiKeySavedSuccess),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.failedToSaveApiKey}: ${e.toString()}'),
+            backgroundColor: Colors.red,
+          ),
+        );
       }
     }
   }
@@ -285,20 +404,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
     try {
       await _preferencesService.updateLanguage(user.uid, language);
       await _loadUserPreferences();
+      await MyApp.of(context)?.refreshUserPreferences(user.uid);
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Language updated to ${language.displayName}'),
+            content: Text('${l10n.languageUpdatedTo} ${language.displayName}'),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update language: ${e.toString()}'),
+            content: Text('${l10n.failedToUpdateLanguage}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -315,21 +437,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (_userPrefs!.currency == currency) return;
 
     // Show conversion warning dialog
+    final l10n = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Change Currency'),
+        title: Text(l10n.changeCurrency),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Changing from ${_userPrefs!.currency.code} to ${currency.code} will update the currency symbol displayed in the app.',
+              '${l10n.changingFrom} ${_userPrefs!.currency.code} to ${currency.code} ${l10n.currencyChangeDescription}',
             ),
             const SizedBox(height: 16),
-            const Text(
-              'The conversion rate from the European Central Bank (via Frankfurter API) will be fetched and stored for your reference.',
-              style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
+            Text(
+              l10n.currencyRateInfo,
+              style: const TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
             ),
             const SizedBox(height: 16),
             Container(
@@ -343,10 +466,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
                   const SizedBox(width: 8),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Note: This does not convert existing transaction amounts',
-                      style: TextStyle(fontSize: 12),
+                      l10n.noteNoConvertExistingAmounts,
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ],
@@ -357,14 +480,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
               backgroundColor: Theme.of(context).primaryColor,
+              foregroundColor: Colors.white,
             ),
-            child: const Text('Update Currency'),
+            child: Text(l10n.updateCurrency),
           ),
         ],
       ),
@@ -400,20 +524,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
       await _loadUserPreferences();
 
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'Currency updated to ${currency.code} (rate: ${conversionRate.toStringAsFixed(4)})',
-            ),
+                '${l10n.currencyUpdatedWithRate} ${currency.code} (rate: ${conversionRate.toStringAsFixed(4)})'),
             backgroundColor: Colors.green,
           ),
         );
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to update currency: ${e.toString()}'),
+            content: Text('${l10n.failedToUpdateCurrency}: ${e.toString()}'),
             backgroundColor: Colors.red,
           ),
         );
@@ -427,8 +552,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile & Settings')),
+      appBar: AppBar(
+        title: Text(l10n.profileAndSettings),
+      ),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           if (authProvider.isLoading || authProvider.currentUser == null) {
@@ -470,16 +598,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             key: _formKey,
                             child: TextFormField(
                               controller: _nameController,
-                              decoration: const InputDecoration(
-                                labelText: 'Name',
-                                border: OutlineInputBorder(),
+                              decoration: InputDecoration(
+                                labelText: l10n.name,
+                                border: const OutlineInputBorder(),
                               ),
                               validator: (value) {
                                 if (value == null || value.trim().isEmpty) {
-                                  return 'Please enter your name';
+                                  return l10n.pleaseEnterYourName;
                                 }
                                 if (value.trim().length < 2) {
-                                  return 'Name must be at least 2 characters';
+                                  return l10n.nameMinimumLength;
                                 }
                                 return null;
                               },
@@ -506,7 +634,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 onPressed: _isLoading
                                     ? null
                                     : () => setState(() => _isEditing = false),
-                                child: const Text('Cancel'),
+                                child: Text(l10n.cancel),
                               ),
                               const SizedBox(width: 8),
                               ElevatedButton(
@@ -521,7 +649,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : const Text('Save'),
+                                    : Text(l10n.save),
                               ),
                             ],
                           )
@@ -529,7 +657,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           OutlinedButton.icon(
                             onPressed: () => setState(() => _isEditing = true),
                             icon: const Icon(Icons.edit),
-                            label: const Text('Edit Profile'),
+                            label: Text(l10n.editProfile),
                           ),
                       ],
                     ),
@@ -545,8 +673,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Preferences',
-                          style: Theme.of(context).textTheme.titleMedium
+                          l10n.preferences,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
@@ -555,7 +685,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Language',
+                              l10n.language,
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 14,
@@ -586,7 +716,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Currency',
+                              l10n.currency,
                               style: TextStyle(
                                 color: Colors.grey[600],
                                 fontSize: 14,
@@ -626,23 +756,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Account Information',
-                          style: Theme.of(context).textTheme.titleMedium
+                          l10n.accountInformation,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
                         _buildInfoRow(
-                          'Member since',
+                          l10n.memberSince,
                           DateFormat('MMM d, y').format(user.createdAt),
                         ),
                         const Divider(height: 24),
                         _buildInfoRow(
-                          'Last login',
+                          l10n.lastLogin,
                           DateFormat('MMM d, y HH:mm').format(user.lastLoginAt),
                         ),
                         const Divider(height: 24),
                         _buildInfoRow(
-                          'Login count',
+                          l10n.loginCount,
                           user.metadata.loginCount.toString(),
                         ),
                       ],
@@ -659,17 +791,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Privacy & Data',
-                          style: Theme.of(context).textTheme.titleMedium
+                          l10n.privacyAndData,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
                         SwitchListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Analytics'),
-                          subtitle: const Text(
-                            'Help improve the app by sharing anonymous usage data',
-                            style: TextStyle(fontSize: 12),
+                          title: Text(l10n.analytics),
+                          subtitle: Text(
+                            l10n.analyticsHelperText,
+                            style: const TextStyle(fontSize: 12),
                           ),
                           value: _analyticsConsent,
                           onChanged: (value) async {
@@ -683,8 +817,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 SnackBar(
                                   content: Text(
                                     value
-                                        ? 'Analytics enabled - thank you!'
-                                        : 'Analytics disabled',
+                                        ? l10n.analyticsEnabledThankYou
+                                        : l10n.analyticsDisabled,
                                   ),
                                   backgroundColor: Colors.green,
                                 ),
@@ -705,13 +839,219 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             );
                           },
                           icon: const Icon(Icons.info_outline, size: 18),
-                          label: const Text(
-                            'What data do we collect?',
-                            style: TextStyle(fontSize: 13),
+                          label: Text(
+                            l10n.whatDataDoWeCollect,
+                            style: const TextStyle(fontSize: 13),
                           ),
                           style: TextButton.styleFrom(
                             alignment: Alignment.centerLeft,
                             padding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Budget Goal Settings
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          l10n.budgetGoal,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        if (_isEditingGoal) ...[
+                          TextField(
+                            controller: _goalController,
+                            decoration: InputDecoration(
+                              labelText: l10n.financialGoal,
+                              hintText: l10n.financialGoalHint,
+                              border: const OutlineInputBorder(),
+                              helperText: l10n.financialGoalHelper,
+                            ),
+                            maxLines: 3,
+                          ),
+                          const SizedBox(height: 12),
+                          SwitchListTile(
+                            contentPadding: EdgeInsets.zero,
+                            title: Text(l10n.goalActive),
+                            subtitle: Text(
+                              l10n.goalActiveHelper,
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            value: _goalActive,
+                            onChanged: (value) {
+                              setState(() {
+                                _goalActive = value;
+                              });
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: OutlinedButton(
+                                  onPressed: () {
+                                    // Reload from preferences
+                                    final goal = _userPreferences.budgetGoal;
+                                    setState(() {
+                                      _goalController.text =
+                                          goal?.goalText ?? '';
+                                      _goalActive = goal?.isActive ?? false;
+                                      _isEditingGoal = false;
+                                    });
+                                  },
+                                  child: Text(l10n.cancel),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: ElevatedButton(
+                                  onPressed: _saveBudgetGoal,
+                                  child: Text(l10n.saveGoal),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ] else ...[
+                          if (_goalController.text.isEmpty)
+                            Text(
+                              l10n.noBudgetGoalSet,
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontSize: 14,
+                              ),
+                            )
+                          else ...[
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: _goalActive
+                                    ? Colors.green.withValues(alpha: 0.1)
+                                    : Colors.grey.withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: _goalActive
+                                      ? Colors.green.withValues(alpha: 0.3)
+                                      : Colors.grey.withValues(alpha: 0.3),
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        _goalActive
+                                            ? Icons.check_circle
+                                            : Icons.pause_circle,
+                                        size: 16,
+                                        color: _goalActive
+                                            ? Colors.green
+                                            : Colors.grey,
+                                      ),
+                                      const SizedBox(width: 4),
+                                      Text(
+                                        _goalActive ? l10n.active : l10n.inactive,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: _goalActive
+                                              ? Colors.green
+                                              : Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    _goalController.text,
+                                    style: const TextStyle(fontSize: 14),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                          const SizedBox(height: 12),
+                          OutlinedButton.icon(
+                            onPressed: () {
+                              setState(() {
+                                _isEditingGoal = true;
+                              });
+                            },
+                            icon: Icon(_goalController.text.isEmpty
+                                ? Icons.add
+                                : Icons.edit),
+                            label: Text(_goalController.text.isEmpty
+                                ? l10n.setBudgetGoal
+                                : l10n.editBudgetGoal),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // OpenAI API Key Configuration
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          l10n.openaiConfiguration,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
+                              ?.copyWith(fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _apiKeyController,
+                          decoration: InputDecoration(
+                            labelText: l10n.openaiApiKey,
+                            hintText: l10n.openaiApiKeyPlaceholder,
+                            border: const OutlineInputBorder(),
+                            helperText: l10n.openaiApiKeyHelper,
+                          ),
+                          obscureText: true,
+                          onEditingComplete: () {
+                            // Save API key when editing is complete
+                            _saveApiKey();
+                          },
+                        ),
+                        const SizedBox(height: 8),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.blue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                                color: Colors.blue.withValues(alpha: 0.3)),
+                          ),
+                          child: Row(
+                            children: [
+                              Icon(Icons.info_outline,
+                                  size: 20, color: Colors.blue[700]),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  l10n.openaiApiKeySecurityInfo,
+                                  style: const TextStyle(fontSize: 12),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
@@ -728,8 +1068,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         Text(
-                          'Account Actions',
-                          style: Theme.of(context).textTheme.titleMedium
+                          l10n.accountActions,
+                          style: Theme.of(context)
+                              .textTheme
+                              .titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
@@ -746,7 +1088,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   ),
                                 )
                               : const Icon(Icons.download),
-                          label: const Text('Export to CSV'),
+                          label: Text(l10n.exportToCSV),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
@@ -755,7 +1097,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         OutlinedButton.icon(
                           onPressed: _isLoading ? null : _logout,
                           icon: const Icon(Icons.logout),
-                          label: const Text('Sign Out'),
+                          label: Text(l10n.signOut),
                           style: OutlinedButton.styleFrom(
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
@@ -764,7 +1106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         OutlinedButton.icon(
                           onPressed: _isLoading ? null : _deleteAccount,
                           icon: const Icon(Icons.delete_forever),
-                          label: const Text('Delete Account'),
+                          label: Text(l10n.deleteAccount),
                           style: OutlinedButton.styleFrom(
                             foregroundColor: Colors.red,
                             padding: const EdgeInsets.symmetric(vertical: 12),

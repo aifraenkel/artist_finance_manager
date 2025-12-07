@@ -7,6 +7,8 @@ import 'package:artist_finance_manager/providers/project_provider.dart';
 import 'package:artist_finance_manager/models/app_user.dart';
 import 'package:artist_finance_manager/models/project.dart';
 import 'package:artist_finance_manager/services/project_service.dart';
+import 'package:artist_finance_manager/l10n/app_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Integration tests for HomeScreen empty state behavior
 ///
@@ -74,11 +76,23 @@ class MockAuthProvider extends ChangeNotifier implements AuthProvider {
   Future<bool> updateProfile({required String name}) async => true;
 }
 
+class FakeProjectService extends ProjectService {
+  @override
+  Future<Project> ensureDefaultProject() async {
+    return Project(
+      id: 'default',
+      name: 'Default',
+      createdAt: DateTime.now(),
+    );
+  }
+}
+
 class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
   List<Project> _projects = [];
   Project? _currentProject;
   final bool _isLoading = false;
   String? _error;
+  final ProjectService _projectService = FakeProjectService();
 
   @override
   List<Project> get projects => _projects;
@@ -93,7 +107,7 @@ class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
   String? get error => _error;
 
   @override
-  ProjectService get projectService => throw UnimplementedError();
+  ProjectService get projectService => _projectService;
 
   void setProjects(List<Project> projects) {
     _projects = projects;
@@ -155,8 +169,14 @@ class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
 void main() {
   late MockAuthProvider mockAuthProvider;
   late MockProjectProvider mockProjectProvider;
+  late AppLocalizations l10n;
 
-  setUp(() {
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({
+      'consent_timestamp': DateTime.now().millisecondsSinceEpoch,
+    });
+
+    l10n = await AppLocalizations.delegate.load(const Locale('en'));
     mockAuthProvider = MockAuthProvider();
     mockProjectProvider = MockProjectProvider();
   });
@@ -168,7 +188,12 @@ void main() {
         ChangeNotifierProvider<ProjectProvider>.value(
             value: mockProjectProvider),
       ],
-      child: const MaterialApp(home: HomeScreen()),
+      child: const MaterialApp(
+        localizationsDelegates: AppLocalizations.localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: Locale('en'),
+        home: HomeScreen(),
+      ),
     );
   }
 
@@ -182,7 +207,7 @@ void main() {
       await tester.pump();
 
       // Verify app bar shows "Loading..."
-      expect(find.text('Loading...'), findsOneWidget);
+      expect(find.text(l10n.loading), findsOneWidget);
     });
 
     testWidgets('Drawer is still accessible in empty state',
@@ -219,7 +244,7 @@ void main() {
       await tester.pump();
 
       // Verify app bar now shows "Loading..."
-      expect(find.text('Loading...'), findsOneWidget);
+      expect(find.text(l10n.loading), findsOneWidget);
     });
   });
 }

@@ -5,6 +5,7 @@ import 'package:artist_finance_manager/screens/dashboard_screen.dart';
 import 'package:artist_finance_manager/providers/project_provider.dart';
 import 'package:artist_finance_manager/models/project.dart';
 import 'package:artist_finance_manager/services/project_service.dart';
+import 'package:artist_finance_manager/l10n/app_localizations.dart';
 
 /// Widget tests for DashboardScreen
 ///
@@ -13,6 +14,15 @@ import 'package:artist_finance_manager/services/project_service.dart';
 /// - Chart rendering with data
 /// - Summary statistics display
 /// - Error handling
+
+Widget wrapWithLocalizations(Widget child) {
+  return MaterialApp(
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+    locale: const Locale('en'),
+    home: child,
+  );
+}
 
 class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
   List<Project> _projects = [];
@@ -82,8 +92,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: ChangeNotifierProvider<ProjectProvider>.value(
+        wrapWithLocalizations(
+          ChangeNotifierProvider<ProjectProvider>.value(
             value: mockProjectProvider,
             child: const DashboardScreen(),
           ),
@@ -101,8 +111,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: ChangeNotifierProvider<ProjectProvider>.value(
+        wrapWithLocalizations(
+          ChangeNotifierProvider<ProjectProvider>.value(
             value: mockProjectProvider,
             child: const DashboardScreen(),
           ),
@@ -125,8 +135,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: ChangeNotifierProvider<ProjectProvider>.value(
+        wrapWithLocalizations(
+          ChangeNotifierProvider<ProjectProvider>.value(
             value: mockProjectProvider,
             child: const DashboardScreen(),
           ),
@@ -147,8 +157,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: ChangeNotifierProvider<ProjectProvider>.value(
+        wrapWithLocalizations(
+          ChangeNotifierProvider<ProjectProvider>.value(
             value: mockProjectProvider,
             child: const DashboardScreen(),
           ),
@@ -178,8 +188,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
+        wrapWithLocalizations(
+          Scaffold(
             body: Builder(
               builder: (context) => TextButton(
                 onPressed: () {
@@ -222,8 +232,8 @@ void main() {
       );
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: ChangeNotifierProvider<ProjectProvider>.value(
+        wrapWithLocalizations(
+          ChangeNotifierProvider<ProjectProvider>.value(
             value: mockProjectProvider,
             child: const DashboardScreen(),
           ),
