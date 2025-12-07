@@ -200,8 +200,25 @@ avg by (app) (faro_measurement_transactions_load_time_ms)
 4. Wait a few minutes - there may be a small delay
 
 ### CORS errors
-- Faro collector URLs are configured to accept cross-origin requests
-- If you see CORS errors, contact Grafana Cloud support
+If you see CORS errors in the browser console like:
+```
+Access to fetch at 'https://faro-collector-prod-us-east-2.grafana.net/collect/...' 
+from origin 'https://app.artfinhub.com' has been blocked by CORS policy
+```
+
+This means your domain is not in the Faro app's allowed origins. To fix:
+
+1. **Log into Grafana Cloud** at https://grafana.com
+2. **Navigate to Frontend Observability / Faro** → Your app
+3. **Find the Allowed Origins / CORS settings**
+4. **Add your domain** to the allowed origins list
+
+**Currently allowed origins should include:**
+- `https://app.artfinhub.com`
+- `https://artfinhub-app.web.app`
+- `https://artist-finance-manager-456648586026.us-central1.run.app`
+
+**Note:** When adding a custom domain, you MUST add it to the Grafana Faro allowed origins for observability to work.
 
 ## Advanced Configuration
 
