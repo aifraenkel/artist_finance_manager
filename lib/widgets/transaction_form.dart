@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../l10n/app_localizations.dart';
 
 class TransactionForm extends StatefulWidget {
   final Function(
@@ -24,16 +25,43 @@ class _TransactionFormState extends State<TransactionForm> {
 
   final Map<String, List<String>> _categories = {
     'expense': [
-      'Venue',
-      'Musicians',
-      'Food & Drinks',
-      'Materials/Clothes',
-      'Book Printing',
-      'Podcast',
-      'Other'
+      'venue',
+      'musicians',
+      'foodAndDrinks',
+      'materialsClothes',
+      'bookPrinting',
+      'podcast',
+      'other'
     ],
-    'income': ['Book Sales', 'Event Tickets', 'Other'],
+    'income': ['bookSales', 'eventTickets', 'other'],
   };
+
+  // Helper method to get localized category name
+  String _getCategoryLabel(BuildContext context, String categoryKey) {
+    final l10n = AppLocalizations.of(context)!;
+    switch (categoryKey) {
+      case 'venue':
+        return l10n.venue;
+      case 'musicians':
+        return l10n.musicians;
+      case 'foodAndDrinks':
+        return l10n.foodAndDrinks;
+      case 'materialsClothes':
+        return l10n.materialsClothes;
+      case 'bookPrinting':
+        return l10n.bookPrinting;
+      case 'podcast':
+        return l10n.podcast;
+      case 'bookSales':
+        return l10n.bookSales;
+      case 'eventTickets':
+        return l10n.eventTickets;
+      case 'other':
+        return l10n.other;
+      default:
+        return categoryKey;
+    }
+  }
 
   @override
   void dispose() {
@@ -77,9 +105,9 @@ class _TransactionFormState extends State<TransactionForm> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'Add Transaction',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.addTransaction,
+                style: const TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
                 ),
@@ -141,7 +169,7 @@ class _TransactionFormState extends State<TransactionForm> {
                   onPressed: _handleSubmit,
                   key: const Key('add_transaction_button'),
                   icon: const Icon(Icons.add),
-                  label: const Text('Add'),
+                  label: Text(AppLocalizations.of(context)!.add),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.blue,
                     foregroundColor: Colors.white,
@@ -156,15 +184,16 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 
   Widget _buildTypeDropdown() {
+    final l10n = AppLocalizations.of(context)!;
     return DropdownButtonFormField<String>(
       key: const Key('type_dropdown'),
       initialValue: _type,
-      decoration: const InputDecoration(
-        labelText: 'Type',
+      decoration: InputDecoration(
+        labelText: l10n.type,
       ),
-      items: const [
-        DropdownMenuItem(value: 'expense', child: Text('Expense')),
-        DropdownMenuItem(value: 'income', child: Text('Income')),
+      items: [
+        DropdownMenuItem(value: 'expense', child: Text(l10n.expense)),
+        DropdownMenuItem(value: 'income', child: Text(l10n.incomeType)),
       ],
       onChanged: (value) {
         setState(() {
@@ -176,15 +205,19 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 
   Widget _buildCategoryDropdown() {
+    final l10n = AppLocalizations.of(context)!;
     return DropdownButtonFormField<String>(
       key: const Key('category_dropdown'),
       initialValue: _category,
-      decoration: const InputDecoration(
-        labelText: 'Category',
+      decoration: InputDecoration(
+        labelText: l10n.category,
       ),
-      hint: const Text('Select category'),
+      hint: Text(l10n.selectCategory),
       items: _categories[_type]!
-          .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+          .map((cat) => DropdownMenuItem(
+                value: cat,
+                child: Text(_getCategoryLabel(context, cat)),
+              ))
           .toList(),
       onChanged: (value) {
         setState(() {
@@ -201,12 +234,13 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 
   Widget _buildDescriptionField() {
+    final l10n = AppLocalizations.of(context)!;
     return TextFormField(
       key: const Key('description_field'),
       controller: _descriptionController,
-      decoration: const InputDecoration(
-        labelText: 'Description',
-        hintText: 'What is this for?',
+      decoration: InputDecoration(
+        labelText: l10n.description,
+        hintText: l10n.description,
       ),
       validator: (value) {
         if (value == null || value.isEmpty) {
@@ -218,13 +252,13 @@ class _TransactionFormState extends State<TransactionForm> {
   }
 
   Widget _buildAmountField() {
+    final l10n = AppLocalizations.of(context)!;
     return TextFormField(
       key: const Key('amount_field'),
       controller: _amountController,
-      decoration: const InputDecoration(
-        labelText: 'Amount (€)',
+      decoration: InputDecoration(
+        labelText: l10n.amount,
         hintText: '0.00',
-        prefixText: '€ ',
       ),
       keyboardType: const TextInputType.numberWithOptions(decimal: true),
       inputFormatters: [

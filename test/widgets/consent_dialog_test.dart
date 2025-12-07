@@ -3,14 +3,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:artist_finance_manager/services/user_preferences.dart';
 import 'package:artist_finance_manager/widgets/consent_dialog.dart';
+import 'package:artist_finance_manager/l10n/app_localizations.dart';
 
 void main() {
   group('ConsentDialog Tests', () {
     late UserPreferences userPreferences;
+    late AppLocalizations l10n;
 
-    setUp(() {
+    setUp(() async {
       userPreferences = UserPreferences();
       SharedPreferences.setMockInitialValues({});
+      l10n = await AppLocalizations.delegate.load(const Locale('en'));
     });
 
     testWidgets('Shows dialog with correct title and content', (
@@ -18,6 +21,9 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: Builder(
               builder: (context) {
@@ -38,13 +44,8 @@ void main() {
       await tester.pumpAndSettle();
 
       // Verify dialog is shown
-      expect(find.text('Privacy & Analytics'), findsOneWidget);
-      expect(
-        find.text(
-          'Help us improve the app by sharing anonymous analytics data.',
-        ),
-        findsOneWidget,
-      );
+        expect(find.text(l10n.privacyAnalyticsTitle), findsOneWidget);
+        expect(find.text(l10n.privacyAnalyticsIntro), findsOneWidget);
     });
 
     testWidgets('Has Accept and Essential Only buttons', (
@@ -52,6 +53,9 @@ void main() {
     ) async {
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: Builder(
               builder: (context) {
@@ -70,8 +74,8 @@ void main() {
       await tester.tap(find.text('Show Dialog'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Accept'), findsOneWidget);
-      expect(find.text('Essential Only'), findsOneWidget);
+      expect(find.text(l10n.accept), findsOneWidget);
+      expect(find.text(l10n.essentialOnly), findsOneWidget);
     });
 
     testWidgets('Accept button sets consent to true', (
@@ -82,6 +86,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: Builder(
               builder: (context) {
@@ -100,7 +107,7 @@ void main() {
       await tester.tap(find.text('Show Dialog'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Accept'));
+      await tester.tap(find.text(l10n.accept));
       await tester.pumpAndSettle();
 
       expect(userPreferences.analyticsConsent, isTrue);
@@ -114,6 +121,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: Builder(
               builder: (context) {
@@ -132,7 +142,7 @@ void main() {
       await tester.tap(find.text('Show Dialog'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Essential Only'));
+      await tester.tap(find.text(l10n.essentialOnly));
       await tester.pumpAndSettle();
 
       expect(userPreferences.analyticsConsent, isFalse);
@@ -144,6 +154,9 @@ void main() {
 
       await tester.pumpWidget(
         MaterialApp(
+          localizationsDelegates: AppLocalizations.localizationsDelegates,
+          supportedLocales: AppLocalizations.supportedLocales,
+          locale: const Locale('en'),
           home: Scaffold(
             body: Builder(
               builder: (context) {
@@ -163,13 +176,13 @@ void main() {
       await tester.pumpAndSettle();
 
       // Dialog should be visible
-      expect(find.text('Privacy & Analytics'), findsOneWidget);
+      expect(find.text(l10n.privacyAnalyticsTitle), findsOneWidget);
 
-      await tester.tap(find.text('Accept'));
+      await tester.tap(find.text(l10n.accept));
       await tester.pumpAndSettle();
 
       // Dialog should be dismissed
-      expect(find.text('Privacy & Analytics'), findsNothing);
+      expect(find.text(l10n.privacyAnalyticsTitle), findsNothing);
     });
   });
 }
