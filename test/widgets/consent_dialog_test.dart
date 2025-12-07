@@ -13,8 +13,9 @@ void main() {
       SharedPreferences.setMockInitialValues({});
     });
 
-    testWidgets('Shows dialog with correct title and content',
-        (WidgetTester tester) async {
+    testWidgets('Shows dialog with correct title and content', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -39,13 +40,16 @@ void main() {
       // Verify dialog is shown
       expect(find.text('Privacy & Analytics'), findsOneWidget);
       expect(
-          find.text(
-              'Help us improve the app by sharing anonymous analytics data.'),
-          findsOneWidget);
+        find.text(
+          'Help us improve the app by sharing anonymous analytics data.',
+        ),
+        findsOneWidget,
+      );
     });
 
-    testWidgets('Has Accept and Essential Only buttons',
-        (WidgetTester tester) async {
+    testWidgets('Has Accept and Essential Only buttons', (
+      WidgetTester tester,
+    ) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -70,8 +74,9 @@ void main() {
       expect(find.text('Essential Only'), findsOneWidget);
     });
 
-    testWidgets('Accept button sets consent to true',
-        (WidgetTester tester) async {
+    testWidgets('Accept button sets consent to true', (
+      WidgetTester tester,
+    ) async {
       await userPreferences.initialize();
       expect(userPreferences.analyticsConsent, isFalse);
 
@@ -102,8 +107,9 @@ void main() {
       expect(userPreferences.hasSeenConsentPrompt, isTrue);
     });
 
-    testWidgets('Essential Only button sets consent to false',
-        (WidgetTester tester) async {
+    testWidgets('Essential Only button sets consent to false', (
+      WidgetTester tester,
+    ) async {
       await userPreferences.initialize();
 
       await tester.pumpWidget(

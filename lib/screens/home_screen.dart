@@ -68,8 +68,10 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
 
     // Initialize project provider
-    final projectProvider =
-        Provider.of<ProjectProvider>(context, listen: false);
+    final projectProvider = Provider.of<ProjectProvider>(
+      context,
+      listen: false,
+    );
 
     // Run data migration before initializing projects
     final migrationService = MigrationService(projectProvider.projectService);
@@ -118,8 +120,9 @@ class _HomeScreenState extends State<HomeScreen> {
       try {
         // Lazy initialize PreferencesService to avoid Firebase initialization in tests
         _preferencesService ??= PreferencesService();
-        final userPrefs = await _preferencesService!
-            .getPreferences(authProvider.currentUser!.uid);
+        final userPrefs = await _preferencesService!.getPreferences(
+          authProvider.currentUser!.uid,
+        );
         if (mounted) {
           setState(() {
             _currencySymbol = userPrefs.currency.symbol;
@@ -183,10 +186,7 @@ class _HomeScreenState extends State<HomeScreen> {
         context: {'operation': 'load_transactions'},
       );
 
-      _observability.log(
-        'Failed to load transactions: $e',
-        level: 'error',
-      );
+      _observability.log('Failed to load transactions: $e', level: 'error');
     }
     // finished loading
   }
@@ -283,8 +283,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Load global summary across all projects
   Future<void> _loadGlobalSummary() async {
-    final projectProvider =
-        Provider.of<ProjectProvider>(context, listen: false);
+    final projectProvider = Provider.of<ProjectProvider>(
+      context,
+      listen: false,
+    );
 
     try {
       final summary = await projectProvider.getGlobalSummary((projectId) async {
@@ -334,8 +336,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   /// Refresh all data (called when switching projects)
   Future<void> _refreshAll() async {
-    final projectProvider =
-        Provider.of<ProjectProvider>(context, listen: false);
+    final projectProvider = Provider.of<ProjectProvider>(
+      context,
+      listen: false,
+    );
     final currentProject = projectProvider.currentProject;
 
     if (currentProject == null) {
@@ -516,8 +520,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         height: 20,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor:
-                              AlwaysStoppedAnimation<Color>(Colors.white70),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white70,
+                          ),
                         ),
                       ),
                     )
@@ -572,10 +577,7 @@ class _HomeScreenState extends State<HomeScreen> {
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
-            colors: [
-              Colors.blue.shade50,
-              Colors.indigo.shade100,
-            ],
+            colors: [Colors.blue.shade50, Colors.indigo.shade100],
           ),
         ),
         child: SafeArea(
@@ -597,8 +599,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     return LayoutBuilder(
                       builder: (context, constraints) {
                         final isWideScreen = constraints.maxWidth > 800;
-                        final maxWidth =
-                            isWideScreen ? 1200.0 : double.infinity;
+                        final maxWidth = isWideScreen
+                            ? 1200.0
+                            : double.infinity;
 
                         return Center(
                           child: ConstrainedBox(
@@ -636,8 +639,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                         _showPrivacyPolicy(context);
                                       },
                                       icon: const Icon(
-                                          Icons.privacy_tip_outlined,
-                                          size: 16),
+                                        Icons.privacy_tip_outlined,
+                                        size: 16,
+                                      ),
                                       label: const Text(
                                         'Privacy Policy',
                                         style: TextStyle(fontSize: 13),

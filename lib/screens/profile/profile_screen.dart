@@ -164,7 +164,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
             const SizedBox(height: 8),
             const Text('• Remove access to your account'),
             const Text(
-                '• Keep your data for 90 days in case you change your mind'),
+              '• Keep your data for 90 days in case you change your mind',
+            ),
             const SizedBox(height: 16),
             Container(
               padding: const EdgeInsets.all(12),
@@ -228,18 +229,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() => _isExporting = true);
 
     try {
-      final projectProvider =
-          Provider.of<ProjectProvider>(context, listen: false);
+      final projectProvider = Provider.of<ProjectProvider>(
+        context,
+        listen: false,
+      );
 
       // Create export service with a factory function for storage services
       final exportService = ExportService(
         projectService: projectProvider.projectService,
         createStorageService: (projectId) {
           final syncService = FirestoreSyncService(projectId: projectId);
-          return StorageService(
-            syncService: syncService,
-            projectId: projectId,
-          );
+          return StorageService(syncService: syncService, projectId: projectId);
         },
       );
 
@@ -403,7 +403,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-                'Currency updated to ${currency.code} (rate: ${conversionRate.toStringAsFixed(4)})'),
+              'Currency updated to ${currency.code} (rate: ${conversionRate.toStringAsFixed(4)})',
+            ),
             backgroundColor: Colors.green,
           ),
         );
@@ -427,9 +428,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile & Settings'),
-      ),
+      appBar: AppBar(title: const Text('Profile & Settings')),
       body: Consumer<AuthProvider>(
         builder: (context, authProvider, child) {
           if (authProvider.isLoading || authProvider.currentUser == null) {
@@ -489,18 +488,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         else
                           Text(
                             user.name,
-                            style: Theme.of(context)
-                                .textTheme
-                                .headlineSmall
+                            style: Theme.of(context).textTheme.headlineSmall
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
                         const SizedBox(height: 8),
                         Text(
                           user.email,
-                          style:
-                              Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: Colors.grey[600],
-                                  ),
+                          style: Theme.of(context).textTheme.bodyLarge
+                              ?.copyWith(color: Colors.grey[600]),
                         ),
                         const SizedBox(height: 16),
                         if (_isEditing)
@@ -551,9 +546,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         Text(
                           'Preferences',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
@@ -605,7 +598,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 return DropdownMenuItem(
                                   value: curr,
                                   child: Text(
-                                      '${curr.symbol} ${curr.displayName}'),
+                                    '${curr.symbol} ${curr.displayName}',
+                                  ),
                                 );
                               }).toList(),
                               onChanged: _isLoading
@@ -633,9 +627,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         Text(
                           'Account Information',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
@@ -668,9 +660,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         Text(
                           'Privacy & Data',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
@@ -739,9 +729,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         Text(
                           'Account Actions',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
+                          style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const SizedBox(height: 16),
@@ -798,19 +786,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 14,
-          ),
-        ),
+        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
         Text(
           value,
-          style: const TextStyle(
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 14),
         ),
       ],
     );
