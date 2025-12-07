@@ -201,13 +201,13 @@ class AppColors {
   // ============================================
 
   /// Card shadow color
-  static Color cardShadow = textPrimary.withValues(alpha: 0.08);
+  static Color cardShadow = textPrimary.withAlpha(20);
 
   /// Card hover shadow color
-  static Color cardShadowHover = textPrimary.withValues(alpha: 0.12);
+  static Color cardShadowHover = textPrimary.withAlpha(31);
 
   /// Accent glow for highlighted elements
-  static Color accentGlow = accent.withValues(alpha: 0.2);
+  static Color accentGlow = accent.withAlpha(51);
 
   // ============================================
   // COLOR SCHEME BUILDERS
