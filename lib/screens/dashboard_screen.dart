@@ -463,7 +463,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   child: _buildSummaryCard(
                     'Balance',
                     '\$${summary.balance.toStringAsFixed(2)}',
-                    summary.balance >= 0 ? AppColors.primary : AppColors.warning,
+                    summary.balance >= 0 ? AppColors.primary : AppColors.expense,
                     Icons.account_balance_wallet,
                   ),
                 ),
