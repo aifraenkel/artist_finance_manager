@@ -75,8 +75,11 @@ static const FirebaseOptions web = FirebaseOptions(
 1. Go to [Authentication Settings](https://console.firebase.google.com/project/artist-manager-479514/authentication/settings)
 2. Add authorized domains:
    - `localhost` (for development)
-   - `artist-finance-manager-456648586026.us-central1.run.app` (your Cloud Run URL)
-   - Any custom domains you use
+   - `app.artfinhub.com` (custom domain - production)
+   - `artfinhub-app.web.app` (Firebase Hosting default)
+   - `artist-finance-manager-456648586026.us-central1.run.app` (Cloud Run direct URL)
+
+**Note:** When adding a new custom domain, always add it to the authorized domains list or authentication will fail.
 
 ### 5. Deploy Firestore Security Rules
 

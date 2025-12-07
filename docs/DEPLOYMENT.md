@@ -119,6 +119,16 @@ firebase deploy --only hosting:app
 |------|------|-------|
 | CNAME | app | artfinhub-app.web.app |
 
+### Post-Domain Setup Checklist
+
+After configuring a custom domain, update these services:
+
+1. **Grafana Faro (Observability)** - Add the new domain to allowed origins
+   - See [GRAFANA_SETUP.md](GRAFANA_SETUP.md#cors-errors) for details
+   
+2. **Firebase Authentication** - Add domain to authorized domains (if using auth)
+   - Firebase Console → Authentication → Settings → Authorized domains
+
 ---
 
 ## Prerequisites
