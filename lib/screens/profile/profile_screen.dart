@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:intl/intl.dart';
+import '../../config/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import '../../providers/project_provider.dart';
 import '../../models/app_user.dart';
@@ -97,7 +98,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(AppLocalizations.of(context)!.failedToLoadUserPreferences),
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.destructive,
             ),
           );
         }
@@ -133,7 +134,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.profileUpdatedSuccess),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.success,
         ),
       );
     } else if (mounted) {
@@ -141,7 +142,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.error ?? l10n.failedToUpdateProfile),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.destructive,
         ),
       );
     }
@@ -196,13 +197,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.orange[50],
+                color: AppColors.warning.withAlpha(25),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.orange[200]!),
+                border: Border.all(color: AppColors.warning.withAlpha(127)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.orange[700], size: 20),
+                  Icon(Icons.info_outline, color: AppColors.warning, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -223,7 +224,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: AppColors.destructive,
               foregroundColor: Colors.white,
             ),
             child: Text(l10n.deleteAccount),
@@ -245,7 +246,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(authProvider.error ?? l10n.failedToDeleteAccount),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.destructive,
           ),
         );
       }
@@ -286,7 +287,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.projectsExportedSuccess),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -296,7 +297,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${l10n.failedToExport}: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.destructive,
           ),
         );
       }
@@ -323,7 +324,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.budgetGoalCleared),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -351,7 +352,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(l10n.budgetGoalSavedSuccess),
-          backgroundColor: Colors.green,
+          backgroundColor: AppColors.success,
         ),
       );
     }
@@ -368,7 +369,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(l10n.openaiApiKeyCleared),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.success,
             ),
           );
         }
@@ -379,7 +380,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(l10n.openaiApiKeySavedSuccess),
-              backgroundColor: Colors.green,
+              backgroundColor: AppColors.success,
             ),
           );
         }
@@ -390,7 +391,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${l10n.failedToSaveApiKey}: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.destructive,
           ),
         );
       }
@@ -412,7 +413,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${l10n.languageUpdatedTo} ${language.displayName}'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -422,7 +423,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${l10n.failedToUpdateLanguage}: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.destructive,
           ),
         );
       }
@@ -459,13 +460,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue[50],
+                color: AppColors.primary.withAlpha(25),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue[200]!),
+                border: Border.all(color: AppColors.primary.withAlpha(76)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: Colors.blue[700], size: 20),
+                  Icon(Icons.info_outline, color: AppColors.primary, size: 20),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -486,7 +487,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).primaryColor,
+              backgroundColor: AppColors.primary,
               foregroundColor: Colors.white,
             ),
             child: Text(l10n.updateCurrency),
@@ -530,7 +531,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           SnackBar(
             content: Text(
                 '${l10n.currencyUpdatedWithRate} ${currency.code} (rate: ${conversionRate.toStringAsFixed(4)})'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
           ),
         );
       }
@@ -540,7 +541,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('${l10n.failedToUpdateCurrency}: ${e.toString()}'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.destructive,
           ),
         );
       }
@@ -583,7 +584,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       children: [
                         CircleAvatar(
                           radius: 50,
-                          backgroundColor: Theme.of(context).primaryColor,
+                          backgroundColor: AppColors.primary,
                           child: Text(
                             user.name[0].toUpperCase(),
                             style: const TextStyle(
@@ -627,7 +628,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           user.email,
                           style:
                               Theme.of(context).textTheme.bodyLarge?.copyWith(
-                                    color: Colors.grey[600],
+                                    color: AppColors.textMuted,
                                   ),
                         ),
                         const SizedBox(height: 16),
@@ -692,7 +693,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Text(
                               l10n.language,
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: AppColors.textMuted,
                                 fontSize: 14,
                               ),
                             ),
@@ -723,7 +724,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Text(
                               l10n.currency,
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: AppColors.textMuted,
                                 fontSize: 14,
                               ),
                             ),
@@ -824,7 +825,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                         ? l10n.analyticsEnabledThankYou
                                         : l10n.analyticsDisabled,
                                   ),
-                                  backgroundColor: Colors.green,
+                                  backgroundColor: AppColors.success,
                                 ),
                               );
                             }
@@ -931,7 +932,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             Text(
                               l10n.noBudgetGoalSet,
                               style: TextStyle(
-                                color: Colors.grey[600],
+                                color: AppColors.textMuted,
                                 fontSize: 14,
                               ),
                             )
@@ -940,13 +941,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               padding: const EdgeInsets.all(12),
                               decoration: BoxDecoration(
                                 color: _goalActive
-                                    ? Colors.green.withValues(alpha: 0.1)
-                                    : Colors.grey.withValues(alpha: 0.1),
+                                    ? AppColors.success.withAlpha(25)
+                                    : AppColors.textMuted.withAlpha(25),
                                 borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
                                   color: _goalActive
-                                      ? Colors.green.withValues(alpha: 0.3)
-                                      : Colors.grey.withValues(alpha: 0.3),
+                                      ? AppColors.success.withAlpha(76)
+                                      : AppColors.textMuted.withAlpha(76),
                                 ),
                               ),
                               child: Column(
@@ -960,8 +961,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                             : Icons.pause_circle,
                                         size: 16,
                                         color: _goalActive
-                                            ? Colors.green
-                                            : Colors.grey,
+                                            ? AppColors.success
+                                            : AppColors.textMuted,
                                       ),
                                       const SizedBox(width: 4),
                                       Text(
@@ -970,8 +971,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                           fontSize: 12,
                                           fontWeight: FontWeight.bold,
                                           color: _goalActive
-                                              ? Colors.green
-                                              : Colors.grey,
+                                              ? AppColors.success
+                                              : AppColors.textMuted,
                                         ),
                                       ),
                                     ],
@@ -1039,15 +1040,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.blue.withValues(alpha: 0.1),
+                            color: AppColors.primary.withAlpha(25),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                                color: Colors.blue.withValues(alpha: 0.3)),
+                                color: AppColors.primary.withAlpha(76)),
                           ),
                           child: Row(
                             children: [
                               Icon(Icons.info_outline,
-                                  size: 20, color: Colors.blue[700]),
+                                  size: 20, color: AppColors.primary),
                               const SizedBox(width: 8),
                               Expanded(
                                 child: Text(
@@ -1112,7 +1113,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           icon: const Icon(Icons.delete_forever),
                           label: Text(l10n.deleteAccount),
                           style: OutlinedButton.styleFrom(
-                            foregroundColor: Colors.red,
+                            foregroundColor: AppColors.destructive,
                             padding: const EdgeInsets.symmetric(vertical: 12),
                           ),
                         ),
@@ -1135,7 +1136,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         Text(
           label,
           style: TextStyle(
-            color: Colors.grey[600],
+            color: AppColors.textMuted,
             fontSize: 14,
           ),
         ),

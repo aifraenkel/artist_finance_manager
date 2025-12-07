@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../config/app_colors.dart';
 import '../models/transaction.dart' as app_models;
 import '../l10n/app_localizations.dart';
 
@@ -38,7 +39,7 @@ class TransactionList extends StatelessWidget {
                   child: Text(
                     AppLocalizations.of(context)!.noTransactionsYet,
                     style: const TextStyle(
-                      color: Colors.grey,
+                      color: AppColors.textMuted,
                       fontSize: 16,
                     ),
                     textAlign: TextAlign.center,
@@ -67,13 +68,13 @@ class TransactionList extends StatelessWidget {
     app_models.Transaction transaction,
   ) {
     final isIncome = transaction.type == 'income';
-    final categoryColor = isIncome ? Colors.green : Colors.red;
-    final amountColor = isIncome ? Colors.green : Colors.red;
+    final categoryColor = isIncome ? AppColors.income : AppColors.expense;
+    final amountColor = isIncome ? AppColors.income : AppColors.expense;
 
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        border: Border.all(color: Colors.grey[300]!),
+        border: Border.all(color: AppColors.border),
         borderRadius: BorderRadius.circular(8),
       ),
       child: LayoutBuilder(
@@ -100,7 +101,7 @@ class TransactionList extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: categoryColor.shade700,
+                          color: categoryColor,
                         ),
                       ),
                     ),
@@ -117,9 +118,9 @@ class TransactionList extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   _formatDate(transaction.date),
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontSize: 12,
-                    color: Colors.grey[600],
+                    color: AppColors.textSecondary,
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -137,7 +138,7 @@ class TransactionList extends StatelessWidget {
                     TextButton(
                       onPressed: () => _confirmDelete(context, transaction.id),
                       style: TextButton.styleFrom(
-                        foregroundColor: Colors.red,
+                        foregroundColor: AppColors.destructive,
                       ),
                       child: Text(AppLocalizations.of(context)!.delete),
                     ),
@@ -171,7 +172,7 @@ class TransactionList extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: categoryColor.shade700,
+                              color: categoryColor,
                             ),
                           ),
                         ),
@@ -190,9 +191,9 @@ class TransactionList extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       _formatDate(transaction.date),
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 12,
-                        color: Colors.grey[600],
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -211,7 +212,7 @@ class TransactionList extends StatelessWidget {
               TextButton(
                 onPressed: () => _confirmDelete(context, transaction.id),
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.red,
+                  foregroundColor: AppColors.destructive,
                 ),
                 child: Text(AppLocalizations.of(context)!.delete),
               ),
@@ -245,7 +246,7 @@ class TransactionList extends StatelessWidget {
               onDelete(id);
               Navigator.pop(context);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
             child: Text(l10n.delete),
           ),
         ],

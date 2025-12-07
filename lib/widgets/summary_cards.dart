@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../config/app_colors.dart';
 import '../l10n/app_localizations.dart';
 
 class SummaryCards extends StatelessWidget {
@@ -64,9 +65,9 @@ class SummaryCards extends StatelessWidget {
                       Text(
                         AppLocalizations.of(context)!.income,
                         key: const ValueKey('income-label'),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
-                          color: Colors.grey,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -76,7 +77,7 @@ class SummaryCards extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.green,
+                          color: AppColors.income,
                         ),
                       ),
                     ],
@@ -84,7 +85,7 @@ class SummaryCards extends StatelessWidget {
                 ),
                 const Icon(
                   Icons.trending_up,
-                  color: Colors.green,
+                  color: AppColors.income,
                   size: 32,
                 ),
               ],
@@ -113,9 +114,9 @@ class SummaryCards extends StatelessWidget {
                       Text(
                         AppLocalizations.of(context)!.expenses,
                         key: const ValueKey('expenses-label'),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
-                          color: Colors.grey,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -125,7 +126,7 @@ class SummaryCards extends StatelessWidget {
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.red,
+                          color: AppColors.expense,
                         ),
                       ),
                     ],
@@ -133,7 +134,7 @@ class SummaryCards extends StatelessWidget {
                 ),
                 const Icon(
                   Icons.trending_down,
-                  color: Colors.red,
+                  color: AppColors.expense,
                   size: 32,
                 ),
               ],
@@ -145,7 +146,7 @@ class SummaryCards extends StatelessWidget {
   }
 
   Widget _buildBalanceCard(BuildContext context) {
-    final balanceColor = balance >= 0 ? Colors.blue : Colors.red;
+    final balanceColor = balance >= 0 ? AppColors.primary : AppColors.expense;
 
     return Card(
       key: const ValueKey('balance-card'),
@@ -164,9 +165,9 @@ class SummaryCards extends StatelessWidget {
                       Text(
                         AppLocalizations.of(context)!.balance,
                         key: const ValueKey('balance-label'),
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
-                          color: Colors.grey,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 4),

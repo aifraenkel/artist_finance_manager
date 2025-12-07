@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../config/app_colors.dart';
 import '../../providers/auth_provider.dart';
 import 'email_verification_screen.dart';
 
@@ -65,7 +66,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.error ?? 'Failed to register'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.destructive,
         ),
       );
     }
@@ -90,7 +91,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 Icon(
                   Icons.person_add,
                   size: 80,
-                  color: Theme.of(context).primaryColor,
+                  color: AppColors.primary,
                 ),
                 const SizedBox(height: 32),
 
@@ -107,7 +108,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                 Text(
                   'Enter your details to get started',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Colors.grey[600],
+                        color: AppColors.textSecondary,
                       ),
                   textAlign: TextAlign.center,
                 ),
@@ -187,7 +188,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       Text(
                         'We\'ll send a verification link to your email',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
+                              color: AppColors.textSecondary,
                             ),
                         textAlign: TextAlign.center,
                       ),
@@ -197,17 +198,17 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.blue[50],
+                          color: AppColors.primarySurface,
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.blue[200]!),
+                          border: Border.all(color: AppColors.primary.withAlpha(51)),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.info_outline,
                               size: 20,
-                              color: Colors.blue[700],
+                              color: AppColors.primary,
                             ),
                             const SizedBox(width: 8),
                             Expanded(
@@ -217,7 +218,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                                     .textTheme
                                     .bodySmall
                                     ?.copyWith(
-                                      color: Colors.blue[900],
+                                      color: AppColors.primaryDark,
                                     ),
                               ),
                             ),

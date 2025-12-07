@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:provider/provider.dart';
+import '../config/app_colors.dart';
 import '../providers/auth_provider.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/home_screen.dart';
@@ -95,7 +96,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(authProvider.error ?? 'Failed to verify registration'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.destructive,
         ),
       );
     } else {

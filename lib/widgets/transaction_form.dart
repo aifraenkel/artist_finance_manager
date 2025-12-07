@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../config/app_colors.dart';
 import '../l10n/app_localizations.dart';
 
 class TransactionForm extends StatefulWidget {
@@ -171,8 +172,8 @@ class _TransactionFormState extends State<TransactionForm> {
                   icon: const Icon(Icons.add),
                   label: Text(AppLocalizations.of(context)!.add),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    foregroundColor: Colors.white,
+                    backgroundColor: AppColors.accent,
+                    foregroundColor: AppColors.textPrimary,
                   ),
                 ),
               ),

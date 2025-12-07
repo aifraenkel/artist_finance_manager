@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../config/app_colors.dart';
 import '../models/transaction.dart';
 import '../models/project.dart';
 import '../providers/project_provider.dart';
@@ -308,7 +309,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           children: [
             Row(
               children: [
-                Icon(Icons.track_changes, color: Colors.blue[700], size: 24),
+                Icon(Icons.track_changes, color: AppColors.primary, size: 24),
                 const SizedBox(width: 8),
                 const Text(
                   'Budget Goal Analysis',
@@ -325,13 +326,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.blue.withValues(alpha: 0.1),
+                color: AppColors.primary.withAlpha(25),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.blue.withValues(alpha: 0.3)),
+                border: Border.all(color: AppColors.primary.withAlpha(76)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.flag, size: 16, color: Colors.blue[700]),
+                  Icon(Icons.flag, size: 16, color: AppColors.primary),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
@@ -358,7 +359,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       'Analyzing your financial goal...',
                       style: TextStyle(
                         fontSize: 14,
-                        color: Colors.grey[600],
+                        color: AppColors.textMuted,
                       ),
                     ),
                   ],
@@ -368,21 +369,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.red.withValues(alpha: 0.1),
+                  color: AppColors.destructive.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.red.withValues(alpha: 0.3)),
+                  border: Border.all(color: AppColors.destructive.withAlpha(76)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Icon(Icons.error_outline, color: Colors.red[700], size: 20),
+                    Icon(Icons.error_outline, color: AppColors.destructive, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
                         _goalAnalysisError!,
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.red[700],
+                          color: AppColors.destructive,
                         ),
                       ),
                     ),
@@ -393,16 +394,16 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Colors.green.withValues(alpha: 0.1),
+                  color: AppColors.success.withAlpha(25),
                   borderRadius: BorderRadius.circular(8),
                   border:
-                      Border.all(color: Colors.green.withValues(alpha: 0.3)),
+                      Border.all(color: AppColors.success.withAlpha(76)),
                 ),
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Icon(Icons.lightbulb_outline,
-                        color: Colors.green[700], size: 20),
+                        color: AppColors.success, size: 20),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(

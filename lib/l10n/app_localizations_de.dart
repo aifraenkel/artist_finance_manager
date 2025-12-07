@@ -474,8 +474,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get privacyNoCollectAmounts => 'Transaktionsbeträge';
 
   @override
-  String get privacyNoCollectDescriptions =>
-      'Transaktionsbeschreibungen';
+  String get privacyNoCollectDescriptions => 'Transaktionsbeschreibungen';
 
   @override
   String get privacyNoCollectPersonal => 'Persönliche Finanzdaten';
