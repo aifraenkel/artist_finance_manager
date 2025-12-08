@@ -2,7 +2,7 @@
 
 ## Overview
 
-Artist Finance Manager implements robust session persistence that keeps users signed in across app restarts, following industry best practices and OWASP security guidelines. The session management works seamlessly across web browsers, iOS, and Android devices.
+Art Finance Hub implements robust session persistence that keeps users signed in across app restarts, following industry best practices and OWASP security guidelines. The session management works seamlessly across web browsers, iOS, and Android devices.
 
 ## How It Works
 

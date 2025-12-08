@@ -2,7 +2,7 @@
 
 ## Overview
 
-This document outlines how the Artist Finance Manager application's session management implementation aligns with OWASP (Open Web Application Security Project) security best practices.
+This document outlines how the Art Finance Hub application's session management implementation aligns with OWASP (Open Web Application Security Project) security best practices.
 
 ## OWASP Session Management Cheat Sheet Compliance
 
