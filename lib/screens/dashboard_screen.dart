@@ -4,13 +4,18 @@ import 'package:fl_chart/fl_chart.dart';
 import '../config/app_colors.dart';
 import '../models/transaction.dart';
 import '../models/project.dart';
+import '../models/financial_goal.dart';
 import '../providers/project_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/storage_service.dart';
 import '../services/firestore_sync_service.dart';
 import '../services/user_preferences.dart';
 import '../services/openai_service.dart';
 import '../services/budget_analysis_service.dart';
+import '../services/financial_goal_service.dart';
+import '../widgets/no_goal_banner.dart';
+import '../widgets/financial_goal_wizard.dart';
 import '../l10n/app_localizations.dart';
 
 /// Dashboard screen showing financial analytics and insights.
@@ -31,12 +36,14 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final AnalyticsService _analyticsService = AnalyticsService();
   final UserPreferences _userPreferences = UserPreferences();
+  final FinancialGoalService _financialGoalService = FinancialGoalService();
   bool _isLoading = true;
   bool _isAnalyzingGoal = false;
   Map<String, List<Transaction>> _projectTransactions = {};
   Map<String, Project> _projects = {};
   String? _goalAnalysis;
   String? _goalAnalysisError;
+  FinancialGoal? _financialGoal;
 
   // Month abbreviations for timeline chart
   static const List<String> _monthAbbreviations = [
@@ -54,6 +61,56 @@ class _DashboardScreenState extends State<DashboardScreen> {
     'Nov',
     'Dec'
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _loadData();
+      _loadPreferencesAndAnalyzeGoal();
+      _loadFinancialGoal();
+    });
+  }
+
+  Future<void> _loadFinancialGoal() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+    if (user == null) return;
+
+    try {
+      final goal = await _financialGoalService.getGoal(user.uid);
+      if (mounted) {
+        setState(() {
+          _financialGoal = goal;
+        });
+      }
+    } catch (e) {
+      print('Error loading financial goal: $e');
+    }
+  }
+
+  void _openGoalWizard() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+    if (user == null) return;
+
+    // Get OpenAI API key (use from user preferences for now)
+    final apiKey = _userPreferences.openaiApiKey ?? '';
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => FinancialGoalWizard(
+          userId: user.uid,
+          openAIApiKey: apiKey,
+          onGoalSaved: () {
+            // Reload the goal after saving
+            _loadFinancialGoal();
+          },
+        ),
+        fullscreenDialog: true,
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -193,6 +250,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+            // Show no goal banner even if there are no transactions
+            if (_financialGoal == null) ...[
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: NoGoalBanner(onSetGoal: _openGoalWizard),
+              ),
+              const SizedBox(height: 24),
+            ],
             Icon(
               Icons.analytics_outlined,
               size: 80,
@@ -238,7 +303,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Budget Goal Analysis Section (if active)
+          // Show no goal banner if no financial goal is set
+          if (_financialGoal == null) ...[
+            NoGoalBanner(onSetGoal: _openGoalWizard),
+            const SizedBox(height: 24),
+          ],
+
+          // Budget Goal Analysis Section (if active) - Keep for backward compatibility
           if (_userPreferences.budgetGoal != null &&
               _userPreferences.budgetGoal!.isActive) ...[
             _buildGoalAnalysisSection(context),

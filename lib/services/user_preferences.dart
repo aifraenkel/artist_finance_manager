@@ -14,14 +14,19 @@ class UserPreferences {
   static const String _budgetGoalCreatedAtKey = 'budget_goal_created_at';
   static const String _budgetGoalUpdatedAtKey = 'budget_goal_updated_at';
   static const String _openaiApiKeyKey = 'openai_api_key';
+  static const String _hasSkippedGoalWizardKey = 'has_skipped_goal_wizard';
 
   bool _analyticsConsent = false;
   DateTime? _consentTimestamp;
   BudgetGoal? _budgetGoal;
   String? _openaiApiKey;
+  bool _hasSkippedGoalWizard = false;
 
   /// Whether the user has consented to analytics tracking
   bool get analyticsConsent => _analyticsConsent;
+  
+  /// Whether the user has skipped the financial goal wizard
+  bool get hasSkippedGoalWizard => _hasSkippedGoalWizard;
 
   /// When the user last updated their consent preference
   DateTime? get consentTimestamp => _consentTimestamp;
@@ -39,6 +44,7 @@ class UserPreferences {
   Future<void> initialize() async {
     final prefs = await SharedPreferences.getInstance();
     _analyticsConsent = prefs.getBool(_analyticsConsentKey) ?? false;
+    _hasSkippedGoalWizard = prefs.getBool(_hasSkippedGoalWizardKey) ?? false;
 
     final timestampMillis = prefs.getInt(_consentTimestampKey);
     if (timestampMillis != null) {
@@ -127,12 +133,21 @@ class UserPreferences {
     await prefs.remove(_openaiApiKeyKey);
   }
 
+  /// Set whether the user has skipped the financial goal wizard
+  Future<void> setHasSkippedGoalWizard(bool skipped) async {
+    _hasSkippedGoalWizard = skipped;
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_hasSkippedGoalWizardKey, skipped);
+  }
+
   /// Reset all preferences (useful for testing)
   Future<void> reset() async {
     _analyticsConsent = false;
     _consentTimestamp = null;
     _budgetGoal = null;
     _openaiApiKey = null;
+    _hasSkippedGoalWizard = false;
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_analyticsConsentKey);
@@ -142,5 +157,6 @@ class UserPreferences {
     await prefs.remove(_budgetGoalCreatedAtKey);
     await prefs.remove(_budgetGoalUpdatedAtKey);
     await prefs.remove(_openaiApiKeyKey);
+    await prefs.remove(_hasSkippedGoalWizardKey);
   }
 }
