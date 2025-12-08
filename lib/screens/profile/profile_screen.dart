@@ -37,8 +37,6 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
-  final _goalController = TextEditingController();
-  final _apiKeyController = TextEditingController();
   bool _isEditing = false;
   bool _isLoading = false;
   bool _isExporting = false;
@@ -47,8 +45,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final CurrencyConversionService _currencyService =
       CurrencyConversionService();
   bool _analyticsConsent = false;
-  bool _goalActive = false;
-  bool _isEditingGoal = false;
   UserPreferencesModel? _userPrefs;
 
   @override
@@ -63,19 +59,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) {
       setState(() {
         _analyticsConsent = _userPreferences.analyticsConsent;
-
-        // Load budget goal if exists
-        final goal = _userPreferences.budgetGoal;
-        if (goal != null) {
-          _goalController.text = goal.goalText;
-          _goalActive = goal.isActive;
-        }
-
-        // Load API key if exists
-        final apiKey = _userPreferences.openaiApiKey;
-        if (apiKey != null) {
-          _apiKeyController.text = apiKey;
-        }
       });
     }
   }
@@ -110,8 +93,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void dispose() {
     _nameController.dispose();
-    _goalController.dispose();
-    _apiKeyController.dispose();
     super.dispose();
   }
 
@@ -305,96 +286,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     } finally {
       if (mounted) {
         setState(() => _isExporting = false);
-      }
-    }
-  }
-
-  Future<void> _saveBudgetGoal() async {
-    final goalText = _goalController.text.trim();
-
-    if (goalText.isEmpty) {
-      // Clear the goal if text is empty
-      await _userPreferences.clearBudgetGoal();
-      setState(() {
-        _goalActive = false;
-        _isEditingGoal = false;
-      });
-
-      if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.budgetGoalCleared),
-            backgroundColor: AppColors.success,
-          ),
-        );
-      }
-      return;
-    }
-
-    final now = DateTime.now();
-    final existingGoal = _userPreferences.budgetGoal;
-
-    final goal = BudgetGoal(
-      goalText: goalText,
-      isActive: _goalActive,
-      createdAt: existingGoal?.createdAt ?? now,
-      updatedAt: now,
-    );
-
-    await _userPreferences.setBudgetGoal(goal);
-
-    setState(() {
-      _isEditingGoal = false;
-    });
-
-    if (mounted) {
-      final l10n = AppLocalizations.of(context)!;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(l10n.budgetGoalSavedSuccess),
-          backgroundColor: AppColors.success,
-        ),
-      );
-    }
-  }
-
-  Future<void> _saveApiKey() async {
-    try {
-      final apiKey = _apiKeyController.text.trim();
-
-      if (apiKey.isEmpty) {
-        await _userPreferences.clearOpenaiApiKey();
-        if (mounted) {
-          final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.openaiApiKeyCleared),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        }
-      } else {
-        await _userPreferences.setOpenaiApiKey(apiKey);
-        if (mounted) {
-          final l10n = AppLocalizations.of(context)!;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(l10n.openaiApiKeySavedSuccess),
-              backgroundColor: AppColors.success,
-            ),
-          );
-        }
-      }
-    } catch (e) {
-      if (mounted) {
-        final l10n = AppLocalizations.of(context)!;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${l10n.failedToSaveApiKey}: ${e.toString()}'),
-            backgroundColor: AppColors.destructive,
-          ),
-        );
       }
     }
   }
@@ -852,214 +743,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           style: TextButton.styleFrom(
                             alignment: Alignment.centerLeft,
                             padding: EdgeInsets.zero,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Budget Goal Settings
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          l10n.budgetGoal,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        if (_isEditingGoal) ...[
-                          TextField(
-                            controller: _goalController,
-                            decoration: InputDecoration(
-                              labelText: l10n.financialGoal,
-                              hintText: l10n.financialGoalHint,
-                              border: const OutlineInputBorder(),
-                              helperText: l10n.financialGoalHelper,
-                            ),
-                            maxLines: 3,
-                          ),
-                          const SizedBox(height: 12),
-                          SwitchListTile(
-                            contentPadding: EdgeInsets.zero,
-                            title: Text(l10n.goalActive),
-                            subtitle: Text(
-                              l10n.goalActiveHelper,
-                              style: const TextStyle(fontSize: 12),
-                            ),
-                            value: _goalActive,
-                            onChanged: (value) {
-                              setState(() {
-                                _goalActive = value;
-                              });
-                            },
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: OutlinedButton(
-                                  onPressed: () {
-                                    // Reload from preferences
-                                    final goal = _userPreferences.budgetGoal;
-                                    setState(() {
-                                      _goalController.text =
-                                          goal?.goalText ?? '';
-                                      _goalActive = goal?.isActive ?? false;
-                                      _isEditingGoal = false;
-                                    });
-                                  },
-                                  child: Text(l10n.cancel),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: ElevatedButton(
-                                  onPressed: _saveBudgetGoal,
-                                  child: Text(l10n.saveGoal),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ] else ...[
-                          if (_goalController.text.isEmpty)
-                            Text(
-                              l10n.noBudgetGoalSet,
-                              style: TextStyle(
-                                color: AppColors.textMuted,
-                                fontSize: 14,
-                              ),
-                            )
-                          else ...[
-                            Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: _goalActive
-                                    ? AppColors.success.withAlpha(25)
-                                    : AppColors.textMuted.withAlpha(25),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: _goalActive
-                                      ? AppColors.success.withAlpha(76)
-                                      : AppColors.textMuted.withAlpha(76),
-                                ),
-                              ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Icon(
-                                        _goalActive
-                                            ? Icons.check_circle
-                                            : Icons.pause_circle,
-                                        size: 16,
-                                        color: _goalActive
-                                            ? AppColors.success
-                                            : AppColors.textMuted,
-                                      ),
-                                      const SizedBox(width: 4),
-                                      Text(
-                                        _goalActive
-                                            ? l10n.active
-                                            : l10n.inactive,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: _goalActive
-                                              ? AppColors.success
-                                              : AppColors.textMuted,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    _goalController.text,
-                                    style: const TextStyle(fontSize: 14),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 12),
-                          OutlinedButton.icon(
-                            onPressed: () {
-                              setState(() {
-                                _isEditingGoal = true;
-                              });
-                            },
-                            icon: Icon(_goalController.text.isEmpty
-                                ? Icons.add
-                                : Icons.edit),
-                            label: Text(_goalController.text.isEmpty
-                                ? l10n.setBudgetGoal
-                                : l10n.editBudgetGoal),
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // OpenAI API Key Configuration
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          l10n.openaiConfiguration,
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                        ),
-                        const SizedBox(height: 16),
-                        TextField(
-                          controller: _apiKeyController,
-                          decoration: InputDecoration(
-                            labelText: l10n.openaiApiKey,
-                            hintText: l10n.openaiApiKeyPlaceholder,
-                            border: const OutlineInputBorder(),
-                            helperText: l10n.openaiApiKeyHelper,
-                          ),
-                          obscureText: true,
-                          onEditingComplete: () {
-                            // Save API key when editing is complete
-                            _saveApiKey();
-                          },
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withAlpha(25),
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                                color: AppColors.primary.withAlpha(76)),
-                          ),
-                          child: Row(
-                            children: [
-                              Icon(Icons.info_outline,
-                                  size: 20, color: AppColors.primary),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  l10n.openaiApiKeySecurityInfo,
-                                  style: const TextStyle(fontSize: 12),
-                                ),
-                              ),
-                            ],
                           ),
                         ),
                       ],
