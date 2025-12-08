@@ -484,4 +484,142 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get close => 'Close';
+
+  @override
+  String get financialGoalWizard => 'Financial Goal Wizard';
+
+  @override
+  String get setYourFinancialGoal => 'Set Your Financial Goal';
+
+  @override
+  String get goalDescription => 'Describe your financial goal';
+
+  @override
+  String get goalDescriptionHint => 'What would you like to achieve?';
+
+  @override
+  String get goalDescriptionHelper =>
+      'Be specific about what you want to achieve, how much, and by when';
+
+  @override
+  String get charactersRemaining => 'characters remaining';
+
+  @override
+  String get goalTooLong => 'Goal must be at most 2000 characters';
+
+  @override
+  String get goalRequired => 'Please describe your financial goal';
+
+  @override
+  String get inspiration => 'Need inspiration? Here are some examples:';
+
+  @override
+  String get exampleGoal1 =>
+      'Save \$5,000 for professional recording equipment to produce my debut album by December';
+
+  @override
+  String get exampleGoal2 =>
+      'Increase my monthly income from live performances to \$3,000 to quit my day job';
+
+  @override
+  String get exampleGoal3 =>
+      'Build an emergency fund of \$2,000 from art sales to cover 3 months of studio rent';
+
+  @override
+  String get exampleGoal4 =>
+      'Earn \$10,000 from poetry book sales and performance fees to fund a national tour';
+
+  @override
+  String get exampleGoal5 =>
+      'Generate \$1,500/month passive income from prints and merchandise to focus on new collections';
+
+  @override
+  String get next => 'Next';
+
+  @override
+  String get timelineAndNotifications => 'Timeline & Notifications';
+
+  @override
+  String get whenDoYouWantToAchieveThis =>
+      'When do you want to achieve this goal?';
+
+  @override
+  String get selectDueDate => 'Select due date';
+
+  @override
+  String get dueDateRequired => 'Please select a due date';
+
+  @override
+  String get dueDateMustBeFuture => 'Due date must be in the future';
+
+  @override
+  String get howOftenEmailUpdates => 'How often would you like email updates?';
+
+  @override
+  String get emailCadenceDaily => 'Daily';
+
+  @override
+  String get emailCadenceWeekly => 'Weekly';
+
+  @override
+  String get emailCadenceBiweekly => 'Every two weeks';
+
+  @override
+  String get emailCadenceMonthly => 'Monthly';
+
+  @override
+  String get emailCadenceNever => 'Never (dashboard only)';
+
+  @override
+  String get confirmation => 'Confirmation';
+
+  @override
+  String get yourGoal => 'Your Goal';
+
+  @override
+  String get dueDate => 'Due Date';
+
+  @override
+  String get emailUpdates => 'Email Updates';
+
+  @override
+  String get generatingAcknowledgment =>
+      'Generating your personalized acknowledgment...';
+
+  @override
+  String get failedToGenerateAcknowledgment =>
+      'Failed to generate acknowledgment. Your goal has been saved.';
+
+  @override
+  String get goalSavedSuccessfully => 'Financial goal saved successfully!';
+
+  @override
+  String get failedToSaveGoal => 'Failed to save financial goal';
+
+  @override
+  String get skip => 'Skip';
+
+  @override
+  String get skipForNow => 'Skip for now';
+
+  @override
+  String get setFinancialGoal => 'Set Financial Goal';
+
+  @override
+  String get noFinancialGoalSet => 'No financial goal set';
+
+  @override
+  String get setAGoalToTrackProgress =>
+      'Set a financial goal to track your progress and get personalized insights';
+
+  @override
+  String get openGoalWizard => 'Set Your Goal';
+
+  @override
+  String get goalBannerTitle =>
+      'Ready to take control of your financial future?';
+
+  @override
+  String get goalBannerDescription =>
+      'Set a meaningful financial goal and get personalized insights to help you achieve it';
 }

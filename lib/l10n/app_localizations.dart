@@ -1005,6 +1005,258 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Close'**
   String get close;
+
+  /// No description provided for @financialGoalWizard.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial Goal Wizard'**
+  String get financialGoalWizard;
+
+  /// No description provided for @setYourFinancialGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Your Financial Goal'**
+  String get setYourFinancialGoal;
+
+  /// No description provided for @goalDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Describe your financial goal'**
+  String get goalDescription;
+
+  /// No description provided for @goalDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What would you like to achieve?'**
+  String get goalDescriptionHint;
+
+  /// No description provided for @goalDescriptionHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Be specific about what you want to achieve, how much, and by when'**
+  String get goalDescriptionHelper;
+
+  /// No description provided for @charactersRemaining.
+  ///
+  /// In en, this message translates to:
+  /// **'characters remaining'**
+  String get charactersRemaining;
+
+  /// No description provided for @goalTooLong.
+  ///
+  /// In en, this message translates to:
+  /// **'Goal must be at most 2000 characters'**
+  String get goalTooLong;
+
+  /// No description provided for @goalRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe your financial goal'**
+  String get goalRequired;
+
+  /// No description provided for @inspiration.
+  ///
+  /// In en, this message translates to:
+  /// **'Need inspiration? Here are some examples:'**
+  String get inspiration;
+
+  /// No description provided for @exampleGoal1.
+  ///
+  /// In en, this message translates to:
+  /// **'Save \$5,000 for professional recording equipment to produce my debut album by December'**
+  String get exampleGoal1;
+
+  /// No description provided for @exampleGoal2.
+  ///
+  /// In en, this message translates to:
+  /// **'Increase my monthly income from live performances to \$3,000 to quit my day job'**
+  String get exampleGoal2;
+
+  /// No description provided for @exampleGoal3.
+  ///
+  /// In en, this message translates to:
+  /// **'Build an emergency fund of \$2,000 from art sales to cover 3 months of studio rent'**
+  String get exampleGoal3;
+
+  /// No description provided for @exampleGoal4.
+  ///
+  /// In en, this message translates to:
+  /// **'Earn \$10,000 from poetry book sales and performance fees to fund a national tour'**
+  String get exampleGoal4;
+
+  /// No description provided for @exampleGoal5.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate \$1,500/month passive income from prints and merchandise to focus on new collections'**
+  String get exampleGoal5;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get next;
+
+  /// No description provided for @timelineAndNotifications.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline & Notifications'**
+  String get timelineAndNotifications;
+
+  /// No description provided for @whenDoYouWantToAchieveThis.
+  ///
+  /// In en, this message translates to:
+  /// **'When do you want to achieve this goal?'**
+  String get whenDoYouWantToAchieveThis;
+
+  /// No description provided for @selectDueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Select due date'**
+  String get selectDueDate;
+
+  /// No description provided for @dueDateRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select a due date'**
+  String get dueDateRequired;
+
+  /// No description provided for @dueDateMustBeFuture.
+  ///
+  /// In en, this message translates to:
+  /// **'Due date must be in the future'**
+  String get dueDateMustBeFuture;
+
+  /// No description provided for @howOftenEmailUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'How often would you like email updates?'**
+  String get howOftenEmailUpdates;
+
+  /// No description provided for @emailCadenceDaily.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily'**
+  String get emailCadenceDaily;
+
+  /// No description provided for @emailCadenceWeekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly'**
+  String get emailCadenceWeekly;
+
+  /// No description provided for @emailCadenceBiweekly.
+  ///
+  /// In en, this message translates to:
+  /// **'Every two weeks'**
+  String get emailCadenceBiweekly;
+
+  /// No description provided for @emailCadenceMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get emailCadenceMonthly;
+
+  /// No description provided for @emailCadenceNever.
+  ///
+  /// In en, this message translates to:
+  /// **'Never (dashboard only)'**
+  String get emailCadenceNever;
+
+  /// No description provided for @confirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirmation'**
+  String get confirmation;
+
+  /// No description provided for @yourGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Your Goal'**
+  String get yourGoal;
+
+  /// No description provided for @dueDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Due Date'**
+  String get dueDate;
+
+  /// No description provided for @emailUpdates.
+  ///
+  /// In en, this message translates to:
+  /// **'Email Updates'**
+  String get emailUpdates;
+
+  /// No description provided for @generatingAcknowledgment.
+  ///
+  /// In en, this message translates to:
+  /// **'Generating your personalized acknowledgment...'**
+  String get generatingAcknowledgment;
+
+  /// No description provided for @failedToGenerateAcknowledgment.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to generate acknowledgment. Your goal has been saved.'**
+  String get failedToGenerateAcknowledgment;
+
+  /// No description provided for @goalSavedSuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Financial goal saved successfully!'**
+  String get goalSavedSuccessfully;
+
+  /// No description provided for @failedToSaveGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to save financial goal'**
+  String get failedToSaveGoal;
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip'**
+  String get skip;
+
+  /// No description provided for @skipForNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Skip for now'**
+  String get skipForNow;
+
+  /// No description provided for @setFinancialGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Financial Goal'**
+  String get setFinancialGoal;
+
+  /// No description provided for @noFinancialGoalSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No financial goal set'**
+  String get noFinancialGoalSet;
+
+  /// No description provided for @setAGoalToTrackProgress.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a financial goal to track your progress and get personalized insights'**
+  String get setAGoalToTrackProgress;
+
+  /// No description provided for @openGoalWizard.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Your Goal'**
+  String get openGoalWizard;
+
+  /// No description provided for @goalBannerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready to take control of your financial future?'**
+  String get goalBannerTitle;
+
+  /// No description provided for @goalBannerDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Set a meaningful financial goal and get personalized insights to help you achieve it'**
+  String get goalBannerDescription;
 }
 
 class _AppLocalizationsDelegate
