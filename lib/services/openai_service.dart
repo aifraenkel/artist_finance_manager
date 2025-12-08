@@ -89,12 +89,6 @@ class OpenAIService {
     required String userPrompt,
     double temperature = 0.7,
   }) async {
-  /// Internal method to call OpenAI API with retry logic
-  Future<String> _callOpenAI({
-    required String systemPrompt,
-    required String userPrompt,
-    double temperature = 0.7,
-  }) async {
     if (apiKey.isEmpty) {
       throw OpenAIException('OpenAI API key is not set');
     }

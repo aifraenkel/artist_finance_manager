@@ -112,15 +112,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _loadData();
-      _loadPreferencesAndAnalyzeGoal();
-    });
-  }
-
   Future<void> _loadPreferencesAndAnalyzeGoal() async {
     await _userPreferences.initialize();
 

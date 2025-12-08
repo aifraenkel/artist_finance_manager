@@ -4,7 +4,7 @@ import '../models/financial_goal.dart';
 /// Service for managing financial goals in Firestore
 ///
 /// Handles CRUD operations for user financial goals.
-/// Each user has a single goal document at: users/{userId}/financialGoal
+/// Each user has a single goal document at: users/{userId}/financialGoal/current
 class FinancialGoalService {
   final FirebaseFirestore _firestore;
 
