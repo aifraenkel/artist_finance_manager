@@ -153,6 +153,8 @@ class _HomeScreenState extends State<HomeScreen> {
     // Load transactions and mark initialization as complete
     if (mounted) {
       await _loadTransactions();
+      // Load global summary across all projects for the drawer
+      await _loadGlobalSummary();
     }
   }
 
@@ -458,6 +460,9 @@ class _HomeScreenState extends State<HomeScreen> {
     // Use optimized add method when in cloud sync mode
     await _storageService.addTransaction(newTransaction, _transactions);
 
+    // Update global summary in the drawer
+    await _loadGlobalSummary();
+
     // Track transaction added event (privacy-safe: no actual amounts)
     _observability.trackEvent(
       'transaction_added',
@@ -503,6 +508,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Use optimized delete method when in cloud sync mode
     await _storageService.deleteTransaction(id, _transactions);
+
+    // Update global summary in the drawer
+    await _loadGlobalSummary();
 
     // Track transaction deleted event (privacy-safe: no actual amounts)
     _observability.trackEvent(
