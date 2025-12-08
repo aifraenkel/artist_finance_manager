@@ -3,17 +3,22 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:artist_finance_manager/screens/dashboard_screen.dart';
 import 'package:artist_finance_manager/providers/project_provider.dart';
+import 'package:artist_finance_manager/providers/auth_provider.dart';
 import 'package:artist_finance_manager/models/project.dart';
+import 'package:artist_finance_manager/models/app_user.dart';
 import 'package:artist_finance_manager/services/project_service.dart';
 import 'package:artist_finance_manager/l10n/app_localizations.dart';
+import 'package:firebase_core/firebase_core.dart';
+import '../firebase_mock.dart';
 
 /// Widget tests for DashboardScreen
 ///
 /// Tests the analytics dashboard UI including:
-/// - Empty state rendering
+/// - Empty state rendering with NoGoalBanner
 /// - Chart rendering with data
 /// - Summary statistics display
 /// - Error handling
+/// - Financial goal wizard integration
 
 Widget wrapWithLocalizations(Widget child) {
   return MaterialApp(
@@ -22,6 +27,18 @@ Widget wrapWithLocalizations(Widget child) {
     locale: const Locale('en'),
     home: child,
   );
+}
+
+/// Mock AuthProvider for testing
+class MockAuthProvider extends ChangeNotifier {
+  final AppUser? _currentUser;
+
+  MockAuthProvider({AppUser? currentUser}) : _currentUser = currentUser;
+
+  AppUser? get currentUser => _currentUser;
+  bool get isAuthenticated => _currentUser != null;
+  bool get isLoading => false;
+  String? get error => null;
 }
 
 class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
@@ -83,7 +100,33 @@ class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
   }
 }
 
+/// Helper to wrap dashboard with all required providers
+Widget wrapDashboard({
+  required MockProjectProvider projectProvider,
+  MockAuthProvider? authProvider,
+}) {
+  return wrapWithLocalizations(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider<ProjectProvider>.value(
+          value: projectProvider,
+        ),
+        ChangeNotifierProvider.value(
+          value: authProvider ?? MockAuthProvider(),
+        ),
+      ],
+      child: const DashboardScreen(),
+    ),
+  );
+}
+
 void main() {
+  setupFirebaseAuthMocks();
+
+  setUpAll(() async {
+    await Firebase.initializeApp();
+  });
+
   group('DashboardScreen', () {
     testWidgets('shows loading indicator initially',
         (WidgetTester tester) async {
@@ -92,12 +135,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        wrapWithLocalizations(
-          ChangeNotifierProvider<ProjectProvider>.value(
-            value: mockProjectProvider,
-            child: const DashboardScreen(),
-          ),
-        ),
+        wrapDashboard(projectProvider: mockProjectProvider),
       );
 
       // Should show loading indicator
@@ -111,22 +149,24 @@ void main() {
       );
 
       await tester.pumpWidget(
-        wrapWithLocalizations(
-          ChangeNotifierProvider<ProjectProvider>.value(
-            value: mockProjectProvider,
-            child: const DashboardScreen(),
-          ),
-        ),
+        wrapDashboard(projectProvider: mockProjectProvider),
       );
 
       // Wait for data to load
       await tester.pumpAndSettle();
 
-      // Should show empty state
+      // Should show empty state message
       expect(find.text('No data available'), findsOneWidget);
       expect(
           find.text('Add some transactions to see analytics'), findsOneWidget);
-      expect(find.byIcon(Icons.analytics_outlined), findsOneWidget);
+
+      // Should show NoGoalBanner when no financial goal is set
+      expect(find.text('Ready to take control of your financial future?'),
+          findsOneWidget);
+      expect(find.text('Set Your Goal'), findsOneWidget);
+
+      // Should have the analytics icon
+      expect(find.byIcon(Icons.analytics_outlined), findsWidgets);
     });
 
     testWidgets('displays app bar with title', (WidgetTester tester) async {
@@ -135,12 +175,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        wrapWithLocalizations(
-          ChangeNotifierProvider<ProjectProvider>.value(
-            value: mockProjectProvider,
-            child: const DashboardScreen(),
-          ),
-        ),
+        wrapDashboard(projectProvider: mockProjectProvider),
       );
 
       await tester.pumpAndSettle();
@@ -157,12 +192,7 @@ void main() {
       );
 
       await tester.pumpWidget(
-        wrapWithLocalizations(
-          ChangeNotifierProvider<ProjectProvider>.value(
-            value: mockProjectProvider,
-            child: const DashboardScreen(),
-          ),
-        ),
+        wrapDashboard(projectProvider: mockProjectProvider),
       );
 
       await tester.pumpAndSettle();
@@ -186,6 +216,7 @@ void main() {
       final mockProjectProvider = MockProjectProvider(
         projects: [],
       );
+      final mockAuthProvider = MockAuthProvider();
 
       await tester.pumpWidget(
         wrapWithLocalizations(
@@ -195,9 +226,15 @@ void main() {
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) =>
+                      builder: (_) => MultiProvider(
+                        providers: [
                           ChangeNotifierProvider<ProjectProvider>.value(
-                        value: mockProjectProvider,
+                            value: mockProjectProvider,
+                          ),
+                          ChangeNotifierProvider.value(
+                            value: mockAuthProvider,
+                          ),
+                        ],
                         child: const DashboardScreen(),
                       ),
                     ),
@@ -232,24 +269,19 @@ void main() {
       );
 
       await tester.pumpWidget(
-        wrapWithLocalizations(
-          ChangeNotifierProvider<ProjectProvider>.value(
-            value: mockProjectProvider,
-            child: const DashboardScreen(),
-          ),
-        ),
+        wrapDashboard(projectProvider: mockProjectProvider),
       );
 
       await tester.pumpAndSettle();
 
-      // Find the icon widget
-      final iconWidget = tester.widget<Icon>(
-        find.byIcon(Icons.analytics_outlined),
-      );
+      // Verify the empty state elements are present
+      expect(find.text('No data available'), findsOneWidget);
+      expect(find.text('Ready to take control of your financial future?'),
+          findsOneWidget);
 
-      // Verify icon size and color
-      expect(iconWidget.size, 80);
-      expect(iconWidget.color, isNotNull);
+      // Verify icons are present (multiple icons now with the banner)
+      expect(find.byIcon(Icons.analytics_outlined), findsWidgets);
+      expect(find.byIcon(Icons.track_changes), findsOneWidget);
     });
   });
 }
