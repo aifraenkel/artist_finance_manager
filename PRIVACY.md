@@ -4,7 +4,7 @@
 
 ## Overview
 
-Artist Finance Manager ("we", "our", or "the app") is committed to protecting your privacy. This Privacy Policy explains what data we collect, why we collect it, how we use it, and your rights regarding your data.
+Art Finance Hub ("we", "our", or "the app") is committed to protecting your privacy. This Privacy Policy explains what data we collect, why we collect it, how we use it, and your rights regarding your data.
 
 ## Our Privacy-First Approach
 
