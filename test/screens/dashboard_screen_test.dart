@@ -6,7 +6,13 @@ import 'package:artist_finance_manager/providers/project_provider.dart';
 import 'package:artist_finance_manager/providers/auth_provider.dart';
 import 'package:artist_finance_manager/models/project.dart';
 import 'package:artist_finance_manager/models/app_user.dart';
+import 'package:artist_finance_manager/models/transaction.dart';
+import 'package:artist_finance_manager/models/financial_goal.dart';
+import 'package:artist_finance_manager/models/budget_goal.dart';
 import 'package:artist_finance_manager/services/project_service.dart';
+import 'package:artist_finance_manager/services/analytics_service.dart';
+import 'package:artist_finance_manager/services/user_preferences.dart';
+import 'package:artist_finance_manager/services/financial_goal_service.dart';
 import 'package:artist_finance_manager/l10n/app_localizations.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../firebase_mock.dart';
@@ -39,6 +45,95 @@ class MockAuthProvider extends ChangeNotifier {
   bool get isAuthenticated => _currentUser != null;
   bool get isLoading => false;
   String? get error => null;
+}
+
+/// Mock AnalyticsService for testing
+class MockAnalyticsService extends AnalyticsService {
+  @override
+  AnalyticsSummary calculateSummary(
+      Map<String, List<Transaction>> projectTransactions) {
+    return AnalyticsSummary(
+      totalIncome: 0,
+      totalExpenses: 0,
+      balance: 0,
+      numberOfTransactions: 0,
+      numberOfProjects: 0,
+      averageTransactionAmount: 0,
+    );
+  }
+
+  @override
+  Map<String, double> getProjectContributions(
+    Map<String, List<Transaction>> projectTransactions,
+    Map<String, Project> projects,
+  ) {
+    return {};
+  }
+
+  @override
+  List<MapEntry<String, double>> getTopExpensiveProjects(
+    Map<String, List<Transaction>> projectTransactions,
+    Map<String, Project> projects, {
+    int limit = 5,
+  }) {
+    return [];
+  }
+
+  @override
+  Map<String, List<TimelineDataPoint>> getTimelineData(
+    List<Transaction> transactions, {
+    TimelineGranularity granularity = TimelineGranularity.monthly,
+  }) {
+    return {
+      'income': [],
+      'expenses': [],
+      'balance': [],
+    };
+  }
+
+  @override
+  Map<String, double> getCategoryBreakdown(
+    List<Transaction> transactions, {
+    String type = 'expense',
+  }) {
+    return {};
+  }
+}
+
+/// Mock UserPreferences for testing
+class MockUserPreferences extends UserPreferences {
+  @override
+  Future<void> initialize() async {}
+
+  @override
+  BudgetGoal? get budgetGoal => null;
+
+  @override
+  String? get openaiApiKey => null;
+
+  @override
+  bool get hasSkippedGoalWizard => false;
+}
+
+/// Mock FinancialGoalService for testing
+class MockFinancialGoalService extends FinancialGoalService {
+  @override
+  Future<FinancialGoal?> getGoal(String userId) async => null;
+
+  @override
+  Stream<FinancialGoal?> watchGoal(String userId) => Stream.value(null);
+
+  @override
+  Future<void> saveGoal(String userId, FinancialGoal goal) async {}
+
+  @override
+  Future<void> updateGoal(String userId, FinancialGoal goal) async {}
+
+  @override
+  Future<void> deleteGoal(String userId) async {}
+
+  @override
+  Future<bool> hasGoal(String userId) async => false;
 }
 
 class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
@@ -100,10 +195,13 @@ class MockProjectProvider extends ChangeNotifier implements ProjectProvider {
   }
 }
 
-/// Helper to wrap dashboard with all required providers
+/// Helper to wrap dashboard with all required providers and mock services
 Widget wrapDashboard({
   required MockProjectProvider projectProvider,
   MockAuthProvider? authProvider,
+  MockAnalyticsService? analyticsService,
+  MockUserPreferences? userPreferences,
+  MockFinancialGoalService? financialGoalService,
 }) {
   return wrapWithLocalizations(
     MultiProvider(
@@ -115,7 +213,12 @@ Widget wrapDashboard({
           value: authProvider ?? MockAuthProvider(),
         ),
       ],
-      child: const DashboardScreen(),
+      child: DashboardScreen(
+        analyticsService: analyticsService ?? MockAnalyticsService(),
+        userPreferences: userPreferences ?? MockUserPreferences(),
+        financialGoalService:
+            financialGoalService ?? MockFinancialGoalService(),
+      ),
     ),
   );
 }

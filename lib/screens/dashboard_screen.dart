@@ -27,16 +27,25 @@ import '../l10n/app_localizations.dart';
 /// - Top expensive projects
 /// - Summary statistics
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final AnalyticsService? analyticsService;
+  final UserPreferences? userPreferences;
+  final FinancialGoalService? financialGoalService;
+
+  const DashboardScreen({
+    super.key,
+    this.analyticsService,
+    this.userPreferences,
+    this.financialGoalService,
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final AnalyticsService _analyticsService = AnalyticsService();
-  final UserPreferences _userPreferences = UserPreferences();
-  final FinancialGoalService _financialGoalService = FinancialGoalService();
+  late final AnalyticsService _analyticsService;
+  late final UserPreferences _userPreferences;
+  late final FinancialGoalService _financialGoalService;
   bool _isLoading = true;
   bool _isAnalyzingGoal = false;
   Map<String, List<Transaction>> _projectTransactions = {};
@@ -65,6 +74,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize services with provided instances or create defaults
+    _analyticsService = widget.analyticsService ?? AnalyticsService();
+    _userPreferences = widget.userPreferences ?? UserPreferences();
+    _financialGoalService =
+        widget.financialGoalService ?? FinancialGoalService();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
       _loadPreferencesAndAnalyzeGoal();
@@ -73,7 +88,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<void> _loadFinancialGoal() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    // Try to get AuthProvider, but handle if it's not available (for testing)
+    final authProvider = _tryGetAuthProvider();
+    if (authProvider == null) return;
+
     final user = authProvider.currentUser;
     if (user == null) return;
 
@@ -89,8 +107,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  /// Try to get AuthProvider from context, return null if not available
+  AuthProvider? _tryGetAuthProvider() {
+    try {
+      return Provider.of<AuthProvider>(context, listen: false);
+    } catch (e) {
+      // Provider not available (likely in tests)
+      return null;
+    }
+  }
+
   void _openGoalWizard() async {
-    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final authProvider = _tryGetAuthProvider();
+    if (authProvider == null) return;
+
     final user = authProvider.currentUser;
     if (user == null) return;
 
