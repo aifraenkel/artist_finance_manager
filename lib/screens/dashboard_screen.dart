@@ -267,41 +267,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _projectTransactions.values.expand((txns) => txns).toList();
 
     if (allTransactions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            // Show no goal banner even if there are no transactions
-            if (_financialGoal == null) ...[
-              Padding(
-                padding: const EdgeInsets.all(16),
-                child: NoGoalBanner(onSetGoal: _openGoalWizard),
-              ),
-              const SizedBox(height: 24),
-            ],
-            Icon(
-              Icons.analytics_outlined,
-              size: 80,
-              color: AppColors.textMuted,
+      return SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Show no goal banner even if there are no transactions
+                if (_financialGoal == null) ...[
+                  NoGoalBanner(onSetGoal: _openGoalWizard),
+                  const SizedBox(height: 24),
+                ],
+                Icon(
+                  Icons.analytics_outlined,
+                  size: 80,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.noDataAvailable,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.addTransactionsToSeeAnalytics,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.noDataAvailable,
-              style: const TextStyle(
-                fontSize: 18,
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.addTransactionsToSeeAnalytics,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textMuted,
-              ),
-            ),
-          ],
+          ),
         ),
       );
     }
