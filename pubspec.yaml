@@ -52,6 +52,8 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   generate: true
+  assets:
+    - lib/prompts/goal_acknowledgment.md
 
 flutter_launcher_icons:
   android: true

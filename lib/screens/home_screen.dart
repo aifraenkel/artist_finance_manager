@@ -11,12 +11,14 @@ import '../services/observability_service.dart';
 import '../services/user_preferences.dart';
 import '../services/migration_service.dart';
 import '../services/preferences_service.dart';
+import '../services/financial_goal_service.dart';
 import '../widgets/summary_cards.dart';
 import '../widgets/transaction_form.dart';
 import '../widgets/transaction_list.dart';
 import '../widgets/consent_dialog.dart';
 import '../widgets/project_drawer.dart';
 import '../widgets/empty_project_state.dart';
+import '../widgets/financial_goal_wizard.dart';
 import '../providers/auth_provider.dart';
 import '../providers/project_provider.dart';
 import 'profile/profile_screen.dart';
@@ -33,6 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late StorageService _storageService;
   FirestoreSyncService? _syncService;
   final UserPreferences _userPreferences = UserPreferences();
+  final FinancialGoalService _financialGoalService = FinancialGoalService();
   PreferencesService? _preferencesService;
   late ObservabilityService _observability;
   List<Transaction> _transactions = [];
@@ -45,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'balance': 0,
   };
   StreamSubscription<UserPreferencesModel>? _prefsSubscription;
+  bool _hasCheckedForGoal = false;
 
   bool get _isFirebaseAvailable {
     try {
@@ -155,6 +159,52 @@ class _HomeScreenState extends State<HomeScreen> {
       await _loadTransactions();
       // Load global summary across all projects for the drawer
       await _loadGlobalSummary();
+      // Check if user needs to set a financial goal
+      await _checkAndShowGoalWizard();
+    }
+  }
+
+  Future<void> _checkAndShowGoalWizard() async {
+    // Only check once per session
+    if (_hasCheckedForGoal) return;
+    _hasCheckedForGoal = true;
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    final user = authProvider.currentUser;
+    if (user == null) return;
+
+    try {
+      // Check if user has a financial goal
+      final hasGoal = await _financialGoalService.hasGoal(user.uid);
+      
+      // Check if user has skipped the wizard before (using a preference key)
+      final hasSkipped = _userPreferences.hasSkippedGoalWizard;
+
+      if (!hasGoal && !hasSkipped && mounted) {
+        // Wait a bit for the UI to settle
+        await Future.delayed(const Duration(milliseconds: 800));
+        
+        if (mounted) {
+          // Get OpenAI API key (use from user preferences for now)
+          final apiKey = _userPreferences.openaiApiKey ?? '';
+
+          await Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => FinancialGoalWizard(
+                userId: user.uid,
+                openAIApiKey: apiKey,
+                onSkipped: () async {
+                  // Mark as skipped so we don't show again automatically
+                  await _userPreferences.setHasSkippedGoalWizard(true);
+                },
+              ),
+              fullscreenDialog: true,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error checking for financial goal: $e');
     }
   }
 

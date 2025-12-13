@@ -490,4 +490,143 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get close => 'Cerrar';
+
+  @override
+  String get financialGoalWizard => 'Asistente de Metas Financieras';
+
+  @override
+  String get setYourFinancialGoal => 'Establece tu Meta Financiera';
+
+  @override
+  String get goalDescription => 'Describe tu meta financiera';
+
+  @override
+  String get goalDescriptionHint => '¿Qué te gustaría lograr?';
+
+  @override
+  String get goalDescriptionHelper =>
+      'Sé específico sobre lo que quieres lograr, cuánto y para cuándo';
+
+  @override
+  String get charactersRemaining => 'caracteres restantes';
+
+  @override
+  String get goalTooLong => 'La meta debe tener como máximo 2000 caracteres';
+
+  @override
+  String get goalRequired => 'Por favor describe tu meta financiera';
+
+  @override
+  String get inspiration =>
+      '¿Necesitas inspiración? Aquí hay algunos ejemplos:';
+
+  @override
+  String get exampleGoal1 =>
+      'Ahorrar \$5,000 para equipo de grabación profesional para producir mi álbum debut en diciembre';
+
+  @override
+  String get exampleGoal2 =>
+      'Aumentar mis ingresos mensuales de presentaciones en vivo a \$3,000 para dejar mi trabajo diurno';
+
+  @override
+  String get exampleGoal3 =>
+      'Construir un fondo de emergencia de \$2,000 con ventas de arte para cubrir 3 meses de alquiler del estudio';
+
+  @override
+  String get exampleGoal4 =>
+      'Ganar \$10,000 de ventas de libros de poesía y honorarios de presentaciones para financiar una gira nacional';
+
+  @override
+  String get exampleGoal5 =>
+      'Generar \$1,500/mes de ingresos pasivos de impresiones y mercancía para enfocarme en nuevas colecciones';
+
+  @override
+  String get next => 'Siguiente';
+
+  @override
+  String get timelineAndNotifications => 'Cronograma y Notificaciones';
+
+  @override
+  String get whenDoYouWantToAchieveThis => '¿Cuándo quieres lograr esta meta?';
+
+  @override
+  String get selectDueDate => 'Seleccionar fecha límite';
+
+  @override
+  String get dueDateRequired => 'Por favor selecciona una fecha límite';
+
+  @override
+  String get dueDateMustBeFuture => 'La fecha límite debe ser en el futuro';
+
+  @override
+  String get howOftenEmailUpdates =>
+      '¿Con qué frecuencia te gustaría recibir actualizaciones por correo?';
+
+  @override
+  String get emailCadenceDaily => 'Diariamente';
+
+  @override
+  String get emailCadenceWeekly => 'Semanalmente';
+
+  @override
+  String get emailCadenceBiweekly => 'Cada dos semanas';
+
+  @override
+  String get emailCadenceMonthly => 'Mensualmente';
+
+  @override
+  String get emailCadenceNever => 'Nunca (solo panel)';
+
+  @override
+  String get confirmation => 'Confirmación';
+
+  @override
+  String get yourGoal => 'Tu Meta';
+
+  @override
+  String get dueDate => 'Fecha Límite';
+
+  @override
+  String get emailUpdates => 'Actualizaciones por Correo';
+
+  @override
+  String get generatingAcknowledgment =>
+      'Generando tu confirmación personalizada...';
+
+  @override
+  String get failedToGenerateAcknowledgment =>
+      'No se pudo generar la confirmación. Tu meta ha sido guardada.';
+
+  @override
+  String get goalSavedSuccessfully => '¡Meta financiera guardada exitosamente!';
+
+  @override
+  String get failedToSaveGoal => 'No se pudo guardar la meta financiera';
+
+  @override
+  String get skip => 'Omitir';
+
+  @override
+  String get skipForNow => 'Omitir por ahora';
+
+  @override
+  String get setFinancialGoal => 'Establecer Meta Financiera';
+
+  @override
+  String get noFinancialGoalSet => 'No hay meta financiera establecida';
+
+  @override
+  String get setAGoalToTrackProgress =>
+      'Establece una meta financiera para seguir tu progreso y obtener información personalizada';
+
+  @override
+  String get openGoalWizard => 'Establece tu Meta';
+
+  @override
+  String get goalBannerTitle =>
+      '¿Listo para tomar control de tu futuro financiero?';
+
+  @override
+  String get goalBannerDescription =>
+      'Establece una meta financiera significativa y obtén información personalizada para ayudarte a alcanzarla';
 }

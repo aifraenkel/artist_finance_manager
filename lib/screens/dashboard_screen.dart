@@ -4,13 +4,18 @@ import 'package:fl_chart/fl_chart.dart';
 import '../config/app_colors.dart';
 import '../models/transaction.dart';
 import '../models/project.dart';
+import '../models/financial_goal.dart';
 import '../providers/project_provider.dart';
+import '../providers/auth_provider.dart';
 import '../services/analytics_service.dart';
 import '../services/storage_service.dart';
 import '../services/firestore_sync_service.dart';
 import '../services/user_preferences.dart';
 import '../services/openai_service.dart';
 import '../services/budget_analysis_service.dart';
+import '../services/financial_goal_service.dart';
+import '../widgets/no_goal_banner.dart';
+import '../widgets/financial_goal_wizard.dart';
 import '../l10n/app_localizations.dart';
 
 /// Dashboard screen showing financial analytics and insights.
@@ -22,21 +27,32 @@ import '../l10n/app_localizations.dart';
 /// - Top expensive projects
 /// - Summary statistics
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  final AnalyticsService? analyticsService;
+  final UserPreferences? userPreferences;
+  final FinancialGoalService? financialGoalService;
+
+  const DashboardScreen({
+    super.key,
+    this.analyticsService,
+    this.userPreferences,
+    this.financialGoalService,
+  });
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final AnalyticsService _analyticsService = AnalyticsService();
-  final UserPreferences _userPreferences = UserPreferences();
+  late final AnalyticsService _analyticsService;
+  late final UserPreferences _userPreferences;
+  late final FinancialGoalService _financialGoalService;
   bool _isLoading = true;
   bool _isAnalyzingGoal = false;
   Map<String, List<Transaction>> _projectTransactions = {};
   Map<String, Project> _projects = {};
   String? _goalAnalysis;
   String? _goalAnalysisError;
+  FinancialGoal? _financialGoal;
 
   // Month abbreviations for timeline chart
   static const List<String> _monthAbbreviations = [
@@ -58,10 +74,72 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
+    // Initialize services with provided instances or create defaults
+    _analyticsService = widget.analyticsService ?? AnalyticsService();
+    _userPreferences = widget.userPreferences ?? UserPreferences();
+    _financialGoalService =
+        widget.financialGoalService ?? FinancialGoalService();
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadData();
       _loadPreferencesAndAnalyzeGoal();
+      _loadFinancialGoal();
     });
+  }
+
+  Future<void> _loadFinancialGoal() async {
+    // Try to get AuthProvider, but handle if it's not available (for testing)
+    final authProvider = _tryGetAuthProvider();
+    if (authProvider == null) return;
+
+    final user = authProvider.currentUser;
+    if (user == null) return;
+
+    try {
+      final goal = await _financialGoalService.getGoal(user.uid);
+      if (mounted) {
+        setState(() {
+          _financialGoal = goal;
+        });
+      }
+    } catch (e) {
+      print('Error loading financial goal: $e');
+    }
+  }
+
+  /// Try to get AuthProvider from context, return null if not available
+  AuthProvider? _tryGetAuthProvider() {
+    try {
+      return Provider.of<AuthProvider>(context, listen: false);
+    } catch (e) {
+      // Provider not available (likely in tests)
+      return null;
+    }
+  }
+
+  void _openGoalWizard() async {
+    final authProvider = _tryGetAuthProvider();
+    if (authProvider == null) return;
+
+    final user = authProvider.currentUser;
+    if (user == null) return;
+
+    // Get OpenAI API key (use from user preferences for now)
+    final apiKey = _userPreferences.openaiApiKey ?? '';
+
+    await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => FinancialGoalWizard(
+          userId: user.uid,
+          openAIApiKey: apiKey,
+          onGoalSaved: () {
+            // Reload the goal after saving
+            _loadFinancialGoal();
+          },
+        ),
+        fullscreenDialog: true,
+      ),
+    );
   }
 
   Future<void> _loadPreferencesAndAnalyzeGoal() async {
@@ -189,33 +267,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _projectTransactions.values.expand((txns) => txns).toList();
 
     if (allTransactions.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.analytics_outlined,
-              size: 80,
-              color: AppColors.textMuted,
+      return SingleChildScrollView(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Show no goal banner even if there are no transactions
+                if (_financialGoal == null) ...[
+                  NoGoalBanner(onSetGoal: _openGoalWizard),
+                  const SizedBox(height: 24),
+                ],
+                Icon(
+                  Icons.analytics_outlined,
+                  size: 80,
+                  color: AppColors.textMuted,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  l10n.noDataAvailable,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  l10n.addTransactionsToSeeAnalytics,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
-            Text(
-              l10n.noDataAvailable,
-              style: const TextStyle(
-                fontSize: 18,
-                color: AppColors.textSecondary,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.addTransactionsToSeeAnalytics,
-              style: const TextStyle(
-                fontSize: 14,
-                color: AppColors.textMuted,
-              ),
-            ),
-          ],
+          ),
         ),
       );
     }
@@ -238,7 +326,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Budget Goal Analysis Section (if active)
+          // Show no goal banner if no financial goal is set
+          if (_financialGoal == null) ...[
+            NoGoalBanner(onSetGoal: _openGoalWizard),
+            const SizedBox(height: 24),
+          ],
+
+          // Budget Goal Analysis Section (if active) - Keep for backward compatibility
           if (_userPreferences.budgetGoal != null &&
               _userPreferences.budgetGoal!.isActive) ...[
             _buildGoalAnalysisSection(context),
